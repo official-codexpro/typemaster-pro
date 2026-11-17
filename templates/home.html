@@ -6,7 +6,7 @@
 {% block content %}
 
     <!-- Separate Loading Component -->
-    {% include "components/loader.html" %}
+    {% comment %} {% include "components/loader.html" %} {% endcomment %}
 <main class="bg-white">
 
     <!-- HERO SECTION -->
@@ -96,23 +96,133 @@
                             </span>
                         </div>
 
-                        <div class="mt-8 bg-gray-50 rounded-2xl p-5 sm:p-6 border border-gray-100">
-                            <p class="text-xs text-gray-400 font-semibold mb-4">TYPE THE FOLLOWING TEXT</p>
+                        
+<div class="mt-8 bg-gray-50 rounded-2xl p-5 sm:p-6 border border-gray-100">
 
-                            <p class="text-lg sm:text-xl leading-[2] font-medium tracking-wide">
-                                <span class="text-purple-600">Success</span>
-                                <span class="text-purple-600"> comes</span>
-                                <span class="text-purple-600"> from</span>
-                                <span class="text-gray-900"> consistent</span>
-                                <span class="text-gray-900"> practice</span>
-                                <span class="text-gray-400"> and</span>
-                                <span class="text-gray-400"> the</span>
-                                <span class="text-gray-400"> determination</span>
-                                <span class="text-gray-400"> to</span>
-                                <span class="text-gray-400"> improve.</span>
-                                <span class="inline-block w-0.5 h-6 bg-purple-600 align-middle ml-1"></span>
-                            </p>
-                        </div>
+    <p class="text-xs text-gray-400 font-semibold mb-4">
+        WATCH THE TYPING EXPERIENCE
+    </p>
+
+    <div id="homePacmanBox"
+         class="relative bg-white border border-gray-200 rounded-xl overflow-hidden">
+
+        <!-- PACMAN -->
+        <div id="homePacman"
+             class="absolute z-20 pointer-events-none w-8 h-8"
+             style="left:0;top:0;transform:translate(0,0);transition:transform 90ms linear;">
+
+            <svg viewBox="0 0 100 100" class="w-full h-full">
+                <circle cx="50" cy="50" r="46" fill="#FACC15"/>
+                <polygon id="homePacmanMouth"
+                         points="50,50 100,18 100,82"
+                         fill="white"/>
+                <circle cx="57" cy="24" r="5" fill="#222"/>
+            </svg>
+        </div>
+
+        <!-- THREE NOTEBOOK LINES -->
+        <div class="h-[132px] overflow-hidden px-3 sm:px-6 py-[5px]
+                    font-mono text-sm sm:text-base leading-[44px]
+                    tracking-wide text-gray-300 text-justify
+                    bg-[linear-gradient(to_bottom,transparent_43px,#edf0f5_43px,#edf0f5_44px)]
+                    bg-[length:100%_44px]">
+
+            <p id="homePacmanText"
+               class="m-0 leading-[44px] text-justify text-purple-500"
+               style="white-space:normal;overflow-wrap:anywhere;"></p>
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+(() => {
+    const box = document.getElementById("homePacmanBox");
+    const text = document.getElementById("homePacmanText");
+    const pacman = document.getElementById("homePacman");
+    const mouth = document.getElementById("homePacmanMouth");
+
+    if (!box || !text || !pacman || !mouth) return;
+
+    const sentence =
+        "Building a website requires creativity and patience. Practice makes every developer faster and more accurate.";
+
+    let characters = [];
+    let index = 0;
+    let mouthOpen = true;
+    let timer;
+
+    const STEP_TIME = 140;
+
+    function buildText() {
+        text.replaceChildren();
+        characters = [];
+
+        for (const char of sentence) {
+            const span = document.createElement("span");
+
+            span.textContent = char === " " ? "\u00A0" : char;
+            span.style.display = "inline-block";
+            span.style.visibility = "visible";
+
+            text.appendChild(span);
+            characters.push(span);
+        }
+    }
+
+    function moveTo(char) {
+        const boxRect = box.getBoundingClientRect();
+        const rect = char.getBoundingClientRect();
+
+        const x = rect.left - boxRect.left - 5;
+        const y = rect.top - boxRect.top +
+                  (rect.height - pacman.offsetHeight) / 2;
+
+        pacman.style.transform = `translate(${x}px, ${y}px)`;
+
+        mouthOpen = !mouthOpen;
+        mouth.setAttribute(
+            "points",
+            mouthOpen
+                ? "50,50 100,20 100,80"
+                : "50,50 100,46 100,54"
+        );
+    }
+
+    function nextCharacter() {
+        // Instant restart, without an empty screen or delay
+        if (index >= characters.length) {
+            characters.forEach(char => {
+                char.style.visibility = "visible";
+            });
+
+            index = 0;
+        }
+
+        const current = characters[index];
+
+        // Move to exactly one character
+        moveTo(current);
+
+        // Wait until Pac-Man reaches it, then eat ONLY that character
+        timer = setTimeout(() => {
+            current.style.visibility = "hidden";
+            index++;
+            nextCharacter();
+        }, STEP_TIME);
+    }
+
+    buildText();
+
+    requestAnimationFrame(() => {
+        moveTo(characters[0]);
+        nextCharacter();
+    });
+})();
+</script>
+
+
 
                         <div class="grid grid-cols-3 gap-3 mt-6">
 
