@@ -1,107 +1,84 @@
 
-<header class="sticky top-0 inset-x-0 z-[100] bg-white/95 backdrop-blur-md border-b border-neutral-200 shadow-sm">
+<header class="theme-header sticky top-0 inset-x-0 z-[100] bg-white/95 backdrop-blur-md border-b border-neutral-200 shadow-sm">
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 h-[72px] flex items-center justify-between">
 
         <!-- Logo -->
-          <!-- Logo -->
         <a href="{% url 'home' %}" class="flex items-center gap-2">
             <span class="text-2xl">⌨</span>
-            <span class="text-xl font-extrabold tracking-tight">
-                TypeMaster
-            </span>
-            <span class="text-xs font-semibold text-purple-600 mt-1">
-                PRO
-            </span>
+            <span class="text-xl font-extrabold tracking-tight">TypeMaster</span>
+            <span class="text-xs font-semibold text-purple-600 mt-1">PRO</span>
         </a>
-
 
         <!-- Main Navigation -->
         <nav class="hidden lg:flex items-center gap-1">
 
-            <a href="{% url 'home' %}#typing-test"
-               class="px-4 py-2.5 rounded-lg text-sm font-semibold text-neutral-600 hover:text-indigo-600 hover:bg-indigo-50 transition">
+            <a href="{% url 'results' %}#typing-test" class="theme-nav-link px-4 py-2.5 rounded-lg text-sm font-semibold text-neutral-600 hover:text-indigo-600 hover:bg-indigo-50 transition">
                 Typing Test
             </a>
 
-            <a href="{% url 'home' %}#code-mode"
-               class="px-4 py-2.5 rounded-lg text-sm font-semibold text-neutral-600 hover:text-indigo-600 hover:bg-indigo-50 transition">
+            <a href="{% url 'home' %}#code-mode" class="theme-nav-link px-4 py-2.5 rounded-lg text-sm font-semibold text-neutral-600 hover:text-indigo-600 hover:bg-indigo-50 transition">
                 Code Practice
             </a>
 
-            <a href="{% url 'home' %}#courses"
-               class="px-4 py-2.5 rounded-lg text-sm font-semibold text-neutral-600 hover:text-indigo-600 hover:bg-indigo-50 transition">
+            <a href="{% url 'home' %}#courses" class="theme-nav-link px-4 py-2.5 rounded-lg text-sm font-semibold text-neutral-600 hover:text-indigo-600 hover:bg-indigo-50 transition">
                 Courses
             </a>
 
-            <a href="{% url 'home' %}#performance"
-               class="px-4 py-2.5 rounded-lg text-sm font-semibold text-neutral-600 hover:text-indigo-600 hover:bg-indigo-50 transition">
+            <a href="{% url 'home' %}#performance" class="theme-nav-link px-4 py-2.5 rounded-lg text-sm font-semibold text-neutral-600 hover:text-indigo-600 hover:bg-indigo-50 transition">
                 Performance
             </a>
 
         </nav>
 
-
         <!-- Right Side -->
         <div class="flex items-center gap-3">
+
+            <!-- Theme Toggle -->
+            <button
+                id="themeToggle"
+                type="button"
+                aria-label="Toggle dark mode"
+                title="Toggle Dark Mode"
+                class="w-10 h-10 flex items-center justify-center rounded-xl border border-neutral-200 hover:bg-neutral-100 transition text-xl">
+                <span id="themeIcon">🌙</span>
+            </button>
 
             {% if request.user.is_authenticated %}
 
                 <!-- User Dropdown -->
                 <details class="relative group">
 
-                    <summary class="list-none cursor-pointer flex items-center gap-2.5 p-1.5 pr-2 rounded-xl hover:bg-neutral-100 transition select-none">
+                    <summary class="theme-summary list-none cursor-pointer flex items-center gap-2.5 p-1.5 pr-2 rounded-xl hover:bg-neutral-100 transition select-none">
 
-                        <!-- Avatar -->
                         {% if request.user.profile.profile_picture %}
-                            <img
-                                src="{{ request.user.profile.profile_picture.url }}"
-                                alt="Profile"
-                                class="w-10 h-10 rounded-full object-cover border border-neutral-200"
-                            >
+                            <img src="{{ request.user.profile.profile_picture.url }}" alt="Profile" class="w-10 h-10 rounded-full object-cover border border-neutral-200">
                         {% else %}
                             <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold uppercase">
                                 {{ request.user.username|first }}
                             </div>
                         {% endif %}
 
-                        <!-- Username -->
                         <div class="hidden sm:block text-left">
-                            <p class="text-sm font-bold text-neutral-800 leading-tight">
-                                {{ request.user.username }}
-                            </p>
-                            <p class="text-xs text-neutral-500 mt-1">
-                                My Account
-                            </p>
+                            <p class="text-sm font-bold text-neutral-800 leading-tight">{{ request.user.username }}</p>
+                            <p class="text-xs text-neutral-500 mt-1">My Account</p>
                         </div>
 
-                        <svg class="w-4 h-4 text-neutral-500 transition-transform group-open:rotate-180"
-                             fill="none"
-                             stroke="currentColor"
-                             viewBox="0 0 24 24">
-                            <path stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                  stroke-width="2"
-                                  d="m6 9 6 6 6-6"/>
+                        <svg class="w-4 h-4 text-neutral-500 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9 6 6 6-6"/>
                         </svg>
 
                     </summary>
 
-
                     <!-- Dropdown Panel -->
-                    <div class="absolute right-0 top-full mt-3 w-72 bg-white border border-neutral-200 rounded-2xl shadow-xl overflow-hidden z-[110]">
+                    <div class="theme-dropdown absolute right-0 top-full mt-3 w-72 bg-white border border-neutral-200 rounded-2xl shadow-xl overflow-hidden z-[110]">
 
-                        <!-- User Details -->
-                        <div class="p-5 bg-gradient-to-br from-indigo-50 to-white border-b border-neutral-100">
+                        <div class="theme-dropdown-header p-5 bg-gradient-to-br from-indigo-50 to-white border-b border-neutral-100">
 
                             <div class="flex items-center gap-3">
 
                                 {% if request.user.profile.profile_picture %}
-                                    <img
-                                        src="{{ request.user.profile.profile_picture.url }}"
-                                        alt="Profile"
-                                        class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
-                                    >
+                                    <img src="{{ request.user.profile.profile_picture.url }}" alt="Profile" class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm">
                                 {% else %}
                                     <div class="w-12 h-12 rounded-full bg-indigo-600 text-white flex items-center justify-center text-lg font-bold uppercase">
                                         {{ request.user.username|first }}
@@ -109,64 +86,46 @@
                                 {% endif %}
 
                                 <div class="min-w-0">
-                                    <p class="font-bold text-neutral-900 truncate">
-                                        {{ request.user.username }}
-                                    </p>
-                                    <p class="text-xs text-neutral-500 truncate mt-1">
-                                        {{ request.user.email }}
-                                    </p>
+                                    <p class="font-bold text-neutral-900 truncate">{{ request.user.username }}</p>
+                                    <p class="text-xs text-neutral-500 truncate mt-1">{{ request.user.email }}</p>
                                 </div>
 
                             </div>
 
-                            <a href="{% url 'profile' %}"
-                               class="block text-center mt-4 py-2 rounded-lg border border-indigo-200 text-indigo-700 text-xs font-bold hover:bg-indigo-50 transition">
+                            <a href="{% url 'profile' %}" class="block text-center mt-4 py-2 rounded-lg border border-indigo-200 text-indigo-700 text-xs font-bold hover:bg-indigo-50 transition">
                                 View Profile
                             </a>
 
                         </div>
 
-
                         <!-- Menu Links -->
                         <div class="p-2">
 
-                            <a href="{% url 'home' %}"
-                               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-700 hover:bg-neutral-100 transition">
-                                <span class="text-lg">▦</span>
-                                My Dashboard
+                            <a href="{% url 'home' %}" class="theme-menu-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-700 hover:bg-neutral-100 transition">
+                                <span class="text-lg">▦</span> My Dashboard
                             </a>
 
-                            <a href="{% url 'profile' %}"
-                               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-700 hover:bg-neutral-100 transition">
-                                <span class="text-lg">👤</span>
-                                My Profile
+                            <a href="{% url 'profile' %}" class="theme-menu-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-700 hover:bg-neutral-100 transition">
+                                <span class="text-lg">👤</span> My Profile
                             </a>
 
-                            <a href="{% url 'edit_profile' %}"
-                               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-700 hover:bg-neutral-100 transition">
-                                <span class="text-lg">✎</span>
-                                Edit Profile
+                            <a href="{% url 'edit_profile' %}" class="theme-menu-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-700 hover:bg-neutral-100 transition">
+                                <span class="text-lg">✎</span> Edit Profile
                             </a>
 
-                            <a href="{% url 'home' %}#performance"
-                               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-700 hover:bg-neutral-100 transition">
-                                <span class="text-lg">📊</span>
-                                My Performance
+                            <a href="{% url 'home' %}#performance" class="theme-menu-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-700 hover:bg-neutral-100 transition">
+                                <span class="text-lg">📊</span> My Performance
                             </a>
 
                         </div>
 
-
                         <!-- Logout -->
-                        <div class="border-t border-neutral-100 p-2">
+                        <div class="theme-dropdown-footer border-t border-neutral-100 p-2">
 
                             <form method="POST" action="{% url 'logout' %}">
                                 {% csrf_token %}
-
-                                <button type="submit"
-                                        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-red-600 hover:bg-red-50 transition text-left">
-                                    <span class="text-lg">↪</span>
-                                    Logout
+                                <button type="submit" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-red-600 hover:bg-red-50 transition text-left">
+                                    <span class="text-lg">↪</span> Logout
                                 </button>
                             </form>
 
@@ -178,14 +137,11 @@
 
             {% else %}
 
-                <!-- Guest Buttons -->
-                <a href="{% url 'login' %}"
-                   class="hidden sm:inline-flex px-4 py-2.5 text-sm font-semibold text-neutral-700 hover:text-indigo-600 transition">
+                <a href="{% url 'login' %}" class="hidden sm:inline-flex px-4 py-2.5 text-sm font-semibold text-neutral-700 hover:text-indigo-600 transition">
                     Login
                 </a>
 
-                <a href="{% url 'signup' %}"
-                   class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-bold shadow-sm hover:bg-indigo-700 transition">
+                <a href="{% url 'signup' %}" class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-bold shadow-sm hover:bg-indigo-700 transition">
                     Get Started
                 </a>
 
@@ -195,3 +151,39 @@
 
     </div>
 </header>
+
+
+<script>
+(() => {
+    const toggle = document.getElementById('themeToggle');
+    const icon = document.getElementById('themeIcon');
+    const root = document.documentElement;
+
+    if (!toggle || !icon) {
+        console.error('Theme toggle elements not found!');
+        return;
+    }
+
+    function updateTheme() {
+        const isDark = root.getAttribute('data-theme') === 'dark';
+
+        icon.textContent = isDark ? '☀️' : '🌙';
+        toggle.title = isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+    }
+
+    updateTheme();
+
+    toggle.addEventListener('click', () => {
+        const current = root.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+
+        root.setAttribute('data-theme', next);
+        localStorage.setItem('typemaster-theme', next);
+
+        updateTheme();
+
+        console.log('Theme changed to:', next);
+    });
+})();
+</script>
+

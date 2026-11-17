@@ -1,20 +1,854 @@
+
+/* =========================================================
+   TYPEMASTER PRO — GLOBAL LIGHT / DARK THEME
+   Complete stylesheet replacement
+========================================================= */
+
+
+/* =========================================================
+   1. GLOBAL RESET
+========================================================= */
+
 * {
     box-sizing: border-box;
 }
 
+html,
+body {
+    min-height: 100%;
+    margin: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     font-family: Arial, Helvetica, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    transition:
+        background-color .25s ease,
+        color .25s ease;
 }
 
-.dashboard-card {
-    border: 1px solid #e5e7eb;
-    border-radius: 15px;
-    background: #fff;
+
+/* =========================================================
+   2. THEME VARIABLES
+========================================================= */
+
+:root,
+html[data-theme="light"] {
+    color-scheme: light;
+
+    --bg-primary: #ffffff;
+    --bg-secondary: #f9fafb;
+    --bg-tertiary: #f3f4f6;
+    --bg-card: #ffffff;
+    --bg-elevated: #ffffff;
+
+    --text-primary: #262626;
+    --text-secondary: #737373;
+    --text-muted: #a3a3a3;
+
+    --border-color: #e5e7eb;
+    --border-soft: #f3f4f6;
+
+    --hover-bg: #f0f0f0;
+    --hover-border: #c4b5fd;
+
+    --input-bg: #ffffff;
+    --input-text: #262626;
+    --input-placeholder: #a3a3a3;
+
+    --accent: #7c3aed;
+    --accent-hover: #6d28d9;
+    --accent-soft: #f5f3ff;
+    --accent-text: #6d28d9;
+
+    --success-soft: #f0fdf4;
+    --danger-soft: #fef2f2;
+
+    --chart-grid: #e5e7eb;
+    --chart-text: #737373;
+    --chart-dot-border: #ffffff;
+
+    --shadow-color: rgba(0, 0, 0, .06);
 }
 
-.nav-item.active {
-    background: #f0f0f0;
+html[data-theme="dark"] {
+    color-scheme: dark;
+
+    --bg-primary: #0f1117;
+    --bg-secondary: #181b24;
+    --bg-tertiary: #202431;
+    --bg-card: #1c202b;
+    --bg-elevated: #242938;
+
+    --text-primary: #f5f5f5;
+    --text-secondary: #a1a1aa;
+    --text-muted: #858b99;
+
+    --border-color: #303543;
+    --border-soft: #292e3b;
+
+    --hover-bg: #292e3b;
+    --hover-border: #7250c7;
+
+    --input-bg: #181b24;
+    --input-text: #f5f5f5;
+    --input-placeholder: #858b99;
+
+    --accent: #8b5cf6;
+    --accent-hover: #a78bfa;
+    --accent-soft: rgba(139, 92, 246, .15);
+    --accent-text: #b69aff;
+
+    --success-soft: rgba(34, 197, 94, .12);
+    --danger-soft: rgba(239, 68, 68, .12);
+
+    --chart-grid: #303543;
+    --chart-text: #a1a1aa;
+    --chart-dot-border: #1c202b;
+
+    --shadow-color: rgba(0, 0, 0, .25);
 }
+
+
+/* =========================================================
+   3. GLOBAL TRANSITIONS
+========================================================= */
+
+body,
+main,
+section,
+article,
+aside,
+header,
+footer,
+nav,
+.dashboard-card,
+.theme-dropdown,
+.profile-page,
+.results-history {
+    transition:
+        background-color .2s ease,
+        border-color .2s ease,
+        color .2s ease;
+}
+
+
+/* =========================================================
+   4. GLOBAL DARK MODE BACKGROUNDS
+========================================================= */
+
+html[data-theme="dark"] body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+/* White surfaces */
+
+html[data-theme="dark"] .bg-white {
+    background-color: var(--bg-card) !important;
+}
+
+/* Neutral surfaces */
+
+html[data-theme="dark"] .bg-neutral-50,
+html[data-theme="dark"] .bg-gray-50 {
+    background-color: var(--bg-secondary) !important;
+}
+
+html[data-theme="dark"] .bg-neutral-100,
+html[data-theme="dark"] .bg-gray-100 {
+    background-color: var(--bg-tertiary) !important;
+}
+
+html[data-theme="dark"] .bg-neutral-200,
+html[data-theme="dark"] .bg-gray-200 {
+    background-color: var(--hover-bg) !important;
+}
+
+/* Custom profile backgrounds */
+
+html[data-theme="dark"] [class~="bg-[#f5f7fb]"],
+html[data-theme="dark"] [class~="bg-[#f3f6f8]"] {
+    background-color: var(--bg-primary) !important;
+}
+
+/* Preserve intentionally white CTA button */
+
+html[data-theme="dark"] .bg-purple-600 a.bg-white,
+html[data-theme="dark"] .bg-purple-600 a.bg-white:hover {
+    background-color: #ffffff !important;
+    color: #5420bd !important;
+}
+
+
+/* =========================================================
+   5. GLOBAL TEXT COLORS
+========================================================= */
+
+html[data-theme="dark"] .text-neutral-900,
+html[data-theme="dark"] .text-neutral-800,
+html[data-theme="dark"] .text-neutral-700,
+html[data-theme="dark"] .text-gray-900,
+html[data-theme="dark"] .text-gray-800,
+html[data-theme="dark"] .text-gray-700 {
+    color: var(--text-primary) !important;
+}
+
+html[data-theme="dark"] .text-neutral-600,
+html[data-theme="dark"] .text-neutral-500,
+html[data-theme="dark"] .text-gray-600,
+html[data-theme="dark"] .text-gray-500 {
+    color: var(--text-secondary) !important;
+}
+
+html[data-theme="dark"] .text-neutral-400,
+html[data-theme="dark"] .text-neutral-300,
+html[data-theme="dark"] .text-gray-400,
+html[data-theme="dark"] .text-gray-300 {
+    color: var(--text-muted) !important;
+}
+
+/* Preserve white text on colored buttons and banners */
+
+html[data-theme="dark"] .text-white,
+html[data-theme="dark"] .text-white * {
+    color: #ffffff;
+}
+
+/* Accent text */
+
+html[data-theme="dark"] .text-purple-600,
+html[data-theme="dark"] .text-indigo-600 {
+    color: var(--accent-text);
+}
+
+
+/* =========================================================
+   6. GLOBAL BORDERS
+========================================================= */
+
+html[data-theme="dark"] .border-neutral-100,
+html[data-theme="dark"] .border-neutral-200,
+html[data-theme="dark"] .border-neutral-300,
+html[data-theme="dark"] .border-gray-100,
+html[data-theme="dark"] .border-gray-200,
+html[data-theme="dark"] .border-gray-300 {
+    border-color: var(--border-color) !important;
+}
+
+html[data-theme="dark"] .divide-neutral-100 > :not([hidden]) ~ :not([hidden]),
+html[data-theme="dark"] .divide-gray-100 > :not([hidden]) ~ :not([hidden]) {
+    border-color: var(--border-color) !important;
+}
+
+
+/* =========================================================
+   7. GLOBAL HOVER EFFECTS
+========================================================= */
+
+html[data-theme="dark"] [class~="hover:bg-neutral-50"]:hover,
+html[data-theme="dark"] [class~="hover:bg-neutral-100"]:hover,
+html[data-theme="dark"] [class~="hover:bg-neutral-200"]:hover,
+html[data-theme="dark"] [class~="hover:bg-gray-50"]:hover,
+html[data-theme="dark"] [class~="hover:bg-gray-100"]:hover {
+    background-color: var(--hover-bg) !important;
+}
+
+html[data-theme="dark"] [class~="hover:border-gray-200"]:hover,
+html[data-theme="dark"] [class~="hover:border-neutral-200"]:hover {
+    border-color: var(--hover-border) !important;
+}
+
+html[data-theme="dark"] [class~="hover:text-gray-900"]:hover,
+html[data-theme="dark"] [class~="hover:text-neutral-900"]:hover {
+    color: var(--text-primary) !important;
+}
+
+html[data-theme="dark"] [class~="hover:shadow-xl"]:hover {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
+}
+
+
+/* =========================================================
+   8. BUTTONS
+========================================================= */
+
+button,
+input,
+select,
+textarea {
+    font-family: inherit;
+}
+
+html[data-theme="dark"] button.bg-neutral-900,
+html[data-theme="dark"] a.bg-neutral-900 {
+    background-color: #5420bd !important;
+    color: #ffffff !important;
+}
+
+html[data-theme="dark"] button.bg-neutral-900:hover,
+html[data-theme="dark"] a.bg-neutral-900:hover {
+    background-color: #6d35d4 !important;
+}
+
+html[data-theme="dark"] button.bg-indigo-600,
+html[data-theme="dark"] a.bg-indigo-600 {
+    background-color: #6341c7;
+}
+
+html[data-theme="dark"] button.bg-indigo-600:hover,
+html[data-theme="dark"] a.bg-indigo-600:hover {
+    background-color: #7956dc;
+}
+
+
+/* =========================================================
+   9. FORMS AND INPUTS
+========================================================= */
+
+form input,
+form textarea,
+form select {
+    max-width: 100%;
+    border: 1px solid var(--border-color);
+    border-radius: 9px;
+    outline: none;
+    background: var(--input-bg);
+    color: var(--input-text);
+    transition:
+        background-color .2s ease,
+        color .2s ease,
+        border-color .2s ease,
+        box-shadow .2s ease;
+}
+
+form input:focus,
+form textarea:focus,
+form select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, .12);
+}
+
+form input::placeholder,
+form textarea::placeholder {
+    color: var(--input-placeholder);
+}
+
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] select {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border-color: var(--border-color);
+}
+
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder {
+    color: var(--input-placeholder);
+}
+
+html[data-theme="dark"] option {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+}
+
+html[data-theme="dark"] input[type="date"] {
+    color-scheme: dark;
+}
+
+html[data-theme="dark"] input[type="checkbox"],
+html[data-theme="dark"] input[type="radio"] {
+    accent-color: var(--accent);
+}
+
+/* Django form labels and help text */
+
+html[data-theme="dark"] label {
+    color: var(--text-primary);
+}
+
+html[data-theme="dark"] form ul {
+    color: #f87171;
+}
+
+
+/* =========================================================
+   10. NAVBAR
+========================================================= */
+
+.theme-header {
+    z-index: 100;
+}
+
+html[data-theme="dark"] .theme-header {
+    background: rgba(15, 17, 23, .96) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Logo */
+
+html[data-theme="dark"] .theme-header a {
+    color: var(--text-primary);
+}
+
+/* Navigation links */
+
+html[data-theme="dark"] .theme-nav-link {
+    color: var(--text-secondary) !important;
+}
+
+html[data-theme="dark"] .theme-nav-link:hover {
+    color: var(--accent-text) !important;
+    background: var(--accent-soft) !important;
+}
+
+/* Theme toggle */
+
+html[data-theme="dark"] #themeToggle {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+html[data-theme="dark"] #themeToggle:hover {
+    background: var(--hover-bg);
+}
+
+/* User summary */
+
+html[data-theme="dark"] .theme-summary {
+    color: var(--text-primary) !important;
+}
+
+html[data-theme="dark"] .theme-summary:hover {
+    background: var(--hover-bg) !important;
+}
+
+html[data-theme="dark"] .theme-summary .text-neutral-800,
+html[data-theme="dark"] .theme-summary .text-neutral-700 {
+    color: var(--text-primary) !important;
+}
+
+html[data-theme="dark"] .theme-summary .text-neutral-500 {
+    color: var(--text-secondary) !important;
+}
+
+html[data-theme="dark"] .theme-summary svg {
+    color: var(--text-secondary);
+}
+
+/* User avatar */
+
+html[data-theme="dark"] .theme-summary img {
+    border-color: var(--border-color);
+}
+
+/* Dropdown */
+
+html[data-theme="dark"] .theme-dropdown {
+    background: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, .35);
+}
+
+html[data-theme="dark"] .theme-dropdown-header {
+    background: var(--bg-secondary) !important;
+    border-color: var(--border-color) !important;
+}
+
+html[data-theme="dark"] .theme-dropdown-footer {
+    border-color: var(--border-color) !important;
+}
+
+html[data-theme="dark"] .theme-menu-link {
+    color: var(--text-primary) !important;
+}
+
+html[data-theme="dark"] .theme-menu-link:hover {
+    background: var(--hover-bg) !important;
+}
+
+html[data-theme="dark"] .theme-dropdown .text-neutral-800,
+html[data-theme="dark"] .theme-dropdown .text-neutral-700 {
+    color: var(--text-primary) !important;
+}
+
+html[data-theme="dark"] .theme-dropdown .text-neutral-500 {
+    color: var(--text-secondary) !important;
+}
+
+
+/* =========================================================
+   11. FOOTER
+========================================================= */
+
+html[data-theme="dark"] footer {
+    background: var(--bg-secondary) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary);
+}
+
+html[data-theme="dark"] footer h3,
+html[data-theme="dark"] footer .text-neutral-900,
+html[data-theme="dark"] footer .text-neutral-800 {
+    color: var(--text-primary) !important;
+}
+
+html[data-theme="dark"] footer .text-neutral-600,
+html[data-theme="dark"] footer .text-neutral-500 {
+    color: var(--text-secondary) !important;
+}
+
+html[data-theme="dark"] footer a:hover {
+    color: var(--accent-text) !important;
+}
+
+
+/* =========================================================
+   12. HOME — HERO SECTION
+========================================================= */
+
+.theme-surface {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+html[data-theme="dark"] .theme-hero {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+html[data-theme="dark"] .theme-hero .bg-white {
+    background: var(--bg-card) !important;
+}
+
+html[data-theme="dark"] .theme-hero .bg-gray-50 {
+    background: var(--bg-secondary) !important;
+}
+
+html[data-theme="dark"] .theme-hero .text-gray-900,
+html[data-theme="dark"] .theme-hero .text-gray-700 {
+    color: var(--text-primary) !important;
+}
+
+html[data-theme="dark"] .theme-hero .text-gray-500,
+html[data-theme="dark"] .theme-hero .text-gray-400 {
+    color: var(--text-secondary) !important;
+}
+
+html[data-theme="dark"] .theme-hero .border-gray-100,
+html[data-theme="dark"] .theme-hero .border-gray-200 {
+    border-color: var(--border-color) !important;
+}
+
+html[data-theme="dark"] .theme-hero .bg-purple-50,
+html[data-theme="dark"] .theme-hero .bg-purple-100 {
+    background: var(--accent-soft) !important;
+}
+
+html[data-theme="dark"] .theme-hero .text-purple-700,
+html[data-theme="dark"] .theme-hero .text-purple-600 {
+    color: var(--accent-text) !important;
+}
+
+html[data-theme="dark"] .theme-hero .bg-green-50,
+html[data-theme="dark"] .theme-hero .bg-blue-50 {
+    background: var(--bg-tertiary) !important;
+}
+
+html[data-theme="dark"] .theme-hero .shadow-purple-100 {
+    --tw-shadow-color: rgba(0, 0, 0, .3);
+}
+
+html[data-theme="dark"] .theme-hero #homePacmanBox > div:last-child {
+    background-image: linear-gradient(
+        to bottom,
+        transparent 43px,
+        #303543 43px,
+        #303543 44px
+    );
+}
+
+html[data-theme="dark"] .theme-hero #homePacmanMouth {
+    fill: var(--bg-card);
+}
+
+
+/* =========================================================
+   13. HOME — FEATURES
+========================================================= */
+
+html[data-theme="dark"] .theme-surface .border-gray-100,
+html[data-theme="dark"] .theme-surface .border-gray-200 {
+    border-color: var(--border-color);
+}
+
+html[data-theme="dark"] .theme-surface .bg-gray-50 {
+    background-color: var(--bg-secondary);
+}
+
+html[data-theme="dark"] .theme-surface .text-gray-900 {
+    color: var(--text-primary);
+}
+
+html[data-theme="dark"] .theme-surface .text-gray-500 {
+    color: var(--text-secondary);
+}
+
+/* Feature icon backgrounds */
+
+html[data-theme="dark"] .bg-purple-50,
+html[data-theme="dark"] .bg-purple-100 {
+    background-color: rgba(139, 92, 246, .15);
+}
+
+html[data-theme="dark"] .bg-green-50,
+html[data-theme="dark"] .bg-green-100 {
+    background-color: rgba(34, 197, 94, .12);
+}
+
+html[data-theme="dark"] .bg-blue-50,
+html[data-theme="dark"] .bg-blue-100 {
+    background-color: rgba(59, 130, 246, .12);
+}
+
+html[data-theme="dark"] .bg-orange-50,
+html[data-theme="dark"] .bg-orange-100 {
+    background-color: rgba(249, 115, 22, .12);
+}
+
+html[data-theme="dark"] .bg-indigo-50,
+html[data-theme="dark"] .bg-indigo-100 {
+    background-color: rgba(99, 102, 241, .14);
+}
+
+html[data-theme="dark"] .text-purple-600,
+html[data-theme="dark"] .text-purple-700,
+html[data-theme="dark"] .text-indigo-600,
+html[data-theme="dark"] .text-indigo-700 {
+    color: var(--accent-text);
+}
+
+
+/* =========================================================
+   14. HOME — LEADERBOARD
+========================================================= */
+
+html[data-theme="dark"] #leaderboard {
+    background: var(--bg-secondary) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary);
+}
+
+html[data-theme="dark"] #leaderboard .bg-white {
+    background: var(--bg-card) !important;
+}
+
+html[data-theme="dark"] #leaderboard .bg-gray-50 {
+    background: var(--bg-secondary) !important;
+}
+
+html[data-theme="dark"] #leaderboard .text-gray-900 {
+    color: var(--text-primary) !important;
+}
+
+html[data-theme="dark"] #leaderboard .text-gray-500,
+html[data-theme="dark"] #leaderboard .text-gray-400 {
+    color: var(--text-secondary) !important;
+}
+
+html[data-theme="dark"] #leaderboard .border-gray-100,
+html[data-theme="dark"] #leaderboard .border-gray-200 {
+    border-color: var(--border-color) !important;
+}
+
+html[data-theme="dark"] #leaderboard .divide-gray-100 > :not([hidden]) ~ :not([hidden]) {
+    border-color: var(--border-color) !important;
+}
+
+html[data-theme="dark"] #leaderboard img {
+    border-color: var(--border-color);
+}
+
+html[data-theme="dark"] #leaderboard .shadow-purple-100 {
+    --tw-shadow-color: rgba(112, 44, 255, .12);
+}
+
+
+/* =========================================================
+   15. HOME — ACHIEVEMENTS
+========================================================= */
+
+html[data-theme="dark"] .bg-orange-50\/50 {
+    background-color: rgba(249, 115, 22, .10) !important;
+}
+
+html[data-theme="dark"] .border-orange-100 {
+    border-color: rgba(249, 115, 22, .25) !important;
+}
+
+html[data-theme="dark"] .bg-yellow-50\/50 {
+    background-color: rgba(234, 179, 8, .10) !important;
+}
+
+html[data-theme="dark"] .border-yellow-100 {
+    border-color: rgba(234, 179, 8, .25) !important;
+}
+
+
+/* =========================================================
+   16. HOME — FINAL CTA
+========================================================= */
+
+html[data-theme="dark"] .bg-purple-600 {
+    background-color: #5420bd;
+}
+
+html[data-theme="dark"] .bg-purple-600 a.bg-white {
+    background-color: #ffffff !important;
+    color: #5420bd !important;
+}
+
+html[data-theme="dark"] .bg-purple-600 a.bg-white:hover {
+    background-color: #f3e8ff !important;
+}
+
+
+/* =========================================================
+   17. DASHBOARD
+========================================================= */
+
+html[data-theme="dark"] #dashboardScreen {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+html[data-theme="dark"] #dashboardScreen .bg-white,
+html[data-theme="dark"] #dashboardScreen .dashboard-card {
+    background: var(--bg-card) !important;
+    border-color: var(--border-color);
+}
+
+html[data-theme="dark"] #dashboardScreen .bg-neutral-50,
+html[data-theme="dark"] #dashboardScreen .bg-gray-50 {
+    background: var(--bg-secondary) !important;
+}
+
+html[data-theme="dark"] #dashboardScreen .bg-neutral-100,
+html[data-theme="dark"] #dashboardScreen .bg-gray-100 {
+    background: var(--bg-tertiary) !important;
+}
+
+html[data-theme="dark"] #dashboardScreen .text-neutral-900,
+html[data-theme="dark"] #dashboardScreen .text-neutral-800,
+html[data-theme="dark"] #dashboardScreen .text-neutral-700,
+html[data-theme="dark"] #dashboardScreen .text-gray-900 {
+    color: var(--text-primary) !important;
+}
+
+html[data-theme="dark"] #dashboardScreen .text-neutral-600,
+html[data-theme="dark"] #dashboardScreen .text-neutral-500,
+html[data-theme="dark"] #dashboardScreen .text-gray-500 {
+    color: var(--text-secondary) !important;
+}
+
+html[data-theme="dark"] #dashboardScreen .text-neutral-400,
+html[data-theme="dark"] #dashboardScreen .text-neutral-300 {
+    color: var(--text-muted) !important;
+}
+
+html[data-theme="dark"] #dashboardScreen [class*="border-neutral-"],
+html[data-theme="dark"] #dashboardScreen [class*="border-gray-"] {
+    border-color: var(--border-color) !important;
+}
+
+/* Sidebar */
+
+html[data-theme="dark"] #dashboardScreen .nav-item {
+    color: var(--text-primary);
+}
+
+html[data-theme="dark"] #dashboardScreen .nav-item:hover,
+html[data-theme="dark"] #dashboardScreen .nav-item.active {
+    background: var(--hover-bg) !important;
+}
+
+html[data-theme="dark"] #dashboardScreen .nav-item.active {
+    color: var(--accent-text) !important;
+}
+
+/* Tables */
+
+html[data-theme="dark"] #dashboardScreen table th,
+html[data-theme="dark"] #dashboardScreen table td {
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+html[data-theme="dark"] #dashboardScreen thead {
+    background: var(--bg-secondary);
+}
+
+html[data-theme="dark"] #dashboardScreen tbody tr:hover {
+    background: var(--hover-bg);
+}
+
+/* Dashboard inputs */
+
+html[data-theme="dark"] #dashboardScreen input,
+html[data-theme="dark"] #dashboardScreen select,
+html[data-theme="dark"] #dashboardScreen textarea {
+    background: var(--input-bg) !important;
+    color: var(--input-text) !important;
+    border-color: var(--border-color) !important;
+}
+
+html[data-theme="dark"] #dashboardScreen input::placeholder {
+    color: var(--input-placeholder);
+}
+
+/* Performance selector */
+
+html[data-theme="dark"] #typingPerformanceBtn,
+html[data-theme="dark"] #codePerformanceBtn {
+    border-color: var(--border-color);
+}
+
+html[data-theme="dark"] #typingPerformanceBtn {
+    background: #5420bd !important;
+    color: #ffffff !important;
+}
+
+html[data-theme="dark"] #codePerformanceBtn {
+    background: var(--bg-tertiary) !important;
+    color: var(--text-secondary) !important;
+}
+
+html[data-theme="dark"] #typingSpeedBtn,
+html[data-theme="dark"] #typingAccuracyBtn,
+html[data-theme="dark"] #codeSpeedBtn,
+html[data-theme="dark"] #codeAccuracyBtn {
+    color: var(--text-secondary);
+}
+
+html[data-theme="dark"] #typingSpeedBtn.active,
+html[data-theme="dark"] #typingAccuracyBtn.active,
+html[data-theme="dark"] #codeSpeedBtn.active,
+html[data-theme="dark"] #codeAccuracyBtn.active {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+}
+
+
+/* =========================================================
+   18. CHARTS
+========================================================= */
 
 .chart-line {
     fill: none;
@@ -25,37 +859,465 @@ body {
 }
 
 .chart-area {
-    fill: rgba(112, 44, 255, 0.10);
+    fill: rgba(112, 44, 255, .10);
 }
 
 .chart-dot {
     fill: #702cff;
-    stroke: white;
+    stroke: var(--chart-dot-border);
     stroke-width: 2;
 }
 
-.hidden {
-    display: none !important;
+html[data-theme="dark"] canvas {
+    color-scheme: dark;
 }
 
-/* Django Authentication Forms */
-
-form input {
-    width: 100%;
-    padding: 12px 14px;
-    border: 1px solid #e5e7eb;
-    border-radius: 9px;
-    outline: none;
-    font-size: 14px;
+html[data-theme="dark"] .chart-grid {
+    stroke: var(--chart-grid);
 }
 
-form input:focus {
-    border-color: #9333ea;
-    box-shadow: 0 0 0 2px rgba(147, 51, 234, 0.1);
+html[data-theme="dark"] .chart-label {
+    fill: var(--chart-text);
 }
 
-form ul {
-    font-size: 12px;
-    color: #dc2626;
-    margin-top: 5px;
+
+/* =========================================================
+   19. RESULTS HISTORY
+========================================================= */
+
+.results-history {
+    color: var(--text-primary);
+}
+
+html[data-theme="dark"] .results-history > .bg-white {
+    background: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+}
+
+html[data-theme="dark"] .results-history .text-neutral-900,
+html[data-theme="dark"] .results-history .text-neutral-800,
+html[data-theme="dark"] .results-history .text-neutral-700,
+html[data-theme="dark"] .results-history .text-neutral-600 {
+    color: var(--text-primary) !important;
+}
+
+html[data-theme="dark"] .results-history .text-neutral-500,
+html[data-theme="dark"] .results-history .text-neutral-400 {
+    color: var(--text-secondary) !important;
+}
+
+html[data-theme="dark"] .results-history .bg-neutral-50,
+html[data-theme="dark"] .results-history .bg-neutral-100 {
+    background: var(--bg-secondary) !important;
+}
+
+html[data-theme="dark"] .results-history .border-neutral-100,
+html[data-theme="dark"] .results-history .border-neutral-200 {
+    border-color: var(--border-color) !important;
+}
+
+html[data-theme="dark"] .results-history input,
+html[data-theme="dark"] .results-history select {
+    background: var(--input-bg) !important;
+    color: var(--input-text) !important;
+    border-color: var(--border-color) !important;
+}
+
+html[data-theme="dark"] .results-history thead {
+    background: var(--bg-secondary);
+}
+
+html[data-theme="dark"] .results-history tbody tr:hover {
+    background: var(--hover-bg) !important;
+}
+
+html[data-theme="dark"] .results-history tbody tr {
+    border-color: var(--border-color);
+}
+
+html[data-theme="dark"] .results-history .divide-neutral-100 > :not([hidden]) ~ :not([hidden]) {
+    border-color: var(--border-color);
+}
+
+html[data-theme="dark"] .results-history a.bg-neutral-100 {
+    background: var(--hover-bg) !important;
+    color: var(--text-primary) !important;
+}
+
+html[data-theme="dark"] .results-history a.border-neutral-200 {
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+html[data-theme="dark"] .results-history a.bg-neutral-900 {
+    background: #5420bd !important;
+    color: #ffffff !important;
+}
+
+
+/* =========================================================
+   20. DIFFICULTY ANALYTICS
+========================================================= */
+
+html[data-theme="dark"] #dashboardScreen .bg-green-50,
+html[data-theme="dark"] #dashboardScreen .bg-blue-50,
+html[data-theme="dark"] #dashboardScreen .bg-red-50 {
+    background: var(--bg-tertiary) !important;
+}
+
+html[data-theme="dark"] #dashboardScreen .border-t {
+    border-color: var(--border-color);
+}
+
+
+/* =========================================================
+   21. PROFILE PAGE
+========================================================= */
+
+.profile-page {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+html[data-theme="dark"] .profile-page .bg-white {
+    background: var(--bg-card) !important;
+}
+
+html[data-theme="dark"] .profile-page .text-neutral-900,
+html[data-theme="dark"] .profile-page .text-neutral-800,
+html[data-theme="dark"] .profile-page .text-neutral-700 {
+    color: var(--text-primary) !important;
+}
+
+html[data-theme="dark"] .profile-page .text-neutral-600,
+html[data-theme="dark"] .profile-page .text-neutral-500,
+html[data-theme="dark"] .profile-page .text-neutral-400 {
+    color: var(--text-secondary) !important;
+}
+
+html[data-theme="dark"] .profile-page .border-neutral-200,
+html[data-theme="dark"] .profile-page .border-neutral-100 {
+    border-color: var(--border-color) !important;
+}
+
+html[data-theme="dark"] .profile-page .bg-neutral-50,
+html[data-theme="dark"] .profile-page .bg-neutral-100 {
+    background: var(--bg-secondary) !important;
+}
+
+html[data-theme="dark"] .profile-page .border-white {
+    border-color: var(--bg-card) !important;
+}
+
+html[data-theme="dark"] .profile-page a.bg-white:hover {
+    background: var(--hover-bg) !important;
+}
+
+
+/* =========================================================
+   22. EDIT PROFILE PAGE
+========================================================= */
+
+html[data-theme="dark"] form .bg-white {
+    background: var(--bg-card) !important;
+}
+
+html[data-theme="dark"] form .border-neutral-100,
+html[data-theme="dark"] form .border-neutral-200 {
+    border-color: var(--border-color) !important;
+}
+
+/* Profile image preview keeps its gradient */
+html[data-theme="dark"] #coverPreview {
+    border-color: var(--border-color);
+}
+
+
+/* =========================================================
+   23. AUTHENTICATION PAGES
+========================================================= */
+
+html[data-theme="dark"] body > div.min-h-screen {
+    color: var(--text-primary);
+}
+
+html[data-theme="dark"] .min-h-screen.bg-neutral-50 {
+    background: var(--bg-primary) !important;
+}
+
+html[data-theme="dark"] .min-h-screen .bg-white {
+    background: var(--bg-card) !important;
+}
+
+html[data-theme="dark"] .min-h-screen .border-neutral-200,
+html[data-theme="dark"] .min-h-screen .border {
+    border-color: var(--border-color) !important;
+}
+
+html[data-theme="dark"] .min-h-screen .text-neutral-500 {
+    color: var(--text-secondary) !important;
+}
+
+html[data-theme="dark"] .min-h-screen h1,
+html[data-theme="dark"] .min-h-screen h2 {
+    color: var(--text-primary);
+}
+
+/* Authentication buttons */
+
+html[data-theme="dark"] .min-h-screen button.bg-neutral-900,
+html[data-theme="dark"] .min-h-screen a.bg-neutral-900 {
+    background: #5420bd !important;
+    color: #ffffff !important;
+}
+
+html[data-theme="dark"] .min-h-screen button.bg-neutral-900:hover,
+html[data-theme="dark"] .min-h-screen a.bg-neutral-900:hover {
+    background: #6d35d4 !important;
+}
+
+
+/* =========================================================
+   24. GAME SCREEN
+========================================================= */
+
+html[data-theme="dark"] #gameScreen {
+    background: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Filter controls */
+
+html[data-theme="dark"] #gameScreen .filter-control,
+html[data-theme="dark"] #gameScreen #restart {
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+html[data-theme="dark"] #gameScreen .filter-control option {
+    background: var(--bg-card);
+    color: var(--text-primary);
+}
+
+html[data-theme="dark"] #gameScreen #restart:hover {
+    background: var(--hover-bg) !important;
+}
+
+/* Game cards */
+
+html[data-theme="dark"] #gameScreen .bg-white {
+    background-color: var(--bg-card) !important;
+}
+
+html[data-theme="dark"] #gameScreen .bg-neutral-50,
+html[data-theme="dark"] #gameScreen .bg-gray-50 {
+    background-color: var(--bg-secondary) !important;
+}
+
+html[data-theme="dark"] #gameScreen .border-neutral-200,
+html[data-theme="dark"] #gameScreen .border-neutral-100 {
+    border-color: var(--border-color) !important;
+}
+
+/* Game text */
+
+html[data-theme="dark"] #gameScreen .text-neutral-900,
+html[data-theme="dark"] #gameScreen .text-neutral-800 {
+    color: var(--text-primary) !important;
+}
+
+html[data-theme="dark"] #gameScreen .text-neutral-700,
+html[data-theme="dark"] #gameScreen .text-neutral-600,
+html[data-theme="dark"] #gameScreen .text-neutral-500,
+html[data-theme="dark"] #gameScreen .text-neutral-400,
+html[data-theme="dark"] #gameScreen .text-neutral-300 {
+    color: var(--text-secondary) !important;
+}
+
+/* Stats separators */
+
+html[data-theme="dark"] #gameScreen .filter-stat + .filter-stat::before {
+    background: var(--border-color);
+}
+
+/* Timeline */
+
+html[data-theme="dark"] #gameScreen #timeProgressBar {
+    background: #303543;
+}
+
+/* Typing paper */
+
+html[data-theme="dark"] #gameScreen .typing-paper {
+    background-color: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+
+    background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 42px,
+        #303543 42px,
+        #303543 43px
+    ) !important;
+}
+
+/* Pac-Man */
+
+html[data-theme="dark"] #gameScreen #pacmanMouth {
+    fill: var(--bg-card);
+}
+
+/* Code editor: preserve its own dark appearance */
+
+html[data-theme="dark"] #gameScreen .filter-editor {
+    background: #1e1e1e !important;
+    border-color: #303039 !important;
+    color: #ffffff;
+}
+
+
+/* =========================================================
+   25. GAME RESULT SCREEN
+========================================================= */
+
+html[data-theme="dark"] #resultScreen {
+    background: var(--bg-primary) !important;
+    color: var(--text-primary);
+}
+
+html[data-theme="dark"] #resultScreen .text-neutral-900,
+html[data-theme="dark"] #resultScreen .text-neutral-700 {
+    color: var(--text-primary) !important;
+}
+
+html[data-theme="dark"] #resultScreen .text-neutral-400,
+html[data-theme="dark"] #resultScreen .text-neutral-300 {
+    color: var(--text-secondary) !important;
+}
+
+html[data-theme="dark"] #resultScreen .bg-neutral-50 {
+    background: var(--bg-secondary) !important;
+}
+
+html[data-theme="dark"] #resultScreen .border-neutral-100,
+html[data-theme="dark"] #resultScreen .border-neutral-200 {
+    border-color: var(--border-color) !important;
+}
+
+html[data-theme="dark"] #resultScreen select {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+html[data-theme="dark"] #resultScreen select option {
+    background: var(--bg-card);
+    color: var(--text-primary);
+}
+
+html[data-theme="dark"] #resultScreen #retestButton {
+    background: #5420bd;
+    color: #ffffff;
+}
+
+html[data-theme="dark"] #resultScreen #retestButton:hover {
+    background: #6d35d4;
+}
+
+html[data-theme="dark"] #resultScreen #homeButton {
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+html[data-theme="dark"] #resultScreen #homeButton:hover {
+    background: var(--hover-bg);
+}
+
+
+/* =========================================================
+   26. LOADER
+========================================================= */
+
+html[data-theme="dark"] #typing-loader {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+html[data-theme="dark"] #typing-loader .loader-subtitle,
+html[data-theme="dark"] #typing-loader .loader-info {
+    color: var(--text-secondary);
+}
+
+
+/* =========================================================
+   27. ACCESSIBILITY AND SCROLLBAR
+========================================================= */
+
+:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+html[data-theme="dark"] ::selection {
+    background: rgba(139, 92, 246, .35);
+    color: #ffffff;
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar-thumb {
+    background: #3b4050;
+    border-radius: 20px;
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+    background: #555b6d;
+}
+
+
+/* =========================================================
+   28. RESPONSIVE SAFETY
+========================================================= */
+
+img,
+video,
+canvas,
+svg {
+    max-width: 100%;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+@media (max-width: 640px) {
+    .theme-dropdown {
+        max-width: calc(100vw - 24px);
+    }
+
+    #resultScreen {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+}
+
+
+/* Fix: View Profile button hover in dark mode */
+
+html[data-theme="dark"] .theme-dropdown-header a:hover {
+    background-color: #292e3b !important;
+    color: #b69aff !important;
+    border-color: #7250c7 !important;
+}
+
+html[data-theme="dark"] .theme-dropdown-header a {
+    transition: all 0.2s ease;
 }

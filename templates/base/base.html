@@ -1,13 +1,21 @@
 
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>{% block title %}TypeMaster Pro{% endblock %}</title>
+
+    <!-- Load saved theme before page renders -->
+    <script>
+        (() => {
+            const savedTheme = localStorage.getItem('typemaster-theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -17,7 +25,7 @@
     {% block extra_css %}{% endblock %}
 </head>
 
-<body class="min-h-screen bg-white text-neutral-800">
+<body class="min-h-screen">
 
     <!-- Navbar -->
     {% include "components/navbar.html" %}
