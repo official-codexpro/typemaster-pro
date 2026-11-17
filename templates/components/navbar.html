@@ -34,16 +34,29 @@
         <!-- Right Side -->
         <div class="flex items-center gap-3">
 
-            <!-- Theme Toggle -->
-            <button
-                id="themeToggle"
-                type="button"
-                aria-label="Toggle dark mode"
-                title="Toggle Dark Mode"
-                class="w-10 h-10 flex items-center justify-center rounded-xl border border-neutral-200 hover:bg-neutral-100 transition text-xl">
-                <span id="themeIcon">🌙</span>
-            </button>
+            <!-- Premium Theme Toggle -->
+<!-- Premium Theme Toggle -->
+<button
+    id="themeToggle"
+    type="button"
+    aria-label="Toggle dark mode"
+    title="Toggle Dark Mode"
+    class="theme-toggle-btn">
 
+    <svg
+        id="themeIcon"
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round">
+    </svg>
+
+</button>
             {% if request.user.is_authenticated %}
 
                 <!-- User Dropdown -->
@@ -164,26 +177,54 @@
         return;
     }
 
+    const moonIcon = `
+        <path d="M19.5 15.5A8.5 8.5 0 0 1 8.5 4.5
+                 8.5 8.5 0 1 0 19.5 15.5Z"/>
+        <path d="M16 3v3"/>
+        <path d="M14.5 4.5h3"/>
+    `;
+
+    const sunIcon = `
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M12 2v2"/>
+        <path d="M12 20v2"/>
+        <path d="m4.93 4.93 1.42 1.42"/>
+        <path d="m17.65 17.65 1.42 1.42"/>
+        <path d="M2 12h2"/>
+        <path d="M20 12h2"/>
+        <path d="m4.93 19.07 1.42-1.42"/>
+        <path d="m17.65 6.35 1.42-1.42"/>
+    `;
+
     function updateTheme() {
         const isDark = root.getAttribute('data-theme') === 'dark';
 
-        icon.textContent = isDark ? '☀️' : '🌙';
-        toggle.title = isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+        icon.innerHTML = isDark ? sunIcon : moonIcon;
+
+        toggle.title = isDark
+            ? 'Switch to Light Mode'
+            : 'Switch to Dark Mode';
+
+        toggle.setAttribute(
+            'aria-label',
+            isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'
+        );
     }
 
+    // Set icon according to saved theme
     updateTheme();
 
+    // Toggle theme
     toggle.addEventListener('click', () => {
-        const current = root.getAttribute('data-theme');
-        const next = current === 'dark' ? 'light' : 'dark';
+        const currentTheme = root.getAttribute('data-theme');
+        const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
 
-        root.setAttribute('data-theme', next);
-        localStorage.setItem('typemaster-theme', next);
+        root.setAttribute('data-theme', nextTheme);
+
+        localStorage.setItem('typemaster-theme', nextTheme);
 
         updateTheme();
-
-        console.log('Theme changed to:', next);
     });
+
 })();
 </script>
-
