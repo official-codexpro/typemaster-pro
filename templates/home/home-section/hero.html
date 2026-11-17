@@ -89,173 +89,9 @@
                     </div>
 
                     <!-- PACMAN PREVIEW -->
-
-<!-- PACMAN TYPING PREVIEW -->
-<div class="mt-8 bg-gray-50 rounded-2xl p-5 sm:p-6 border border-gray-100">
-
-    <p class="text-xs text-gray-400 font-semibold mb-4">
-        WATCH THE TYPING EXPERIENCE
-    </p>
-
-    <div id="homePacmanBox"
-         class="relative bg-white border border-gray-200 rounded-xl overflow-hidden">
-
-        <!-- PACMAN -->
-        <div id="homePacman"
-             class="absolute z-20 pointer-events-none w-8 h-8"
-             style="left:0;top:0;transform:translate(0px,0px);transition:transform 100ms linear;">
-
-            <svg viewBox="0 0 100 100" class="w-full h-full">
-                <circle cx="50" cy="50" r="46" fill="#FACC15"/>
-
-                <polygon id="homePacmanMouth"
-                         points="50,50 100,18 100,82"
-                         fill="white"/>
-
-                <circle cx="57" cy="24" r="5" fill="#222"/>
-            </svg>
-        </div>
-
-        <!-- THREE NOTEBOOK LINES -->
-        <div class="h-[132px] overflow-hidden px-3 sm:px-6 py-[5px]
-                    font-mono text-sm sm:text-base leading-[44px]
-                    tracking-wide text-gray-900 text-justify
-                    bg-[linear-gradient(to_bottom,transparent_43px,#edf0f5_43px,#edf0f5_44px)]
-                    bg-[length:100%_44px]">
-
-            <p id="homePacmanText"
-               class="m-0 leading-[44px] text-justify"
-               style="white-space:normal;overflow-wrap:anywhere;"></p>
-
-        </div>
-    </div>
-</div>
-
-
-<!-- PACMAN PREVIEW SCRIPT -->
-<script>
-(() => {
-    const box = document.getElementById("homePacmanBox");
-    const text = document.getElementById("homePacmanText");
-    const pacman = document.getElementById("homePacman");
-    const mouth = document.getElementById("homePacmanMouth");
-
-    if (!box || !text || !pacman || !mouth) return;
-
-    const sentence =
-        "Building a website requires creativity and patience. Practice makes every developer faster and more accurate. Keep practicing every day to improve your typing skills.";
-
-    const STEP_TIME = 115;
-
-    let characters = [];
-    let index = 0;
-    let mouthOpen = true;
-    let timer = null;
-    let running = false;
-
-    function buildText() {
-        text.replaceChildren();
-        characters = [];
-
-        for (const char of sentence) {
-            const span = document.createElement("span");
-
-            span.textContent = char;
-            span.className = "text-gray-900 transition-colors duration-100";
-
-            text.appendChild(span);
-            characters.push(span);
-        }
-    }
-
-    function movePacman(character) {
-        const boxRect = box.getBoundingClientRect();
-        const rect = character.getBoundingClientRect();
-
-        const x = rect.left - boxRect.left - 5;
-        const y = rect.top - boxRect.top +
-                  (rect.height - pacman.offsetHeight) / 2;
-
-        pacman.style.transform = `translate(${x}px, ${y}px)`;
-
-        mouthOpen = !mouthOpen;
-
-        mouth.setAttribute(
-            "points",
-            mouthOpen
-                ? "50,50 100,18 100,82"
-                : "50,50 100,46 100,54"
-        );
-    }
-
-    function resetPreview() {
-        // Restore every character to black
-        characters.forEach(char => {
-            char.classList.remove("text-purple-600");
-            char.classList.add("text-gray-900");
-        });
-
-        index = 0;
-
-        // Return Pac-Man instantly to the first character
-        pacman.style.transition = "none";
-        movePacman(characters[0]);
-
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                pacman.style.transition = "transform 100ms linear";
-                eatNext();
-            });
-        });
-    }
-
-    function eatNext() {
-        if (!running) return;
-
-        if (index >= characters.length) {
-            resetPreview();
-            return;
-        }
-
-        const current = characters[index];
-
-        // Move to one individual character
-        movePacman(current);
-
-        // After reaching it, turn only that character purple
-        timer = setTimeout(() => {
-            current.classList.remove("text-gray-900");
-            current.classList.add("text-purple-600");
-
-            index++;
-            eatNext();
-        }, STEP_TIME);
-    }
-
-    function startPreview() {
-        if (running) return;
-
-        running = true;
-        eatNext();
-    }
-
-    function stopPreview() {
-        running = false;
-        clearTimeout(timer);
-    }
-
-    buildText();
-
-    requestAnimationFrame(() => {
-        movePacman(characters[0]);
-        startPreview();
-    });
-
-})();
-</script>
-
-               
-                    <!-- PERSONAL STATS -->
+                   <div class="mt-8 bg-gray-50 rounded-2xl p-5 sm:p-6 border border-gray-100"> <p class="text-xs text-gray-400 font-semibold mb-4"> WATCH THE TYPING EXPERIENCE </p> <div id="homePacmanBox" class="relative bg-white border border-gray-200 rounded-xl overflow-hidden"> <div id="homePacman" class="absolute z-20 pointer-events-none w-8 h-8" style="left:0;top:0;transform:translate(0,0);transition:none;"> <svg viewBox="0 0 100 100" class="w-full h-full"> <circle cx="50" cy="50" r="46" fill="#FACC15"/> <polygon id="homePacmanMouth" points="50,50 100,18 100,82" fill="white"/> <circle cx="57" cy="24" r="5" fill="#222"/> </svg> </div> <div class="h-[132px] overflow-hidden px-3 sm:px-4 py-[5px] font-mono text-[10px] sm:text-sm md:text-base leading-[44px] tracking-wide bg-[linear-gradient(to_bottom,transparent_43px,#edf0f5_43px,#edf0f5_44px)] bg-[length:100%_44px]"> <p id="homePacmanText" class="m-0 w-full leading-[44px]" style="white-space:normal;"></p> </div> </div> </div>
+                 
+                   <!-- PERSONAL STATS -->
                     <div class="grid grid-cols-3 gap-3 mt-6">
 
                         <div class="bg-purple-50 rounded-xl p-4">
@@ -289,4 +125,210 @@
         </div>
     </div>
 </section>
+{% comment %} for pacman animation in home page  {% endcomment %}
+<script>
+(() => {
+    const box = document.getElementById("homePacmanBox");
+    const text = document.getElementById("homePacmanText");
+    const pacman = document.getElementById("homePacman");
+    const mouth = document.getElementById("homePacmanMouth");
 
+    if (!box || !text || !pacman || !mouth) return;
+
+    const lines = [
+    "Practice typing daily to improve your speed",
+    "and accuracy. Build better habit for become",
+    "a faster and confident typist."
+    ];
+    
+    const MOVE_TIME = 100;
+    const EAT_TIME = 35;
+    const ENTRY_TIME = 300;
+    const EXIT_TIME = 300;
+
+    let running = true;
+    let mouthOpen = true;
+
+    pacman.style.transition = "none";
+
+    function buildLines() {
+        text.replaceChildren();
+
+        lines.forEach((line, index) => {
+            const row = document.createElement("div");
+
+            row.style.width = index === 2 ? "50%" : "100%";
+            row.style.height = "44px";
+            row.style.lineHeight = "44px";
+            row.style.whiteSpace = "nowrap";
+            row.style.boxSizing = "border-box";
+
+            [...line].forEach(char => {
+                const span = document.createElement("span");
+
+                span.textContent = char === " " ? "\u00a0" : char;
+                span.style.display = "inline-block";
+                span.className = "text-gray-900";
+
+                row.appendChild(span);
+            });
+
+            text.appendChild(row);
+        });
+
+        justifyLines();
+    }
+
+    function justifyLines() {
+        [...text.children].forEach(row => {
+            const chars = [...row.children];
+
+            chars.forEach(char => {
+                char.style.marginRight = "0px";
+            });
+
+            const spaces = chars.filter(
+                char => char.textContent === "\u00a0"
+            );
+
+            if (!spaces.length) return;
+
+            const naturalWidth = chars.reduce(
+                (total, char) =>
+                    total + char.getBoundingClientRect().width,
+                0
+            );
+
+            const extraSpace = Math.max(
+                0,
+                row.clientWidth - naturalWidth
+            );
+
+            const spacePerWord = extraSpace / spaces.length;
+
+            spaces.forEach(space => {
+                space.style.marginRight = `${spacePerWord}px`;
+            });
+        });
+    }
+
+    function getPosition(element) {
+        const boxRect = box.getBoundingClientRect();
+        const rect = element.getBoundingClientRect();
+
+        return {
+            x: rect.left - boxRect.left - 5,
+            y: rect.top - boxRect.top +
+               (rect.height - pacman.offsetHeight) / 2
+        };
+    }
+
+    function currentPosition() {
+        const matrix = new DOMMatrixReadOnly(
+            getComputedStyle(pacman).transform
+        );
+
+        return { x: matrix.m41, y: matrix.m42 };
+    }
+
+    function move(from, to, duration) {
+        return new Promise(resolve => {
+            const start = performance.now();
+
+            function animate(now) {
+                if (!running) return resolve();
+
+                const progress = Math.min(
+                    (now - start) / duration, 1
+                );
+
+                const x = from.x + (to.x - from.x) * progress;
+                const y = from.y + (to.y - from.y) * progress;
+
+                pacman.style.transform =
+                    `translate3d(${x}px, ${y}px, 0)`;
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    resolve();
+                }
+            }
+
+            requestAnimationFrame(animate);
+        });
+    }
+
+    function chew() {
+        mouthOpen = !mouthOpen;
+
+        mouth.setAttribute(
+            "points",
+            mouthOpen
+                ? "50,50 100,18 100,82"
+                : "50,50 100,46 100,54"
+        );
+    }
+
+    function wait(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function start() {
+        while (running) {
+            const width = box.clientWidth;
+
+            for (let lineIndex = 0; lineIndex < 3; lineIndex++) {
+                const row = text.children[lineIndex];
+                const rowChars = [...row.children];
+
+                const first = getPosition(rowChars[0]);
+
+                const entry = {
+                    x: -pacman.offsetWidth,
+                    y: first.y
+                };
+
+                pacman.style.transform =
+                    `translate3d(${entry.x}px, ${entry.y}px, 0)`;
+
+                await new Promise(requestAnimationFrame);
+
+                await move(entry, first, ENTRY_TIME);
+
+                for (const character of rowChars) {
+                    if (!running) return;
+
+                    await move(
+                        currentPosition(),
+                        getPosition(character),
+                        MOVE_TIME
+                    );
+
+                    character.classList.remove("text-gray-900");
+                    character.classList.add("text-purple-600");
+
+                    chew();
+                    await wait(EAT_TIME);
+                }
+
+                await move(
+                    currentPosition(),
+                    { x: width + 12, y: first.y },
+                    EXIT_TIME
+                );
+            }
+
+            text.querySelectorAll("span").forEach(char => {
+                char.classList.remove("text-purple-600");
+                char.classList.add("text-gray-900");
+            });
+        }
+    }
+
+    buildLines();
+    requestAnimationFrame(start);
+
+    window.addEventListener("resize", justifyLines);
+})();
+</script>
