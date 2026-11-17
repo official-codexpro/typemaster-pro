@@ -1,229 +1,487 @@
 
-<div id="gameScreen" class="hidden min-h-screen bg-white text-neutral-800 font-mono">
+<style>
+    /* =========================
+       BASE
+    ========================= */
+    #gameScreen {
+        min-height: 100vh;
+        background: #f7f8fa;
+        color: #171717;
+    }
 
-    <header class="max-w-6xl mx-auto px-6 py-7 flex justify-between items-center">
+    .filter-control {
+        height: 44px;
+        padding: 0 14px;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        background: #fff;
+        color: #404040;
+        font-size: 13px;
+        font-weight: 600;
+        outline: none;
+        cursor: pointer;
+        transition: border-color .2s, box-shadow .2s;
+    }
 
-        <a href="/" class="text-xl font-bold tracking-tight">
-            <span class="text-green-500">●</span> Filter
-        </a>
+    .filter-control:hover {
+        border-color: #c4b5fd;
+    }
 
-        <div class="flex items-center gap-3">
+    .filter-control:focus {
+        border-color: #8b5cf6;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, .09);
+    }
 
-            <select id="difficulty" class="bg-white border border-neutral-200 rounded-lg px-3 py-2 text-sm">
-                <option value="easy">Easy</option>
-                <option value="normal" selected>Normal</option>
-                <option value="hard">Hard</option>
-                <option value="code">Code</option>
-            </select>
+    #restart {
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        background: #fff;
+        color: #737373;
+        font-size: 23px;
+        transition: .2s ease;
+    }
 
-            <select id="languageSelect" class="hidden bg-white border border-neutral-200 rounded-lg px-3 py-2 text-sm">
-                <option value="python">Python</option>
-                <option value="javascript">JavaScript</option>
-                <option value="typescript">TypeScript</option>
-                <option value="html">HTML</option>
-                <option value="css">CSS</option>
-                <option value="c">C</option>
-                <option value="cpp">C++</option>
-                <option value="java">Java</option>
-                <option value="csharp">C#</option>
-                <option value="php">PHP</option>
-                <option value="sql">SQL</option>
-                <option value="go">Go</option>
-                <option value="rust">Rust</option>
-                <option value="ruby">Ruby</option>
-                <option value="swift">Swift</option>
-                <option value="kotlin">Kotlin</option>
-                <option value="bash">Bash</option>
-                <option value="shell">Shell</option>
-                <option value="json">JSON</option>
-                <option value="xml">XML</option>
-                <option value="yaml">YAML</option>
-                <option value="dart">Dart</option>
-                <option value="r">R</option>
-                <option value="lua">Lua</option>
-                <option value="perl">Perl</option>
-                <option value="scala">Scala</option>
-                <option value="powershell">PowerShell</option>
-            </select>
+    #restart:hover {
+        color: #ef4444;
+        border-color: #fecaca;
+        background: #fffafa;
+        transform: rotate(-35deg);
+    }
 
-            <select id="duration" class="bg-white border border-neutral-200 rounded-lg px-3 py-2 text-sm">
-                <option value="15">15s</option>
-                <option value="30" selected>30s</option>
-                <option value="60">60s</option>
-                <option value="120">120s</option>
-            </select>
+    /* =========================
+       STATS
+    ========================= */
+    .filter-stat {
+        flex: 1;
+        min-width: 0;
+        padding: 17px 10px;
+        text-align: center;
+        position: relative;
+    }
 
-            <button id="restart" class="text-2xl text-neutral-500 hover:text-red-500" title="Restart">
-                ↻
-            </button>
+    .filter-stat + .filter-stat::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 22%;
+        height: 56%;
+        width: 1px;
+        background: #eeeeee;
+    }
 
-        </div>
-    </header>
+    /* =========================
+       TIMELINE
+    ========================= */
+    #timeProgressBar {
+        width: 100%;
+        height: 7px;
+        background: #eaecef;
+        border-radius: 999px;
+        overflow: hidden;
+    }
 
-    <main class="max-w-5xl mx-auto px-6 pt-20">
+    #timeProgress {
+        height: 100%;
+        width: 100%;
+        border-radius: 999px;
+        background: #22c55e;
+        transition: width .45s linear, background-color .6s linear;
+        will-change: width, background-color;
+    }
 
-        <section class="mb-16">
+    /* =========================
+       NORMAL TYPING AREA
+    ========================= */
+    .typing-paper {
+        position: relative;
+        width: 100%;
+        min-height: 270px;
+        overflow: hidden;
+        border: 1px solid #e5e7eb;
+        border-radius: 13px;
+        background-color: #fff;
+        background-image: repeating-linear-gradient(
+            to bottom,
+            transparent 0,
+            transparent 42px,
+            #edf0f5 42px,
+            #edf0f5 43px
+        );
+        background-position: 0 16px;
+        background-size: 100% 43px;
+    }
 
-            <div class="flex justify-between items-end mb-5">
+    #textDisplay {
+        position: relative;
+        z-index: 1;
+        box-sizing: border-box;
+        width: 100%;
+        height: 270px;
+        min-height: 270px;
+        padding: 16px 24px;
+        overflow: hidden;
+        font-size: 22px;
+        line-height: 43px;
+        letter-spacing: .025em;
+        word-break: break-word;
+        text-align: left;
+        user-select: none;
+    }
 
-                <div>
-                    <p class="text-xs text-neutral-400 uppercase tracking-widest">
-                        Time Remaining
-                    </p>
+    /* Pac-Man starts at the first text line */
+    #pacman {
+        position: absolute;
+        top: 16px !important;
+        left: 24px !important;
+        z-index: 5;
+        width: 42px;
+        height: 42px;
+        pointer-events: none;
+        will-change: transform;
+    }
 
-                    <div class="mt-2 flex items-baseline gap-2">
-                        <span id="timer" class="text-7xl font-semibold tracking-tighter text-neutral-900">30</span>
-                        <span class="text-xl text-neutral-400">sec</span>
+    #pacman svg {
+        display: block;
+        width: 42px;
+        height: 42px;
+    }
+
+    /* IMPORTANT:
+       Hide notebook and Pac-Man completely in Code Mode.
+       The existing JS toggles the hidden class on codeEditor.
+    */
+    #typingArea:has(#codeEditor:not(.hidden)) .typing-paper,
+    #typingArea:has(#codeEditor:not(.hidden)) #pacman {
+        display: none !important;
+    }
+
+    /* =========================
+       CODE EDITORS
+    ========================= */
+    .filter-editor {
+        min-width: 0;
+        overflow: hidden;
+        border: 1px solid #303039;
+        border-radius: 12px;
+        background: #1e1e1e;
+    }
+
+    .filter-editor-scroll {
+        height: 350px;
+        overflow: auto;
+        scrollbar-width: thin;
+        scrollbar-color: #52525b #1e1e1e;
+        overscroll-behavior: contain;
+    }
+
+    .filter-editor-scroll::-webkit-scrollbar {
+        width: 7px;
+        height: 7px;
+    }
+
+    .filter-editor-scroll::-webkit-scrollbar-track {
+        background: #1e1e1e;
+    }
+
+    .filter-editor-scroll::-webkit-scrollbar-thumb {
+        background: #52525b;
+        border-radius: 20px;
+    }
+
+    .filter-editor-header {
+        height: 46px;
+        background: #252526;
+        border-bottom: 1px solid #383838;
+    }
+
+    .filter-editor-footer {
+        min-height: 42px;
+        background: #252526;
+        border-top: 1px solid #383838;
+    }
+
+    /* =========================
+       HIDDEN INPUT
+    ========================= */
+    #typingInput {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+    }
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+    @media (max-width: 640px) {
+        .filter-stat {
+            padding: 13px 3px;
+        }
+
+        #textDisplay {
+            height: 270px;
+            min-height: 270px;
+            padding: 16px 12px;
+            font-size: 17px;
+            line-height: 43px;
+        }
+
+        #pacman {
+            left: 12px !important;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .filter-control,
+        #restart,
+        #timeProgress {
+            transition: none;
+        }
+    }
+</style>
+
+
+<div id="gameScreen" class="hidden min-h-screen bg-[#f7f8fa] text-neutral-800 font-mono">
+
+    <main class="max-w-[88rem] mx-auto px-4 md:px-8 xl:px-12 pt-8 md:pt-10 pb-12">
+
+        <!-- FILTER BAR -->
+        <section class="mb-8">
+
+            <div class="flex flex-wrap items-center justify-between gap-4">
+
+                <div class="flex items-center gap-3 shrink-0">
+
+                    <div class="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center text-lg">
+                        ☷
                     </div>
+
+                    <div>
+                        <h1 class="text-lg font-bold tracking-tight text-neutral-900">
+                            Filter
+                        </h1>
+                        <p class="text-[11px] text-neutral-400">
+                            Customize your test
+                        </p>
+                    </div>
+
                 </div>
 
-                <div class="flex gap-8 pb-2">
+                <div class="flex items-center justify-end gap-2 flex-wrap">
 
-                    <div>
-                        <p class="text-xs text-neutral-400 uppercase tracking-wider">WPM</p>
-                        <strong id="wpm" class="text-2xl font-semibold">0</strong>
-                    </div>
+                    <select id="difficulty" class="filter-control w-[115px] sm:w-36">
+                        <option value="easy">Easy</option>
+                        <option value="normal" selected>Normal</option>
+                        <option value="hard">Hard</option>
+                        <option value="code">Code Mode</option>
+                    </select>
 
-                    <div>
-                        <p class="text-xs text-neutral-400 uppercase tracking-wider">Accuracy</p>
-                        <strong id="accuracy" class="text-2xl font-semibold">100%</strong>
-                    </div>
+                    <select id="languageSelect" class="hidden filter-control w-[125px] sm:w-40">
+                        <option value="python">Python</option>
+                        <option value="javascript">JavaScript</option>
+                        <option value="typescript">TypeScript</option>
+                        <option value="html">HTML</option>
+                        <option value="css">CSS</option>
+                        <option value="c">C</option>
+                        <option value="cpp">C++</option>
+                        <option value="java">Java</option>
+                        <option value="csharp">C#</option>
+                        <option value="php">PHP</option>
+                        <option value="sql">SQL</option>
+                        <option value="go">Go</option>
+                        <option value="rust">Rust</option>
+                        <option value="ruby">Ruby</option>
+                        <option value="swift">Swift</option>
+                        <option value="kotlin">Kotlin</option>
+                        <option value="bash">Bash</option>
+                        <option value="shell">Shell</option>
+                        <option value="json">JSON</option>
+                        <option value="xml">XML</option>
+                        <option value="yaml">YAML</option>
+                        <option value="dart">Dart</option>
+                        <option value="r">R</option>
+                        <option value="lua">Lua</option>
+                        <option value="perl">Perl</option>
+                        <option value="scala">Scala</option>
+                        <option value="powershell">PowerShell</option>
+                    </select>
 
-                    <div>
-                        <p class="text-xs text-neutral-400 uppercase tracking-wider">Mistakes</p>
-                        <strong id="mistakes" class="text-2xl font-semibold">0</strong>
-                    </div>
+                    <select id="duration" class="filter-control w-[125px] sm:w-36">
+                        <option value="15">15 Seconds</option>
+                        <option value="30" selected>30 Seconds</option>
+                        <option value="60">60 Seconds</option>
+                        <option value="120">120 Seconds</option>
+                    </select>
+
+                    <button id="restart" type="button" title="Restart Test" aria-label="Restart Test">
+                        ↻
+                    </button>
 
                 </div>
-            </div>
 
-            <div class="w-full h-2 bg-neutral-100 rounded-full overflow-hidden">
-                <div id="timeProgress" class="h-full bg-red-500 rounded-full" style="width: 100%"></div>
             </div>
 
         </section>
 
+
+        <!-- STATS -->
+        <section class="mb-7">
+
+            <div class="flex items-stretch bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
+
+                <div class="filter-stat">
+                    <p class="text-[10px] md:text-xs text-neutral-400 uppercase tracking-wider font-bold">Time</p>
+                    <div class="mt-2 flex items-baseline justify-center gap-1">
+                        <span id="timer" class="text-3xl md:text-5xl font-bold tracking-tight text-neutral-900">30</span>
+                        <span class="hidden sm:inline text-xs text-neutral-400">sec</span>
+                    </div>
+                </div>
+
+                <div class="filter-stat">
+                    <p class="text-[10px] md:text-xs text-neutral-400 uppercase tracking-wider font-bold">WPM</p>
+                    <div class="mt-2">
+                        <strong id="wpm" class="text-3xl md:text-5xl font-bold tracking-tight text-violet-600">0</strong>
+                    </div>
+                </div>
+
+                <div class="filter-stat">
+                    <p class="text-[10px] md:text-xs text-neutral-400 uppercase tracking-wider font-bold">Accuracy</p>
+                    <div class="mt-2">
+                        <strong id="accuracy" class="text-3xl md:text-5xl font-bold tracking-tight text-emerald-600">100%</strong>
+                    </div>
+                </div>
+
+                <div class="filter-stat">
+                    <p class="text-[10px] md:text-xs text-neutral-400 uppercase tracking-wider font-bold">Mistakes</p>
+                    <div class="mt-2">
+                        <strong id="mistakes" class="text-3xl md:text-5xl font-bold tracking-tight text-red-500">0</strong>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- TIMELINE -->
+        <section class="mb-6">
+
+            <div class="flex justify-between items-center text-[10px] text-neutral-400 uppercase tracking-wider font-bold mb-2">
+                <span>Time Progress</span>
+                <span id="timeProgressLabel">100% remaining</span>
+            </div>
+
+            <div id="timeProgressBar">
+                <div id="timeProgress" style="width:100%"></div>
+            </div>
+
+        </section>
+
+
+        <!-- TYPING AREA -->
         <section id="typingArea" class="relative">
 
-            <!-- NORMAL TYPING DISPLAY -->
+            <!-- NORMAL TYPING -->
+            <div class="typing-paper">
+                <div id="textDisplay" class="text-neutral-400"></div>
+            </div>
 
-            <div
-                id="textDisplay"
-                class="h-36 w-full overflow-hidden text-justify text-2xl md:text-3xl leading-9 tracking-wide break-words text-neutral-300 select-none"
-            ></div>
 
             <!-- PACMAN -->
-
-            <div id="pacman" class="absolute top-0 left-0 z-10 pointer-events-none">
-
-                <svg viewBox="0 0 100 100" width="42" height="42">
+            <div id="pacman" class="pointer-events-none">
+                <svg viewBox="0 0 100 100">
                     <circle id="pacmanFace" cx="50" cy="50" r="45" fill="#FACC15"/>
                     <polygon id="pacmanMouth" points="50,50 100,25 100,75" fill="white"/>
                     <circle cx="57" cy="24" r="5" fill="#222"/>
                 </svg>
-
             </div>
 
-            <!-- CODE MODE: TWO EDITOR BOARDS -->
 
-            <div id="codeEditor" class="hidden w-full space-y-5">
+            <!-- CODE MODE -->
+            <div id="codeEditor" class="hidden w-full">
 
-                <!-- TARGET CODE BOARD -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
-                <div class="overflow-hidden rounded-xl border border-neutral-800 bg-[#1e1e1e] shadow-lg">
+                    <!-- TARGET CODE -->
+                    <div class="filter-editor">
 
-                    <div class="flex items-center justify-between px-5 py-3 bg-[#252526] border-b border-neutral-700">
+                        <div class="filter-editor-header flex items-center justify-between px-4">
 
-                        <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full bg-red-400"></span>
-                            <span class="w-3 h-3 rounded-full bg-yellow-400"></span>
-                            <span class="w-3 h-3 rounded-full bg-green-400"></span>
-                        </div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded-full bg-red-400"></span>
+                                <span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span>
+                                <span class="w-2.5 h-2.5 rounded-full bg-green-400"></span>
+                            </div>
 
-                        <span class="text-xs text-neutral-300 font-semibold tracking-wider">
-                            TARGET CODE
-                        </span>
-
-                        <span id="codeLanguageLabel" class="text-xs text-neutral-400 uppercase tracking-wider">
-                            Python
-                        </span>
-
-                    </div>
-
-                    <div id="targetCodeScroll" class="flex min-h-[220px] max-h-[350px] overflow-auto">
-
-                        <div
-                            id="codeLineNumbers"
-                            class="shrink-0 min-w-12 px-3 py-6 text-right text-sm leading-7 text-neutral-600 bg-[#1e1e1e] select-none"
-                        ></div>
-
-                        <pre
-                            id="codeDisplay"
-                            class="flex-1 min-w-0 m-0 px-4 py-6 text-sm md:text-base leading-7 text-neutral-300 whitespace-pre font-mono select-none"
-                        ></pre>
-
-                    </div>
-
-                    <div class="flex items-center justify-between px-5 py-3 border-t border-neutral-700 bg-[#252526]">
-
-                        <span class="text-xs text-neutral-500">
-                            Type the code shown above
-                        </span>
-
-                        <span id="codeProgress" class="text-xs text-neutral-400">
-                            0 characters
-                        </span>
-
-                    </div>
-
-                </div>
-
-                <!-- USER TYPED CODE BOARD -->
-
-                <div class="overflow-hidden rounded-xl border border-neutral-800 bg-[#1e1e1e] shadow-lg">
-
-                    <div class="flex items-center justify-between px-5 py-3 bg-[#252526] border-b border-neutral-700">
-
-                        <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full bg-neutral-600"></span>
-                            <span class="text-xs text-neutral-300 font-semibold tracking-wider">
-                                YOUR CODE
+                            <span class="text-xs text-neutral-300 font-bold tracking-wider">
+                                TARGET CODE
                             </span>
+
+                            <span id="codeLanguageLabel" class="text-xs text-neutral-400 uppercase">
+                                Python
+                            </span>
+
                         </div>
 
-                        <span class="text-xs text-neutral-500">
-                            Live Editor
-                        </span>
+                        <div id="targetCodeScroll" class="filter-editor-scroll flex">
+
+                            <div id="codeLineNumbers" class="shrink-0 min-w-12 px-3 py-5 text-right text-sm leading-7 text-neutral-600 bg-[#1e1e1e] select-none"></div>
+
+                            <pre id="codeDisplay" class="flex-1 min-w-0 m-0 px-4 py-5 text-sm md:text-base leading-7 text-neutral-300 whitespace-pre font-mono select-none"></pre>
+
+                        </div>
+
+                        <div class="filter-editor-footer flex items-center justify-between px-4">
+                            <span class="text-xs text-neutral-500">Reference Code</span>
+                            <span id="codeProgress" class="text-xs text-neutral-400">0 characters</span>
+                        </div>
 
                     </div>
 
-                    <div id="typedCodeScroll" class="flex min-h-[220px] max-h-[350px] overflow-auto">
 
-                        <div
-                            id="typedCodeLineNumbers"
-                            class="shrink-0 min-w-12 px-3 py-6 text-right text-sm leading-7 text-neutral-600 bg-[#1e1e1e] select-none"
-                        >
-                            <div>1</div>
+                    <!-- YOUR CODE -->
+                    <div class="filter-editor">
+
+                        <div class="filter-editor-header flex items-center justify-between px-4">
+
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded-full bg-neutral-600"></span>
+                                <span class="text-xs text-neutral-300 font-bold tracking-wider">YOUR CODE</span>
+                            </div>
+
+                            <span class="text-xs text-neutral-500">Live Editor</span>
+
                         </div>
 
-                        <pre
-                            id="typedCodeDisplay"
-                            class="flex-1 min-w-0 m-0 px-4 py-6 text-sm md:text-base leading-7 text-neutral-300 whitespace-pre font-mono"
-                        ><span class="text-neutral-600">Start typing your code here...</span></pre>
+                        <div id="typedCodeScroll" class="filter-editor-scroll flex">
 
-                    </div>
+                            <div id="typedCodeLineNumbers" class="shrink-0 min-w-12 px-3 py-5 text-right text-sm leading-7 text-neutral-600 bg-[#1e1e1e] select-none">
+                                <div>1</div>
+                            </div>
 
-                    <div class="flex items-center justify-between px-5 py-3 border-t border-neutral-700 bg-[#252526]">
+                            <pre id="typedCodeDisplay" class="flex-1 min-w-0 m-0 px-4 py-5 text-sm md:text-base leading-7 text-neutral-300 whitespace-pre font-mono"><span class="text-neutral-600">Start typing your code here...</span></pre>
 
-                        <span class="text-xs text-neutral-500">
-                            <span class="text-emerald-400">●</span> Correct
-                            <span class="ml-3 text-red-400">●</span> Incorrect
-                            <span class="ml-3 text-neutral-500">●</span> Pending
-                        </span>
+                        </div>
 
-                        <span class="text-xs text-neutral-500">
-                            Code Practice
-                        </span>
+                        <div class="filter-editor-footer flex flex-wrap items-center justify-between gap-2 px-4">
+
+                            <div class="flex items-center gap-3 text-xs text-neutral-500">
+                                <span><span class="text-emerald-400">●</span> Correct</span>
+                                <span><span class="text-red-400">●</span> Incorrect</span>
+                                <span><span class="text-neutral-500">●</span> Pending</span>
+                            </div>
+
+                            <span class="text-xs text-neutral-500">Code Practice</span>
+
+                        </div>
 
                     </div>
 
@@ -233,27 +491,67 @@
 
         </section>
 
-        <input
-            type="text"
-            id="typingInput"
-            autocomplete="off"
-            autocapitalize="off"
-            spellcheck="false"
-            class="fixed top-0 left-0 opacity-0 w-1 h-1"
-        >
 
-        <div class="mt-20 text-center">
+        <!-- HIDDEN INPUT -->
+        <input type="text" id="typingInput" autocomplete="off" autocapitalize="off" spellcheck="false">
 
-            <p class="text-sm text-neutral-400">
-                Start typing to begin your test
-            </p>
 
-            <p class="text-xs text-neutral-300 mt-3">
-                Choose your difficulty · Improve your speed · Beat your record
-            </p>
-
+        <!-- FOOTER -->
+        <div class="mt-7 text-center">
+            <p class="text-sm text-neutral-400">Start typing to begin your test</p>
+            <p class="text-xs text-neutral-300 mt-2">Choose your difficulty · Improve your speed · Beat your record</p>
         </div>
 
     </main>
 
 </div>
+
+
+<!-- TIMELINE COLOR CONTROLLER -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const progress = document.getElementById("timeProgress");
+    const timer = document.getElementById("timer");
+    const duration = document.getElementById("duration");
+    const label = document.getElementById("timeProgressLabel");
+
+    if (!progress || !timer || !duration) return;
+
+    function getColor(ratio) {
+        const start = { r: 34, g: 197, b: 94 };
+        const end = { r: 239, g: 68, b: 68 };
+        const t = 1 - ratio;
+
+        const r = Math.round(start.r + (end.r - start.r) * t);
+        const g = Math.round(start.g + (end.g - start.g) * t);
+        const b = Math.round(start.b + (end.b - start.b) * t);
+
+        return `rgb(${r}, ${g}, ${b})`;
+    }
+
+    function updateTimeline() {
+        const total = Math.max(1, Number(duration.value) || 30);
+        const remaining = Math.min(total, Math.max(0, Number(timer.textContent) || 0));
+        const ratio = remaining / total;
+
+        progress.style.backgroundColor = getColor(ratio);
+
+        if (label) {
+            label.textContent = `${Math.round(ratio * 100)}% remaining`;
+        }
+    }
+
+    const observer = new MutationObserver(updateTimeline);
+
+    observer.observe(timer, {
+        childList: true,
+        characterData: true,
+        subtree: true
+    });
+
+    duration.addEventListener("change", updateTimeline);
+    updateTimeline();
+
+});
+</script>

@@ -1,4 +1,3 @@
-
 /* ==========================================================
    TYPEMASTER PRO — COMPLETE GAME ENGINE
    Normal Typing + Developer Code Mode
@@ -447,8 +446,7 @@ function getTokenTypeAt(index) {
 ========================================================== */
 
 function renderLineNumbers(container, lineCount) {
-
-    container.innerHTML = "";
+        container.innerHTML = "";
 
     for (let line = 1; line <= lineCount; line++) {
 
@@ -710,28 +708,47 @@ async function loadSentence() {
 
 function updatePacman() {
 
-    if (isCodeMode()) return;
+    if (isCodeMode() || !pacman || !textDisplay.children[currentIndex]) {
+        return;
+    }
 
     const character = textDisplay.children[currentIndex];
 
-    if (!character) return;
+    // Use Pac-Man's actual positioning parent. This keeps the calculation
+    // correct even if the HTML nesting or positioned container changes.
+    const positionParent = pacman.offsetParent || typingArea;
 
-    const areaRect = typingArea.getBoundingClientRect();
+    const parentRect = positionParent.getBoundingClientRect();
     const charRect = character.getBoundingClientRect();
 
-    const x = charRect.left - areaRect.left - 42;
+    const pacmanWidth = pacman.offsetWidth || 42;
+    const pacmanHeight = pacman.offsetHeight || 42;
 
-    const y = charRect.top - areaRect.top +
-        (charRect.height - 42) / 2;
+    // Pac-Man's CSS left/top are its starting position. GSAP moves it
+    // from that point so its mouth sits just before the current character.
+    const x =
+        charRect.left -
+        parentRect.left -
+        pacmanWidth -
+        pacman.offsetLeft;
+
+    // Center Pac-Man vertically on the current character's line.
+    const y =
+        charRect.top +
+        charRect.height / 2 -
+        parentRect.top -
+        pacmanHeight / 2 -
+        pacman.offsetTop;
 
     gsap.to(pacman, {
         x,
         y,
-        duration: 0.12,
+        duration: 0.16,
         ease: "power2.out",
         overwrite: "auto"
     });
 }
+
 
 
 /* ==========================================================
@@ -951,10 +968,10 @@ function typeCharacter(typedCharacter) {
     }
 }
 
-
 /* ==========================================================
    19. TYPING INPUT HANDLER
 ========================================================== */
+
 typingInput.addEventListener("keydown", function(event) {
 
     if (gameOver || passageLoading) return;
@@ -1026,6 +1043,7 @@ typingInput.addEventListener("keydown", function(event) {
 
     typeCharacter(event.key);
 });
+
 
 /* ==========================================================
    20. LIVE STATISTICS
