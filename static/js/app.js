@@ -1,9 +1,13 @@
 
-// ==================================================
-// TYPEMASTER PRO — COMPLETE GAME ENGINE
-// Django + NLTK + GSAP
-// ==================================================
-// 1. DOM ELEMENTS
+/* ==========================================================
+   TYPEMASTER PRO — COMPLETE GAME ENGINE
+   Normal Typing + Developer Code Mode
+========================================================== */
+
+
+/* ==========================================================
+   1. DOM ELEMENTS
+========================================================== */
 
 const textDisplay = document.getElementById("textDisplay");
 const typingInput = document.getElementById("typingInput");
@@ -24,7 +28,20 @@ const difficultySelect = document.getElementById("difficulty");
 const durationSelect = document.getElementById("duration");
 const restartButton = document.getElementById("restart");
 
-// Result elements
+const languageSelect = document.getElementById("languageSelect");
+const codeEditor = document.getElementById("codeEditor");
+
+const codeDisplay = document.getElementById("codeDisplay");
+const codeLineNumbers = document.getElementById("codeLineNumbers");
+const codeLanguageLabel = document.getElementById("codeLanguageLabel");
+const codeProgress = document.getElementById("codeProgress");
+
+const targetCodeScroll = document.getElementById("targetCodeScroll");
+const typedCodeScroll = document.getElementById("typedCodeScroll");
+
+const typedCodeDisplay = document.getElementById("typedCodeDisplay");
+const typedCodeLineNumbers = document.getElementById("typedCodeLineNumbers");
+
 const gameScreen = document.getElementById("gameScreen");
 const resultScreen = document.getElementById("resultScreen");
 
@@ -38,21 +55,48 @@ const retestButton = document.getElementById("retestButton");
 const homeButton = document.getElementById("homeButton");
 
 
-// 2. VALIDATION
+/* ==========================================================
+   2. VALIDATION
+========================================================== */
 
 if (typeof gsap === "undefined") {
     throw new Error("GSAP failed to load!");
 }
 
 const requiredElements = [
-    textDisplay, typingInput, typingArea,
-    pacman, pacmanFace, pacmanMouth,
-    timerDisplay, progressBar,
-    wpmDisplay, accuracyDisplay, mistakesDisplay,
-    difficultySelect, durationSelect, restartButton,
-    gameScreen, resultScreen,
-    resultWpm, resultAccuracy, resultCorrect, resultMistakes,
-    retestDuration, retestButton, homeButton
+    textDisplay,
+    typingInput,
+    typingArea,
+    pacman,
+    pacmanFace,
+    pacmanMouth,
+    timerDisplay,
+    progressBar,
+    wpmDisplay,
+    accuracyDisplay,
+    mistakesDisplay,
+    difficultySelect,
+    durationSelect,
+    restartButton,
+    gameScreen,
+    resultScreen,
+    resultWpm,
+    resultAccuracy,
+    resultCorrect,
+    resultMistakes,
+    retestDuration,
+    retestButton,
+    homeButton,
+    languageSelect,
+    codeEditor,
+    codeDisplay,
+    codeLineNumbers,
+    codeLanguageLabel,
+    codeProgress,
+    targetCodeScroll,
+    typedCodeScroll,
+    typedCodeDisplay,
+    typedCodeLineNumbers
 ];
 
 if (requiredElements.some(element => !element)) {
@@ -60,7 +104,9 @@ if (requiredElements.some(element => !element)) {
 }
 
 
-// 3. GAME VARIABLES
+/* ==========================================================
+   3. GAME VARIABLES
+========================================================== */
 
 let currentSentence = "";
 let currentIndex = 0;
@@ -87,12 +133,106 @@ const recoverySteps = 5;
 const normalColor = "#FACC15";
 const errorColor = "#EF4444";
 
-// Scroll tracking
 let nextScrollLine = 2;
 let scrollInProgress = false;
 
+// Code Mode state
+let typedCodeCharacters = [];
+let codeSyntaxTokens = [];
+let codeErrorLocked = false;
 
-// 4. PACMAN EATING ANIMATION
+
+/* ==========================================================
+   4. CODE EDITOR STYLES
+========================================================== */
+
+const codeStyle = document.createElement("style");
+
+codeStyle.textContent = `
+    .code-char {
+        position: relative;
+        white-space: pre;
+    }
+
+    .code-char.code-current {
+        background: rgba(250, 204, 21, 0.20);
+        border-bottom: 2px solid #facc15;
+        border-radius: 2px;
+    }
+
+    .code-char.code-correct {
+        color: #34d399 !important;
+    }
+
+    .code-char.code-wrong {
+        color: #f87171 !important;
+        background: rgba(239, 68, 68, 0.12);
+    }
+
+    .typed-code-char {
+        white-space: pre;
+    }
+
+    .typed-code-char.correct {
+        color: #34d399;
+    }
+
+    .typed-code-char.wrong {
+        color: #f87171;
+        background: rgba(239, 68, 68, 0.12);
+    }
+
+    .typed-code-cursor {
+        display: inline-block;
+        width: 2px;
+        height: 1.2em;
+        background: #facc15;
+        vertical-align: text-bottom;
+        margin-left: -1px;
+        animation: codeCursorBlink 1s step-end infinite;
+    }
+
+    @keyframes codeCursorBlink {
+        50% { opacity: 0; }
+    }
+`;
+
+document.head.appendChild(codeStyle);
+
+
+/* ==========================================================
+   5. MODE HELPERS
+========================================================== */
+
+function isCodeMode() {
+    return difficultySelect.value === "code";
+}
+
+function getSelectedLanguage() {
+    return languageSelect.value || "python";
+}
+
+function updateModeVisibility() {
+
+    const codeMode = isCodeMode();
+
+    languageSelect.classList.toggle("hidden", !codeMode);
+
+    textDisplay.classList.toggle("hidden", codeMode);
+    pacman.classList.toggle("hidden", codeMode);
+
+    codeEditor.classList.toggle("hidden", !codeMode);
+
+    if (codeMode) {
+        codeLanguageLabel.textContent =
+            languageSelect.options[languageSelect.selectedIndex].text;
+    }
+}
+
+
+/* ==========================================================
+   6. PACMAN ANIMATIONS
+========================================================== */
 
 function eatAnimation() {
 
@@ -111,11 +251,8 @@ function eatAnimation() {
             },
             duration: 0.09
         });
-
 }
 
-
-// 5. ERROR ANIMATION
 
 function errorAnimation() {
 
@@ -130,7 +267,8 @@ function errorAnimation() {
 
     gsap.killTweensOf(svg);
 
-    gsap.fromTo(svg,
+    gsap.fromTo(
+        svg,
         {
             y: 0,
             rotation: 0
@@ -150,11 +288,8 @@ function errorAnimation() {
             }
         }
     );
-
 }
 
-
-// 6. COLOR RECOVERY
 
 function recoverPacman() {
 
@@ -174,18 +309,27 @@ function recoverPacman() {
         fill: newColor,
         duration: 0.45
     });
-
 }
 
 
-// 7. DJANGO PASSAGE API
+/* ==========================================================
+   7. DJANGO PASSAGE API
+========================================================== */
 
 async function getRandomSentence() {
 
     const difficulty = difficultySelect.value;
 
+    const params = new URLSearchParams({
+        difficulty: difficulty
+    });
+
+    if (difficulty === "code") {
+        params.set("language", getSelectedLanguage());
+    }
+
     const response = await fetch(
-        `/api/generate/?difficulty=${encodeURIComponent(difficulty)}`,
+        `/api/generate/?${params.toString()}`,
         {
             credentials: "same-origin"
         }
@@ -197,16 +341,273 @@ async function getRandomSentence() {
 
     const data = await response.json();
 
-    if (!data.success || !data.text) {
-        throw new Error("Invalid passage received!");
+    if (!data.success || typeof data.text !== "string" || !data.text.length) {
+        throw new Error(data.message || "Invalid passage received!");
     }
 
     return data.text;
-
 }
 
 
-// 8. LOAD PASSAGE
+/* ==========================================================
+   8. SYNTAX HIGHLIGHTING
+========================================================== */
+
+const syntaxKeywords = new Set([
+    "abstract", "as", "async", "await", "break", "case",
+    "catch", "class", "const", "continue", "def", "default",
+    "delete", "do", "else", "enum", "export", "extends",
+    "false", "final", "finally", "for", "foreach", "from",
+    "func", "function", "if", "implements", "import", "in",
+    "interface", "let", "loop", "namespace", "new", "null",
+    "package", "pass", "private", "protected", "public",
+    "raise", "return", "self", "static", "struct", "super",
+    "switch", "this", "throw", "throws", "true", "try",
+    "type", "var", "void", "while", "with", "yield",
+    "SELECT", "FROM", "WHERE", "JOIN", "LEFT", "RIGHT",
+    "INNER", "GROUP", "ORDER", "BY", "INSERT", "UPDATE",
+    "DELETE", "CREATE", "TABLE", "AND", "OR", "NOT",
+    "AS", "ON", "LIMIT"
+]);
+
+
+function getCodeTokens(code) {
+
+    const tokens = [];
+
+    const pattern =
+        /\/\/[^\n]*|#[^\n]*|\/\*[\s\S]*?\*\/|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`|\b\d+(?:\.\d+)?\b|\b[A-Za-z_$][\w$]*\b|[+\-*/%=!<>|&^~?:]+/g;
+
+    let match;
+
+    while ((match = pattern.exec(code)) !== null) {
+
+        const value = match[0];
+
+        let type = "plain";
+
+        if (
+            value.startsWith("//") ||
+            value.startsWith("#") ||
+            value.startsWith("/*")
+        ) {
+            type = "comment";
+        } else if (
+            value.startsWith('"') ||
+            value.startsWith("'") ||
+            value.startsWith("`")
+        ) {
+            type = "string";
+        } else if (/^\d/.test(value)) {
+            type = "number";
+        } else if (syntaxKeywords.has(value)) {
+            type = "keyword";
+        } else if (/^[+\-*/%=!<>|&^~?:]+$/.test(value)) {
+            type = "operator";
+        }
+
+        tokens.push({
+            start: match.index,
+            end: match.index + value.length,
+            type: type
+        });
+    }
+
+    return tokens;
+}
+
+
+function getSyntaxClass(type) {
+
+    const classes = {
+        plain: "text-neutral-300",
+        keyword: "text-purple-400",
+        string: "text-green-400",
+        number: "text-orange-300",
+        comment: "text-neutral-500 italic",
+        operator: "text-pink-400"
+    };
+
+    return classes[type] || classes.plain;
+}
+
+
+function getTokenTypeAt(index) {
+
+    const token = codeSyntaxTokens.find(item =>
+        index >= item.start && index < item.end
+    );
+
+    return token ? token.type : "plain";
+}
+
+
+/* ==========================================================
+   9. CODE LINE NUMBERS
+========================================================== */
+
+function renderLineNumbers(container, lineCount) {
+
+    container.innerHTML = "";
+
+    for (let line = 1; line <= lineCount; line++) {
+
+        const number = document.createElement("div");
+
+        number.textContent = line;
+
+        container.appendChild(number);
+    }
+}
+
+
+/* ==========================================================
+   10. TARGET CODE RENDERER
+========================================================== */
+
+function renderCodeEditor() {
+
+    codeDisplay.innerHTML = "";
+    codeLineNumbers.innerHTML = "";
+
+    codeSyntaxTokens = getCodeTokens(currentSentence);
+
+    const fragment = document.createDocumentFragment();
+
+    for (let index = 0; index < currentSentence.length; index++) {
+
+        const character = currentSentence[index];
+
+        const span = document.createElement("span");
+
+        span.dataset.index = index;
+
+        span.className =
+            `code-char ${getSyntaxClass(getTokenTypeAt(index))}`;
+
+        span.textContent = character;
+
+        fragment.appendChild(span);
+    }
+
+    codeDisplay.appendChild(fragment);
+
+    const lineCount = currentSentence.split("\n").length;
+
+    renderLineNumbers(codeLineNumbers, lineCount);
+
+    codeProgress.textContent =
+        `0 / ${currentSentence.length} characters`;
+
+    typedCodeCharacters = [];
+
+    renderTypedCode();
+    updateCodeCursor();
+}
+
+
+/* ==========================================================
+   11. LIVE USER CODE RENDERER
+========================================================== */
+
+function renderTypedCode() {
+
+    typedCodeDisplay.innerHTML = "";
+
+    const fragment = document.createDocumentFragment();
+
+    typedCodeCharacters.forEach(item => {
+
+        const span = document.createElement("span");
+
+        span.className =
+            `typed-code-char ${item.correct ? "correct" : "wrong"}`;
+
+        span.textContent = item.character;
+
+        fragment.appendChild(span);
+    });
+
+    const cursor = document.createElement("span");
+
+    cursor.className = "typed-code-cursor";
+
+    cursor.setAttribute("aria-hidden", "true");
+
+    fragment.appendChild(cursor);
+
+    typedCodeDisplay.appendChild(fragment);
+
+    const typedText = typedCodeCharacters
+        .map(item => item.character)
+        .join("");
+
+    const lineCount = Math.max(1, typedText.split("\n").length);
+
+    renderLineNumbers(typedCodeLineNumbers, lineCount);
+
+    scrollTypedCodeToCursor();
+}
+
+
+function scrollTypedCodeToCursor() {
+
+    const cursor = typedCodeDisplay.querySelector(".typed-code-cursor");
+
+    if (!cursor) return;
+
+    const cursorRect = cursor.getBoundingClientRect();
+    const containerRect = typedCodeScroll.getBoundingClientRect();
+
+    if (cursorRect.bottom > containerRect.bottom - 30) {
+        typedCodeScroll.scrollTop += 28;
+    }
+
+    if (cursorRect.right > containerRect.right - 30) {
+        typedCodeScroll.scrollLeft += 30;
+    }
+}
+
+
+/* ==========================================================
+   12. TARGET CURSOR AND PROGRESS
+========================================================== */
+
+function updateCodeCursor() {
+
+    const characters = codeDisplay.children;
+
+    Array.from(characters).forEach(character => {
+        character.classList.remove("code-current");
+    });
+
+    const currentCharacter = characters[currentIndex];
+
+    if (currentCharacter) {
+
+        currentCharacter.classList.add("code-current");
+
+        currentCharacter.scrollIntoView({
+            block: "nearest",
+            inline: "nearest",
+            behavior: "smooth"
+        });
+    }
+}
+
+
+function updateCodeProgress() {
+
+    codeProgress.textContent =
+        `${currentIndex} / ${currentSentence.length} characters`;
+
+    updateCodeCursor();
+}
+
+
+/* ==========================================================
+   13. LOAD PASSAGE
+========================================================== */
 
 async function loadSentence() {
 
@@ -215,11 +616,24 @@ async function loadSentence() {
     passageLoading = true;
     typingInput.disabled = true;
 
-    textDisplay.textContent = "Generating new passage...";
+    updateModeVisibility();
+
+    if (isCodeMode()) {
+        codeDisplay.textContent = "Generating code...";
+        typedCodeDisplay.textContent = "Preparing editor...";
+    } else {
+        textDisplay.textContent = "Generating new passage...";
+    }
 
     gsap.killTweensOf(textDisplay);
 
     textDisplay.scrollTop = 0;
+
+    targetCodeScroll.scrollTop = 0;
+    targetCodeScroll.scrollLeft = 0;
+
+    typedCodeScroll.scrollTop = 0;
+    typedCodeScroll.scrollLeft = 0;
 
     scrollInProgress = false;
     nextScrollLine = 2;
@@ -233,25 +647,37 @@ async function loadSentence() {
         currentSentence = passage;
         currentIndex = 0;
 
-        textDisplay.innerHTML = "";
+        if (isCodeMode()) {
 
-        currentSentence.split("").forEach(character => {
+            renderCodeEditor();
 
-            const span = document.createElement("span");
+            codeLanguageLabel.textContent =
+                languageSelect.options[languageSelect.selectedIndex].text;
 
-            span.textContent = character;
-            span.className = "text-neutral-300";
+        } else {
 
-            textDisplay.appendChild(span);
+            textDisplay.innerHTML = "";
 
-        });
+            currentSentence.split("").forEach(character => {
+
+                const span = document.createElement("span");
+
+                span.textContent = character;
+                span.className = "text-neutral-300";
+
+                textDisplay.appendChild(span);
+            });
+        }
 
         passageLoading = false;
         typingInput.disabled = false;
 
-        requestAnimationFrame(() => {
-            updatePacman();
-        });
+        if (!isCodeMode()) {
+
+            requestAnimationFrame(() => {
+                updatePacman();
+            });
+        }
 
         typingInput.focus();
 
@@ -261,20 +687,30 @@ async function loadSentence() {
 
         console.error("Passage loading error:", error);
 
-        textDisplay.textContent =
-            "Unable to generate passage. Please restart.";
+        if (isCodeMode()) {
+
+            codeDisplay.textContent =
+                "Unable to generate code. Please restart.";
+
+        } else {
+
+            textDisplay.textContent =
+                "Unable to generate passage. Please restart.";
+        }
 
         passageLoading = true;
         typingInput.disabled = true;
-
     }
-
 }
 
 
-// 9. PACMAN POSITION
+/* ==========================================================
+   14. PACMAN POSITION
+========================================================== */
 
 function updatePacman() {
+
+    if (isCodeMode()) return;
 
     const character = textDisplay.children[currentIndex];
 
@@ -295,11 +731,12 @@ function updatePacman() {
         ease: "power2.out",
         overwrite: "auto"
     });
-
 }
 
 
-// 10. TWO-LINE SCROLLING SYSTEM
+/* ==========================================================
+   15. NORMAL MODE SCROLLING
+========================================================== */
 
 function scrollTypingWindow() {
 
@@ -336,6 +773,7 @@ function scrollTypingWindow() {
         gsap.killTweensOf(textDisplay);
 
         gsap.to(textDisplay, {
+
             scrollTop: targetScroll,
             duration: 0.35,
             ease: "power1.inOut",
@@ -353,13 +791,13 @@ function scrollTypingWindow() {
     } else {
 
         updatePacman();
-
     }
-
 }
 
 
-// 11. TIMER
+/* ==========================================================
+   16. TIMER
+========================================================== */
 
 function startTimer() {
 
@@ -383,47 +821,101 @@ function startTimer() {
         }
 
     }, 1000);
-
 }
 
 
-// 12. TYPING ENGINE
+/* ==========================================================
+   17. CODE MODE CHARACTER DISPLAY
+========================================================== */
 
-typingInput.addEventListener("keydown", function(event) {
+function addTypedCodeCharacter(character, correct) {
 
-    if (gameOver || passageLoading) return;
+    typedCodeCharacters.push({
+        character: character,
+        correct: correct
+    });
 
-    if (event.ctrlKey || event.metaKey || event.altKey) return;
+    renderTypedCode();
+}
 
-    if (event.key.length !== 1) return;
 
-    event.preventDefault();
+function markTargetCharacter(correct) {
 
-    const characterElement = textDisplay.children[currentIndex];
+    const characterElement = codeDisplay.children[currentIndex];
+
+    if (!characterElement) return;
+
+    characterElement.classList.remove(
+        "code-correct",
+        "code-wrong",
+        "code-current"
+    );
+
+    characterElement.classList.add(
+        correct ? "code-correct" : "code-wrong"
+    );
+}
+
+
+/* ==========================================================
+   18. CHARACTER TYPING ENGINE
+========================================================== */
+
+function typeCharacter(typedCharacter) {
+
+    if (gameOver || passageLoading || typingInput.disabled) {
+        return;
+    }
+
+    // Stop typing until the wrong character is removed.
+    if (isCodeMode() && codeErrorLocked) {
+        return;
+    }
+
+    const codeMode = isCodeMode();
+
+    const characterElement = codeMode
+        ? codeDisplay.children[currentIndex]
+        : textDisplay.children[currentIndex];
 
     if (!characterElement) return;
 
     startTimer();
 
-    const typedCharacter = event.key;
     const expectedCharacter = currentSentence[currentIndex];
 
     totalTyped++;
 
-    // CORRECT CHARACTER
+    const isCorrect = typedCharacter === expectedCharacter;
 
-    if (typedCharacter === expectedCharacter) {
+    if (codeMode) {
+
+        addTypedCodeCharacter(typedCharacter, isCorrect);
+
+        markTargetCharacter(isCorrect);
+    }
+
+    if (isCorrect) {
 
         correctTyped++;
 
-        characterElement.style.visibility = "hidden";
+        if (codeMode) {
 
-        characterElement.classList.remove("text-red-500");
+            currentIndex++;
 
-        recoverPacman();
-        eatAnimation();
+            updateCodeProgress();
 
-        currentIndex++;
+        } else {
+
+            characterElement.style.visibility = "hidden";
+
+            characterElement.classList.remove("text-red-500");
+
+            recoverPacman();
+            eatAnimation();
+
+            currentIndex++;
+        }
 
         updateStats();
 
@@ -431,32 +923,113 @@ typingInput.addEventListener("keydown", function(event) {
 
             loadSentence();
 
-        } else {
+        } else if (!codeMode) {
 
             scrollTypingWindow();
-
         }
 
-    }
-
-    // WRONG CHARACTER
-
-    else {
+    } else {
 
         mistakes++;
 
-        characterElement.classList.add("text-red-500");
+        if (codeMode) {
 
-        errorAnimation();
+            // Lock typing until the wrong character is removed.
+            codeErrorLocked = true;
+
+            // Keep the cursor on the expected character.
+            updateCodeCursor();
+
+        } else {
+
+            characterElement.classList.add("text-red-500");
+
+            errorAnimation();
+        }
 
         updateStats();
+    }
+}
 
+
+/* ==========================================================
+   19. TYPING INPUT HANDLER
+========================================================== */
+typingInput.addEventListener("keydown", function(event) {
+
+    if (gameOver || passageLoading) return;
+
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
+
+    // Backspace: Remove incorrect character and unlock typing.
+    if (event.key === "Backspace") {
+
+        event.preventDefault();
+
+        if (isCodeMode() && codeErrorLocked) {
+
+            // Remove the last incorrect character
+            typedCodeCharacters.pop();
+
+            // Unlock typing
+            codeErrorLocked = false;
+
+            // Reset target character styling
+            const characterElement = codeDisplay.children[currentIndex];
+
+            if (characterElement) {
+
+                characterElement.classList.remove(
+                    "code-wrong",
+                    "code-correct",
+                    "code-current"
+                );
+            }
+
+            // Restore live editor and cursor
+            renderTypedCode();
+            updateCodeCursor();
+        }
+
+        return;
     }
 
+    // Tab inserts four spaces in Code Mode.
+    if (isCodeMode() && event.key === "Tab") {
+
+        event.preventDefault();
+
+        for (let i = 0; i < 4; i++) {
+
+            if (gameOver || passageLoading || codeErrorLocked) break;
+
+            typeCharacter(" ");
+        }
+
+        return;
+    }
+
+    // Enter inserts a newline in Code Mode.
+    if (isCodeMode() && event.key === "Enter") {
+
+        event.preventDefault();
+
+        typeCharacter("\n");
+
+        return;
+    }
+
+    // Ignore non-character keys.
+    if (event.key.length !== 1) return;
+
+    event.preventDefault();
+
+    typeCharacter(event.key);
 });
 
-
-// 13. LIVE STATISTICS
+/* ==========================================================
+   20. LIVE STATISTICS
+========================================================== */
 
 function updateStats() {
 
@@ -474,11 +1047,12 @@ function updateStats() {
     wpmDisplay.textContent = wpm;
     accuracyDisplay.textContent = accuracy + "%";
     mistakesDisplay.textContent = mistakes;
-
 }
 
 
-// 14. SAVE TEST RESULT TO DJANGO DATABASE
+/* ==========================================================
+   21. CSRF TOKEN
+========================================================== */
 
 function getCSRFToken() {
 
@@ -489,15 +1063,17 @@ function getCSRFToken() {
     return cookie
         ? decodeURIComponent(cookie.split("=")[1])
         : "";
-
 }
 
 
-async function saveTestResult(wpm, accuracy, correct, mistakes) {
+/* ==========================================================
+   22. SAVE RESULT TO DJANGO
+========================================================== */
+
+async function saveTestResult(wpm, accuracy, correct, mistakeCount) {
 
     try {
 
-        
         console.log("Sending result to Django...");
 
         const response = await fetch("/api/save-result/", {
@@ -516,15 +1092,13 @@ async function saveTestResult(wpm, accuracy, correct, mistakes) {
                 wpm: wpm,
                 accuracy: accuracy,
                 correct_characters: correct,
-                mistakes: mistakes,
+                mistakes: mistakeCount,
                 duration: totalTime,
-                difficulty: difficultySelect.value
+                difficulty: difficultySelect.value,
+                language: isCodeMode() ? getSelectedLanguage() : ""
 
             })
-
         });
-
-        console.log("Save API status:", response.status);
 
         const data = await response.json();
 
@@ -533,7 +1107,6 @@ async function saveTestResult(wpm, accuracy, correct, mistakes) {
             console.log("Login required to save test results.");
 
             return false;
-
         }
 
         if (!response.ok || !data.success) {
@@ -541,7 +1114,6 @@ async function saveTestResult(wpm, accuracy, correct, mistakes) {
             throw new Error(
                 data.message || "Result saving failed."
             );
-
         }
 
         console.log(
@@ -556,13 +1128,13 @@ async function saveTestResult(wpm, accuracy, correct, mistakes) {
         console.error("Result save error:", error);
 
         return false;
-
     }
-
 }
 
 
-// 15. RESULT SCREEN
+/* ==========================================================
+   23. RESULT SCREEN
+========================================================== */
 
 async function endGame() {
 
@@ -578,8 +1150,6 @@ async function endGame() {
     timerDisplay.textContent = "0";
     progressBar.style.width = "0%";
 
-    // Final calculations
-
     const elapsedMinutes = totalTime / 60;
 
     const finalWpm = elapsedMinutes > 0
@@ -590,28 +1160,19 @@ async function endGame() {
         ? Math.round((correctTyped / totalTyped) * 100)
         : 100;
 
-    // Save result before displaying result screen
-
-    
-await saveTestResult(
+    await saveTestResult(
         finalWpm,
         finalAccuracy,
         correctTyped,
         mistakes
     );
 
-    // Display results
-
     resultWpm.textContent = finalWpm;
     resultAccuracy.textContent = finalAccuracy + "%";
     resultCorrect.textContent = correctTyped;
     resultMistakes.textContent = mistakes;
 
-    // Keep current duration selected
-
     retestDuration.value = String(totalTime);
-
-    // Switch screens
 
     gameScreen.classList.add("hidden");
     resultScreen.classList.remove("hidden");
@@ -620,17 +1181,16 @@ await saveTestResult(
         top: 0,
         behavior: "smooth"
     });
-
 }
 
 
-// 16. RESET GAME
+/* ==========================================================
+   24. RESET GAME
+========================================================== */
 
 async function resetGame() {
 
     clearInterval(timerInterval);
-
-    // Cancel previous API requests
 
     passageRequestId++;
 
@@ -648,6 +1208,8 @@ async function resetGame() {
     mistakes = 0;
 
     currentIndex = 0;
+
+    typedCodeCharacters = [];
 
     gameStarted = false;
     gameOver = false;
@@ -686,17 +1248,31 @@ async function resetGame() {
         }
     });
 
+    updateModeVisibility();
+
+    textDisplay.scrollTop = 0;
+
+    targetCodeScroll.scrollTop = 0;
+    targetCodeScroll.scrollLeft = 0;
+
+    typedCodeScroll.scrollTop = 0;
+    typedCodeScroll.scrollLeft = 0;
+
+    codeDisplay.scrollTop = 0;
+    codeDisplay.scrollLeft = 0;
+
     gameScreen.classList.remove("hidden");
     resultScreen.classList.add("hidden");
 
     window.scrollTo(0, 0);
 
     await loadSentence();
-
 }
 
 
-// 17. EVENT LISTENERS
+/* ==========================================================
+   25. EVENT LISTENERS
+========================================================== */
 
 restartButton.addEventListener("click", resetGame);
 
@@ -704,8 +1280,10 @@ difficultySelect.addEventListener("change", resetGame);
 
 durationSelect.addEventListener("change", resetGame);
 
+languageSelect.addEventListener("change", resetGame);
 
-// RETEST
+
+// Retest
 
 retestButton.addEventListener("click", async () => {
 
@@ -718,30 +1296,31 @@ retestButton.addEventListener("click", async () => {
     durationSelect.value = String(selectedDuration);
 
     await resetGame();
-
 });
 
 
-// BACK TO HOME
+// Back to home
 
 homeButton.addEventListener("click", () => {
 
     window.location.href = "/";
-
 });
 
 
-// TYPING AREA CLICK
+// Typing area click
 
 typingArea.addEventListener("click", () => {
 
     if (!passageLoading && !gameOver) {
         typingInput.focus();
     }
-
 });
 
 
-// 18. INITIALIZE
+/* ==========================================================
+   26. INITIALIZE
+========================================================== */
+
+updateModeVisibility();
 
 resetGame();

@@ -30,6 +30,37 @@ class TestResult(models.Model):
         ('easy', 'Easy'),
         ('normal', 'Normal'),
         ('hard', 'Hard'),
+        ('code', 'Code'),
+    ]
+
+    LANGUAGE_CHOICES = [
+        ('python', 'Python'),
+        ('javascript', 'JavaScript'),
+        ('typescript', 'TypeScript'),
+        ('html', 'HTML'),
+        ('css', 'CSS'),
+        ('c', 'C'),
+        ('cpp', 'C++'),
+        ('java', 'Java'),
+        ('csharp', 'C#'),
+        ('php', 'PHP'),
+        ('sql', 'SQL'),
+        ('go', 'Go'),
+        ('rust', 'Rust'),
+        ('ruby', 'Ruby'),
+        ('swift', 'Swift'),
+        ('kotlin', 'Kotlin'),
+        ('bash', 'Bash'),
+        ('shell', 'Shell'),
+        ('json', 'JSON'),
+        ('xml', 'XML'),
+        ('yaml', 'YAML'),
+        ('dart', 'Dart'),
+        ('r', 'R'),
+        ('lua', 'Lua'),
+        ('perl', 'Perl'),
+        ('scala', 'Scala'),
+        ('powershell', 'PowerShell'),
     ]
 
     user = models.ForeignKey(
@@ -54,10 +85,23 @@ class TestResult(models.Model):
         default='normal'
     )
 
+    language = models.CharField(
+        max_length=30,
+        choices=LANGUAGE_CHOICES,
+        blank=True,
+        default=''
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['-created_at']
 
     def __str__(self):
+        if self.difficulty == 'code':
+            return (
+                f'{self.user.username} - '
+                f'{self.language} - {self.wpm} WPM'
+            )
+
         return f'{self.user.username} - {self.wpm} WPM'

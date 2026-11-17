@@ -2,14 +2,19 @@
 import random
 import re
 import json
-from django.db.models import Avg, Max, Sum, Count
-from django.views.decorators.csrf import ensure_csrf_cookie
-from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import csrf_protect
-from nltk.corpus import brown
 
+from django.db.models import Avg, Max, Sum, Count
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
+from django.core.paginator import Paginator
+from django.utils.dateparse import parse_date
+
+from django.views.decorators.csrf import (
+    ensure_csrf_cookie,
+    csrf_protect,
+)
+from django.views.decorators.http import require_POST
+
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
@@ -17,24 +22,585 @@ from django.contrib.auth.decorators import login_required
 from .forms import (
     CustomUserCreationForm,
     UserUpdateForm,
-    ProfileUpdateForm
+    ProfileUpdateForm,
 )
 
-from .models import UserProfile
+from .models import UserProfile, TestResult
 
 
+# =========================================================
+# TYPING CONTENT
+# =========================================================
+
+EASY_WORDS = [
+    'the', 'and', 'you', 'are', 'this', 'that', 'have',
+    'with', 'from', 'your', 'good', 'home', 'work', 'play',
+    'book', 'tree', 'water', 'light', 'small', 'happy',
+    'learn', 'write', 'read', 'walk', 'talk', 'open',
+    'close', 'green', 'white', 'black', 'simple', 'clean',
+    'quick', 'slow', 'today', 'every', 'never', 'always',
+    'people', 'friend', 'school', 'family', 'computer',
+    'keyboard', 'window', 'screen', 'mouse', 'table',
+    'apple', 'house', 'music', 'smile', 'dream', 'bread',
+    'river', 'cloud', 'morning', 'garden', 'little', 'hello',
+]
 
 
+NORMAL_SENTENCES = [
+    'Technology helps people improve their daily work.',
+    'Every developer needs time to practice and improve.',
+    'Learning new skills can create better opportunities.',
+    'A good project requires planning and attention to detail.',
+    'Modern computers can process large amounts of information.',
+    'Practice makes it easier to understand new concepts.',
+    'Building a website requires creativity and patience.',
+    'A strong network connects people across the world.',
+    'Software development involves testing and problem solving.',
+    'Good communication makes teamwork more effective.',
+    'The application stores important information in a database.',
+    'Developers should write clean and readable code.',
+]
+
+
+NORMAL_MIXED_SENTENCES = [
+    'The project has 3 important stages, and each stage needs attention.',
+    'A developer can manage 5 tasks without losing focus.',
+    'The system supports basic commands like save, edit and update.',
+    'Version 2.0 includes a faster search and better performance.',
+    'A secure website uses HTTPS and protects user information.',
+    'The keyboard has 104 keys, including function and control keys.',
+    'A database can store 500 records in a few seconds.',
+    'Good planning saves time and improves the final result.',
+]
+
+
+HARD_WORDS = [
+    'architecture', 'comprehensive', 'implementation',
+    'configuration', 'infrastructure', 'authentication',
+    'optimization', 'sophisticated', 'methodology',
+    'extraordinary', 'compatibility', 'administration',
+    'communication', 'responsibility', 'characteristics',
+    'entrepreneurship', 'concentration', 'determination',
+    'professionalism', 'environmental', 'significant',
+    'independently', 'transformation', 'investigation',
+    'interpretation', 'demonstration', 'efficiently',
+    'consequently', 'particularly', 'approximately',
+    'reliability', 'functionality', 'specification',
+    'development', 'experimental', 'synchronization',
+    'accessibility', 'infrastructure', 'authentication',
+]
+
+
+HARD_SENTENCE_TEMPLATES = [
+    'The {word} requires careful planning and consistent execution.',
+    'A successful {word} depends on accuracy, efficiency and reliability.',
+    'Modern technology improves {word} through systematic development.',
+    'The {word} process must maintain performance under demanding conditions.',
+    'Developers should evaluate {word} before implementing complex solutions.',
+    'Effective {word} reduces unnecessary errors and improves productivity.',
+    'The organization introduced {word} to improve its existing framework.',
+    'Understanding {word} requires patience, concentration and technical knowledge.',
+]
+
+
+HARD_MIXED_SENTENCES = [
+    'The application processed 2,450 requests within 3.8 seconds.',
+    'The system achieved 98.7% accuracy after 125 testing cycles.',
+    'Performance improved by 35% after optimization and configuration.',
+    'The server supports 8,192 connections with a 99.9% uptime target.',
+    'Version 4.2 introduced 15 improvements and resolved 27 issues.',
+    'The final result must remain between 75% and 100% accuracy.',
+    'Developers should verify input, output and system reliability.',
+    'The configuration uses ports 8080 and 443 for different services.',
+    'A reliable process requires testing, validation and documentation.',
+    'The algorithm reduced processing time from 12.5 to 7.2 seconds.',
+]
+
+
+# =========================================================
+# CODE PRACTICE SNIPPETS
+# =========================================================
+
+CODE_SNIPPETS = {
+    'python': [
+        '''def calculate_total(price, quantity):
+    discount = 0.10
+    total = price * quantity
+    return total - (total * discount)
+
+
+items = [120, 250, 300]
+result = calculate_total(sum(items), 2)
+print(f"Total: {result}")''',
+
+        '''class User:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+    def introduce(self):
+        return f"{self.name} is {self.age} years old"
+
+
+user = User("Alex", 22)
+print(user.introduce())'''
+    ],
+
+    'javascript': [
+        '''const users = [
+    { name: "Alex", active: true },
+    { name: "Sam", active: false }
+];
+
+const activeUsers = users.filter(user => {
+    return user.active === true;
+});
+
+console.log(activeUsers);''',
+
+        '''function calculateTotal(price, quantity) {
+    const tax = 0.18;
+    const subtotal = price * quantity;
+    return subtotal + (subtotal * tax);
+}
+
+console.log(calculateTotal(500, 3));'''
+    ],
+
+    'typescript': [
+        '''interface User {
+    id: number;
+    name: string;
+    active: boolean;
+}
+
+function getUserName(user: User): string {
+    return user.name;
+}
+
+const account: User = {
+    id: 101,
+    name: "Alex",
+    active: true
+};
+
+console.log(getUserName(account));'''
+    ],
+
+    'html': [
+        '''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Website</title>
+</head>
+<body>
+    <main class="container">
+        <h1>Hello World</h1>
+        <p>Welcome to my website.</p>
+    </main>
+</body>
+</html>'''
+    ],
+
+    'css': [
+        '''.container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 24px;
+}
+
+.container h1 {
+    font-size: 2rem;
+    color: #ffffff;
+}'''
+    ],
+
+    'c': [
+        '''#include <stdio.h>
+
+int main(void) {
+    int numbers[] = {10, 20, 30};
+    int total = 0;
+
+    for (int i = 0; i < 3; i++) {
+        total += numbers[i];
+    }
+
+    printf("Total: %d\\n", total);
+    return 0;
+}'''
+    ],
+
+    'cpp': [
+        '''#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+    vector<int> numbers = {10, 20, 30};
+    int total = 0;
+
+    for (int number : numbers) {
+        total += number;
+    }
+
+    cout << "Total: " << total << endl;
+    return 0;
+}'''
+    ],
+
+    'java': [
+        '''public class Main {
+    public static void main(String[] args) {
+        int[] numbers = {10, 20, 30};
+        int total = 0;
+
+        for (int number : numbers) {
+            total += number;
+        }
+
+        System.out.println(total);
+    }
+}'''
+    ],
+
+    'csharp': [
+        '''using System;
+
+class Program {
+    static void Main() {
+        int[] numbers = { 10, 20, 30 };
+        int total = 0;
+
+        foreach (int number in numbers) {
+            total += number;
+        }
+
+        Console.WriteLine(total);
+    }
+}'''
+    ],
+
+    'php': [
+        '''<?php
+
+$users = ["Alex", "Sam", "John"];
+
+foreach ($users as $user) {
+    echo "Welcome, " . $user . PHP_EOL;
+}
+
+$total = 100 + 250;
+echo "Total: " . $total;
+
+?>'''
+    ],
+
+    'sql': [
+        '''SELECT
+    users.name,
+    COUNT(orders.id) AS total_orders
+FROM users
+LEFT JOIN orders
+    ON users.id = orders.user_id
+WHERE users.active = 1
+GROUP BY users.id, users.name
+ORDER BY total_orders DESC;'''
+    ],
+
+    'go': [
+        '''package main
+
+import "fmt"
+
+func calculateTotal(numbers []int) int {
+    total := 0
+
+    for _, number := range numbers {
+        total += number
+    }
+
+    return total
+}
+
+func main() {
+    fmt.Println(calculateTotal([]int{10, 20, 30}))
+}'''
+    ],
+
+    'rust': [
+        '''fn calculate_total(numbers: &[i32]) -> i32 {
+    let mut total = 0;
+
+    for number in numbers {
+        total += number;
+    }
+
+    total
+}
+
+fn main() {
+    let values = [10, 20, 30];
+    println!("{}", calculate_total(&values));
+}'''
+    ],
+
+    'ruby': [
+        '''class User
+    def initialize(name, age)
+        @name = name
+        @age = age
+    end
+
+    def introduce
+        "#{@name} is #{@age} years old"
+    end
+end
+
+user = User.new("Alex", 22)
+puts user.introduce'''
+    ],
+
+    'swift': [
+        '''struct User {
+    let name: String
+    let age: Int
+
+    func introduce() -> String {
+        return "\\(name) is \\(age) years old"
+    }
+}
+
+let user = User(name: "Alex", age: 22)
+print(user.introduce())'''
+    ],
+
+    'kotlin': [
+        '''data class User(
+    val name: String,
+    val age: Int
+)
+
+fun main() {
+    val user = User("Alex", 22)
+
+    if (user.age >= 18) {
+        println("${user.name} is an adult")
+    }
+}'''
+    ],
+
+    'bash': [
+        '''#!/bin/bash
+
+name="Alex"
+count=5
+
+for ((i = 1; i <= count; i++)); do
+    echo "Hello, $name - $i"
+done
+
+echo "Process completed!"'''
+    ],
+
+    'shell': [
+        '''#!/bin/sh
+
+USER_NAME="Alex"
+TOTAL=100
+
+if [ "$TOTAL" -ge 50 ]; then
+    echo "Welcome, $USER_NAME"
+else
+    echo "Access denied"
+fi'''
+    ],
+
+    'json': [
+        '''{
+    "name": "Alex",
+    "active": true,
+    "age": 22,
+    "skills": [
+        "Python",
+        "Django",
+        "JavaScript"
+    ],
+    "score": 95.5
+}'''
+    ],
+
+    'xml': [
+        '''<?xml version="1.0" encoding="UTF-8"?>
+<users>
+    <user id="101">
+        <name>Alex</name>
+        <active>true</active>
+        <score>95</score>
+    </user>
+</users>'''
+    ],
+
+    'yaml': [
+        '''application:
+  name: TypeMaster
+  version: 1.0
+
+database:
+  engine: sqlite
+  debug: false
+
+users:
+  - name: Alex
+    active: true
+  - name: Sam
+    active: false'''
+    ],
+
+    'dart': [
+        '''class User {
+    final String name;
+    final int age;
+
+    User(this.name, this.age);
+
+    void introduce() {
+        print("$name is $age years old");
+    }
+}
+
+void main() {
+    final user = User("Alex", 22);
+    user.introduce();
+}'''
+    ],
+
+    'r': [
+        '''numbers <- c(10, 20, 30, 40)
+
+total <- sum(numbers)
+average <- mean(numbers)
+
+if (average > 20) {
+    print("Average is high")
+}
+
+print(total)'''
+    ],
+
+    'lua': [
+        '''local users = {"Alex", "Sam", "John"}
+
+for index, name in ipairs(users) do
+    print(index .. ": " .. name)
+end
+
+local total = 100 + 250
+print("Total: " .. total)'''
+    ],
+
+    'perl': [
+        '''use strict;
+use warnings;
+
+my @numbers = (10, 20, 30);
+my $total = 0;
+
+foreach my $number (@numbers) {
+    $total += $number;
+}
+
+print "Total: $total\\n";'''
+    ],
+
+    'scala': [
+        '''object Main {
+    def calculateTotal(numbers: List[Int]): Int = {
+        numbers.sum
+    }
+
+    def main(args: Array[String]): Unit = {
+        val values = List(10, 20, 30)
+        println(calculateTotal(values))
+    }
+}'''
+    ],
+
+    'powershell': [
+        '''$users = @("Alex", "Sam", "John")
+$total = 0
+
+foreach ($user in $users) {
+    Write-Output "Welcome, $user"
+    $total += 10
+}
+
+Write-Output "Total: $total"'''
+    ],
+}
+
+
+# =========================================================
+# PASSAGE GENERATORS
+# =========================================================
+
+def generate_easy_passage():
+    return ' '.join(random.choices(EASY_WORDS, k=55))
+
+
+def generate_normal_passage():
+    sentences = []
+
+    for _ in range(6):
+        if random.random() < 0.35:
+            sentences.append(random.choice(NORMAL_MIXED_SENTENCES))
+        else:
+            sentences.append(random.choice(NORMAL_SENTENCES))
+
+    return ' '.join(sentences)
+
+
+def generate_hard_passage():
+    sentences = []
+
+    for _ in range(8):
+        word = random.choice(HARD_WORDS)
+        template = random.choice(HARD_SENTENCE_TEMPLATES)
+        sentences.append(template.format(word=word))
+
+    # Add mixed numeric and symbol content without
+    # making the entire test a symbol-only exercise.
+    mixed_sentences = random.sample(
+        HARD_MIXED_SENTENCES,
+        k=4
+    )
+
+    for sentence in mixed_sentences:
+        insert_at = random.randint(0, len(sentences))
+        sentences.insert(insert_at, sentence)
+
+    return ' '.join(sentences)
+
+
+def generate_code_passage(language):
+    snippets = CODE_SNIPPETS.get(language)
+
+    if not snippets:
+        return None
+
+    return random.choice(snippets)
+
+
+# =========================================================
+# DASHBOARD
+# =========================================================
 
 @ensure_csrf_cookie
 def home(request):
 
-    from django.db.models import Avg, Max, Sum, Count
-    from django.core.paginator import Paginator
-    from django.utils.dateparse import parse_date
-    from .models import TestResult
-
-    # Default dashboard statistics
     stats = {
         'total_tests': 0,
         'best_wpm': 0,
@@ -46,17 +612,52 @@ def home(request):
 
     recent_results = []
     chart_data = []
+    typing_chart_data = []
+    code_chart_data = []
+    code_language_stats = []
+
     page_obj = None
     max_wpm = 0
-    difficulty_stats = []
+
+    difficulty_stats = [
+        {
+            'difficulty': 'Easy',
+            'total_tests': 0,
+            'average_wpm': 0,
+            'average_accuracy': 0,
+        },
+        {
+            'difficulty': 'Normal',
+            'total_tests': 0,
+            'average_wpm': 0,
+            'average_accuracy': 0,
+        },
+        {
+            'difficulty': 'Hard',
+            'total_tests': 0,
+            'average_wpm': 0,
+            'average_accuracy': 0,
+        },
+    ]
 
     if request.user.is_authenticated:
 
-        # All results belonging to the current user
-        results = TestResult.objects.filter(user=request.user)
+        # Every query is restricted to the logged-in user.
+        results = TestResult.objects.filter(
+            user=request.user
+        )
 
-        # Overall statistics
-        summary = results.aggregate(
+        # Separate normal typing and code results.
+        typing_results = results.filter(
+            difficulty__in=['easy', 'normal', 'hard']
+        )
+
+        code_results = results.filter(
+            difficulty='code'
+        )
+
+        # Normal typing summary only.
+        summary = typing_results.aggregate(
             best_wpm=Max('wpm'),
             best_accuracy=Max('accuracy'),
             average_wpm=Avg('wpm'),
@@ -65,7 +666,7 @@ def home(request):
         )
 
         stats = {
-            'total_tests': results.count(),
+            'total_tests': typing_results.count(),
             'best_wpm': summary['best_wpm'] or 0,
             'best_accuracy': summary['best_accuracy'] or 0,
             'average_wpm': round(summary['average_wpm'] or 0),
@@ -75,43 +676,48 @@ def home(request):
             'total_characters': summary['total_characters'] or 0,
         }
 
-        # Difficulty-wise performance analytics
+        # Normal difficulty cards.
         difficulty_data = (
-            results.values('difficulty')
+            typing_results
+            .values('difficulty')
             .annotate(
                 total_tests=Count('id'),
                 average_wpm=Avg('wpm'),
                 average_accuracy=Avg('accuracy'),
             )
-            .order_by('difficulty')
         )
 
-        difficulty_stats = [
-            {
-                'difficulty': item['difficulty'].title(),
-                'total_tests': item['total_tests'],
-                'average_wpm': round(item['average_wpm'] or 0),
-                'average_accuracy': round(
-                    item['average_accuracy'] or 0, 1
-                ),
-            }
-            for item in difficulty_data
-        ]
+        for item in difficulty_data:
+            for card in difficulty_stats:
+                if card['difficulty'].lower() == item['difficulty']:
+                    card['total_tests'] = item['total_tests']
+                    card['average_wpm'] = round(
+                        item['average_wpm'] or 0
+                    )
+                    card['average_accuracy'] = round(
+                        item['average_accuracy'] or 0, 1
+                    )
+                    break
 
-        # Dashboard filters
+        # Existing history filters.
         difficulty = request.GET.get('difficulty', '')
         date_from = request.GET.get('date_from', '')
         date_to = request.GET.get('date_to', '')
 
         filtered_results = results
 
-        if difficulty in ['easy', 'normal', 'hard']:
+        if difficulty in ['easy', 'normal', 'hard', 'code']:
             filtered_results = filtered_results.filter(
                 difficulty=difficulty
             )
 
-        parsed_date_from = parse_date(date_from) if date_from else None
-        parsed_date_to = parse_date(date_to) if date_to else None
+        parsed_date_from = (
+            parse_date(date_from) if date_from else None
+        )
+
+        parsed_date_to = (
+            parse_date(date_to) if date_to else None
+        )
 
         if parsed_date_from:
             filtered_results = filtered_results.filter(
@@ -123,41 +729,97 @@ def home(request):
                 created_at__date__lte=parsed_date_to
             )
 
-        # Pagination: 5 results per page
+        # Pagination: 5 results per page.
         paginator = Paginator(
             filtered_results.order_by('-created_at'),
             5
         )
 
-        page_obj = paginator.get_page(request.GET.get('page'))
+        page_obj = paginator.get_page(
+            request.GET.get('page')
+        )
+
         recent_results = page_obj.object_list
 
-        # Dynamic WPM progress bar
         max_wpm = max(
             (result.wpm for result in recent_results),
             default=0
         )
 
-        # Last 5 tests for performance chart
-        chart_results = list(
-            results.order_by('-created_at')[:5]
+        # Separate normal typing chart.
+        typing_chart_results = list(
+            typing_results.order_by('-created_at')[:10]
         )
 
-        chart_results.reverse()
+        typing_chart_results.reverse()
 
-        chart_data = [
+        typing_chart_data = [
             {
                 'date': result.created_at.strftime('%d %b'),
                 'wpm': result.wpm,
                 'accuracy': result.accuracy,
             }
-            for result in chart_results
+            for result in typing_chart_results
         ]
+
+        # Separate code typing chart.
+        code_chart_results = list(
+            code_results.order_by('-created_at')[:10]
+        )
+
+        code_chart_results.reverse()
+
+        code_chart_data = [
+            {
+                'date': result.created_at.strftime('%d %b'),
+                'wpm': result.wpm,
+                'accuracy': result.accuracy,
+            }
+            for result in code_chart_results
+        ]
+
+        # Language-wise code analytics.
+        language_data = (
+            code_results
+            .values('language')
+            .annotate(
+                total_tests=Count('id'),
+                average_wpm=Avg('wpm'),
+                average_accuracy=Avg('accuracy'),
+            )
+            .order_by('language')
+        )
+
+        language_names = dict(TestResult.LANGUAGE_CHOICES)
+
+        code_language_stats = [
+            {
+                'language': item['language'],
+                'language_name': language_names.get(
+                    item['language'],
+                    item['language'].upper()
+                ),
+                'total_tests': item['total_tests'],
+                'average_wpm': round(
+                    item['average_wpm'] or 0
+                ),
+                'average_accuracy': round(
+                    item['average_accuracy'] or 0, 1
+                ),
+            }
+            for item in language_data
+        ]
+
+        # Keep old chart_data context for existing templates.
+        chart_data = typing_chart_data
 
     return render(request, 'index.html', {
         'stats': stats,
         'recent_results': recent_results,
         'chart_data': chart_data,
+        'typing_chart_data': typing_chart_data,
+        'code_chart_data': code_chart_data,
+        'code_language_stats': code_language_stats,
         'page_obj': page_obj,
         'max_wpm': max_wpm,
         'difficulty_stats': difficulty_stats,
@@ -167,6 +829,9 @@ def home(request):
     })
 
 
+# =========================================================
+# AUTHENTICATION
+# =========================================================
 
 def signup(request):
 
@@ -178,9 +843,12 @@ def signup(request):
 
         if form.is_valid():
             user = form.save()
-            UserProfile.objects.get_or_create(user=user)
-            login(request, user)
 
+            UserProfile.objects.get_or_create(
+                user=user
+            )
+
+            login(request, user)
             return redirect('home')
 
     else:
@@ -197,12 +865,14 @@ def user_login(request):
         return redirect('home')
 
     if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
+        form = AuthenticationForm(
+            request,
+            data=request.POST
+        )
 
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-
             return redirect('home')
 
     else:
@@ -217,6 +887,10 @@ def user_logout(request):
     logout(request)
     return redirect('home')
 
+
+# =========================================================
+# PROFILE
+# =========================================================
 
 @login_required
 def user_profile(request):
@@ -238,7 +912,6 @@ def edit_profile(request):
     )
 
     if request.method == 'POST':
-
         user_form = UserUpdateForm(
             request.POST,
             instance=request.user
@@ -251,22 +924,29 @@ def edit_profile(request):
         )
 
         if user_form.is_valid() and profile_form.is_valid():
-
             user_form.save()
             profile_form.save()
-
             return redirect('profile')
 
     else:
+        user_form = UserUpdateForm(
+            instance=request.user
+        )
 
-        user_form = UserUpdateForm(instance=request.user)
-        profile_form = ProfileUpdateForm(instance=profile)
+        profile_form = ProfileUpdateForm(
+            instance=profile
+        )
 
     return render(request, 'profile/edit_profile.html', {
         'user_form': user_form,
         'profile_form': profile_form,
         'profile': profile
     })
+
+
+# =========================================================
+# SAVE TEST RESULT
+# =========================================================
 
 @require_POST
 @csrf_protect
@@ -284,10 +964,22 @@ def save_test_result(request):
 
         wpm = int(data.get('wpm', 0))
         accuracy = float(data.get('accuracy', 0))
-        correct_characters = int(data.get('correct_characters', 0))
+        correct_characters = int(
+            data.get('correct_characters', 0)
+        )
         mistakes = int(data.get('mistakes', 0))
         duration = int(data.get('duration', 0))
+
         difficulty = data.get('difficulty', 'normal')
+        language = data.get('language', '').lower().strip()
+
+        valid_difficulties = [
+            'easy', 'normal', 'hard', 'code'
+        ]
+
+        valid_languages = dict(
+            TestResult.LANGUAGE_CHOICES
+        )
 
         if (
             wpm < 0 or
@@ -295,14 +987,21 @@ def save_test_result(request):
             correct_characters < 0 or
             mistakes < 0 or
             duration not in [15, 30, 60, 120] or
-            difficulty not in ['easy', 'normal', 'hard']
+            difficulty not in valid_difficulties
         ):
             return JsonResponse({
                 'success': False,
                 'message': 'Invalid test result data.'
             }, status=400)
 
-        from .models import TestResult
+        if difficulty == 'code':
+            if language not in valid_languages:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Please select a valid programming language.'
+                }, status=400)
+        else:
+            language = ''
 
         result = TestResult.objects.create(
             user=request.user,
@@ -311,7 +1010,8 @@ def save_test_result(request):
             correct_characters=correct_characters,
             mistakes=mistakes,
             duration=duration,
-            difficulty=difficulty
+            difficulty=difficulty,
+            language=language,
         )
 
         return JsonResponse({
@@ -320,58 +1020,92 @@ def save_test_result(request):
             'result_id': result.id
         })
 
-    except (ValueError, TypeError, json.JSONDecodeError):
+    except (
+        ValueError,
+        TypeError,
+        json.JSONDecodeError
+    ):
         return JsonResponse({
             'success': False,
             'message': 'Invalid request data.'
         }, status=400)
 
+
+# =========================================================
+# GENERATE TYPING PASSAGE
+# =========================================================
+
 def generate_passage(request):
 
-    difficulty = request.GET.get('difficulty', 'normal')
+    difficulty = request.GET.get(
+        'difficulty',
+        'normal'
+    ).lower().strip()
 
-    categories = {
-        'easy': ['reviews', 'fiction', 'romance'],
-        'normal': ['news', 'editorial', 'adventure'],
-        'hard': ['learned', 'government', 'belles_lettres'],
-    }
+    if difficulty == 'easy':
+        text = generate_easy_passage()
 
-    selected_categories = categories.get(
-        difficulty, categories['normal']
-    )
+        return JsonResponse({
+            'success': True,
+            'difficulty': 'easy',
+            'text': text,
+            'word_count': len(text.split()),
+        })
 
-    sentences = brown.sents(categories=selected_categories)
+    if difficulty == 'normal':
+        text = generate_normal_passage()
 
-    valid_sentences = []
+        return JsonResponse({
+            'success': True,
+            'difficulty': 'normal',
+            'text': text,
+            'word_count': len(text.split()),
+        })
 
-    for sentence in sentences:
-        words = [
-            word for word in sentence
-            if re.search(r'[a-zA-Z0-9]', word)
-        ]
+    if difficulty == 'hard':
+        text = generate_hard_passage()
 
-        if len(words) >= 5:
-            valid_sentences.append(words)
+        return JsonResponse({
+            'success': True,
+            'difficulty': 'hard',
+            'text': text,
+            'word_count': len(text.split()),
+        })
 
-    random.shuffle(valid_sentences)
+    if difficulty == 'code':
 
-    passage = []
-    word_count = 0
-    target_words = 40
+        language = request.GET.get(
+            'language',
+            'python'
+        ).lower().strip()
 
-    for sentence in valid_sentences:
-        passage.extend(sentence)
-        word_count += len(sentence)
+        valid_languages = dict(
+            TestResult.LANGUAGE_CHOICES
+        )
 
-        if word_count >= target_words:
-            break
+        if language not in valid_languages:
+            return JsonResponse({
+                'success': False,
+                'message': 'Unsupported programming language.'
+            }, status=400)
 
-    text = ' '.join(passage)
-    text = re.sub(r'\s+([.,!?;:])', r'\1', text)
+        text = generate_code_passage(language)
+
+        if text is None:
+            return JsonResponse({
+                'success': False,
+                'message': 'No practice snippet available for this language.'
+            }, status=404)
+
+        return JsonResponse({
+            'success': True,
+            'difficulty': 'code',
+            'language': language,
+            'text': text,
+            'word_count': len(text.split()),
+        })
 
     return JsonResponse({
-        'success': True,
-        'difficulty': difficulty,
-        'text': text,
-        'word_count': len(text.split())
-    })
+        'success': False,
+        'message': 'Invalid difficulty selected.'
+    }, status=400)

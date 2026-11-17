@@ -1,35 +1,54 @@
 
 <section class="mt-8 mb-8">
 
-    <!-- Heading -->
     <div class="mb-5">
         <h3 class="text-xl font-black tracking-tight text-neutral-900">
             Performance Analytics
         </h3>
         <p class="text-sm text-neutral-500 mt-1">
-            Track your typing performance over time.
+            Track your typing and coding performance separately.
         </p>
     </div>
 
-    <div class="bg-white border border-neutral-200 rounded-2xl p-5 md:p-7 shadow-sm">
+    <!-- MODE SELECTOR -->
+    <div class="flex gap-2 mb-5">
+        <button
+            type="button"
+            id="typingPerformanceBtn"
+            class="px-5 py-2.5 rounded-xl bg-neutral-900 text-white text-xs font-extrabold transition"
+        >
+            Normal Typing
+        </button>
 
-        <!-- Chart Header -->
+        <button
+            type="button"
+            id="codePerformanceBtn"
+            class="px-5 py-2.5 rounded-xl bg-neutral-100 text-neutral-600 text-xs font-extrabold transition"
+        >
+            Code Practice
+        </button>
+    </div>
+
+    <!-- NORMAL TYPING ANALYTICS -->
+    <div id="typingPerformancePanel"
+         class="bg-white border border-neutral-200 rounded-2xl p-5 md:p-7 shadow-sm">
+
         <div class="flex items-center justify-between flex-wrap gap-4 mb-5">
 
             <div class="flex items-center gap-1 bg-neutral-100 p-1 rounded-xl">
 
                 <button
                     type="button"
-                    id="speedChartBtn"
-                    class="px-5 py-2 rounded-lg bg-white shadow-sm text-neutral-900 text-xs font-extrabold transition"
+                    id="typingSpeedBtn"
+                    class="px-5 py-2 rounded-lg bg-white shadow-sm text-neutral-900 text-xs font-extrabold"
                 >
                     Speed
                 </button>
 
                 <button
                     type="button"
-                    id="accuracyChartBtn"
-                    class="px-5 py-2 rounded-lg text-neutral-500 text-xs font-extrabold transition"
+                    id="typingAccuracyBtn"
+                    class="px-5 py-2 rounded-lg text-neutral-500 text-xs font-extrabold"
                 >
                     Accuracy
                 </button>
@@ -37,390 +56,369 @@
             </div>
 
             <div class="text-right">
-                <p id="chartTitle"
-                   class="text-sm font-extrabold text-neutral-700">
-                    Speed
+                <p id="typingChartTitle" class="text-sm font-extrabold text-neutral-700">
+                    Typing Speed
                 </p>
-                <p id="chartSubtitle"
-                   class="text-xs text-neutral-400 mt-1">
+                <p id="typingChartSubtitle" class="text-xs text-neutral-400 mt-1">
                     Words per minute
                 </p>
             </div>
 
         </div>
 
-        <!-- Chart -->
-        {% if chart_data %}
-
-        <div class="relative w-full" style="height: 320px;">
-            <canvas id="performanceChart"></canvas>
+        <div id="typingChartContainer" class="relative w-full" style="height: 320px;">
+            <canvas id="typingPerformanceChart"></canvas>
         </div>
 
-        <div class="flex justify-center items-center gap-2 mt-5">
-            <span id="chartLegendDot"
-                  class="w-2.5 h-2.5 rounded-full bg-violet-600"></span>
-
-            <span id="chartLegendText"
-                  class="text-xs font-bold text-neutral-500">
-                Typing Speed (WPM)
-            </span>
+        <div id="typingEmptyState" class="hidden py-12 text-center">
+            <div class="text-3xl mb-3">⌨️</div>
+            <h4 class="font-black text-neutral-900">No typing data yet</h4>
+            <p class="text-sm text-neutral-500 mt-2">
+                Complete an Easy, Normal or Hard test to see your performance.
+            </p>
         </div>
 
-        {% else %}
+    </div>
 
-        <div class="py-16 text-center">
 
-            <div class="w-16 h-16 mx-auto rounded-2xl bg-violet-50 flex items-center justify-center text-3xl mb-5">
-                📊
+    <!-- CODE ANALYTICS -->
+    <div id="codePerformancePanel"
+         class="hidden bg-white border border-neutral-200 rounded-2xl p-5 md:p-7 shadow-sm">
+
+        <div class="flex items-center justify-between flex-wrap gap-4 mb-5">
+
+            <div class="flex items-center gap-1 bg-neutral-100 p-1 rounded-xl">
+
+                <button
+                    type="button"
+                    id="codeSpeedBtn"
+                    class="px-5 py-2 rounded-lg bg-white shadow-sm text-neutral-900 text-xs font-extrabold"
+                >
+                    Speed
+                </button>
+
+                <button
+                    type="button"
+                    id="codeAccuracyBtn"
+                    class="px-5 py-2 rounded-lg text-neutral-500 text-xs font-extrabold"
+                >
+                    Accuracy
+                </button>
+
             </div>
 
-            <h3 class="text-lg font-black text-neutral-900">
-                No performance data yet
-            </h3>
-
-            <p class="text-sm text-neutral-500 mt-2 max-w-sm mx-auto">
-                Complete your first typing test to see your performance graph here.
-            </p>
+            <div class="text-right">
+                <p id="codeChartTitle" class="text-sm font-extrabold text-neutral-700">
+                    Coding Speed
+                </p>
+                <p id="codeChartSubtitle" class="text-xs text-neutral-400 mt-1">
+                    Words per minute
+                </p>
+            </div>
 
         </div>
 
-        {% endif %}
+        <div id="codeChartContainer" class="relative w-full" style="height: 320px;">
+            <canvas id="codePerformanceChart"></canvas>
+        </div>
+
+        <div id="codeEmptyState" class="hidden py-12 text-center">
+            <div class="text-3xl mb-3">💻</div>
+            <h4 class="font-black text-neutral-900">No coding data yet</h4>
+            <p class="text-sm text-neutral-500 mt-2">
+                Complete a Code Mode test to see your coding performance.
+            </p>
+        </div>
+
+        <!-- Language-wise performance -->
+        <div class="mt-8 border-t border-neutral-100 pt-6">
+
+            <h4 class="text-sm font-black text-neutral-900 mb-4">
+                Language-wise Performance
+            </h4>
+
+            <div id="codeLanguageStats" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {% for item in code_language_stats %}
+                <div class="border border-neutral-200 rounded-xl p-4">
+
+                    <p class="text-sm font-black text-neutral-900">
+                        {{ item.language_name }}
+                    </p>
+
+                    <div class="grid grid-cols-3 gap-2 mt-4">
+
+                        <div>
+                            <p class="text-xs text-neutral-400">Tests</p>
+                            <p class="font-bold text-neutral-800">
+                                {{ item.total_tests }}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p class="text-xs text-neutral-400">Avg WPM</p>
+                            <p class="font-bold text-neutral-800">
+                                {{ item.average_wpm }}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p class="text-xs text-neutral-400">Accuracy</p>
+                            <p class="font-bold text-neutral-800">
+                                {{ item.average_accuracy }}%
+                            </p>
+                        </div>
+
+                    </div>
+
+                </div>
+                {% empty %}
+                <p class="text-sm text-neutral-500 col-span-full">
+                    No language statistics available yet.
+                </p>
+                {% endfor %}
+            </div>
+
+        </div>
 
     </div>
 
 </section>
 
-{{ chart_data|json_script:"performance-chart-data" }}
-
-{% if chart_data %}
+{{ typing_chart_data|json_script:"typing-chart-data" }}
+{{ code_chart_data|json_script:"code-chart-data" }}
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 
 <script>
 (function () {
 
-    const canvas = document.getElementById("performanceChart");
+    const typingPanel = document.getElementById("typingPerformancePanel");
+    const codePanel = document.getElementById("codePerformancePanel");
 
-    if (!canvas || typeof Chart === "undefined") {
+    const typingModeBtn = document.getElementById("typingPerformanceBtn");
+    const codeModeBtn = document.getElementById("codePerformanceBtn");
+
+    const typingData = JSON.parse(
+        document.getElementById("typing-chart-data").textContent
+    );
+
+    const codeData = JSON.parse(
+        document.getElementById("code-chart-data").textContent
+    );
+
+    if (typeof Chart === "undefined") {
         console.error("Chart.js failed to load.");
         return;
     }
 
-    const rawData = JSON.parse(
-        document.getElementById("performance-chart-data").textContent
-    );
+    function setMode(mode) {
 
-    const labels = rawData.map(item => item.date);
-    const speedValues = rawData.map(item => Number(item.wpm));
-    const accuracyValues = rawData.map(item => Number(item.accuracy));
+        const isTyping = mode === "typing";
 
-    const speedButton = document.getElementById("speedChartBtn");
-    const accuracyButton = document.getElementById("accuracyChartBtn");
+        typingPanel.classList.toggle("hidden", !isTyping);
+        codePanel.classList.toggle("hidden", isTyping);
 
-    const chartTitle = document.getElementById("chartTitle");
-    const chartSubtitle = document.getElementById("chartSubtitle");
-    const legendText = document.getElementById("chartLegendText");
-    const legendDot = document.getElementById("chartLegendDot");
+        typingModeBtn.className = isTyping
+            ? "px-5 py-2.5 rounded-xl bg-neutral-900 text-white text-xs font-extrabold transition"
+            : "px-5 py-2.5 rounded-xl bg-neutral-100 text-neutral-600 text-xs font-extrabold transition";
 
-    let currentMode = "speed";
+        codeModeBtn.className = !isTyping
+            ? "px-5 py-2.5 rounded-xl bg-neutral-900 text-white text-xs font-extrabold transition"
+            : "px-5 py-2.5 rounded-xl bg-neutral-100 text-neutral-600 text-xs font-extrabold transition";
+    }
 
-    // Custom value labels above every point
-    const valueLabelsPlugin = {
+    typingModeBtn.addEventListener("click", () => setMode("typing"));
+    codeModeBtn.addEventListener("click", () => setMode("code"));
 
-        id: "valueLabels",
 
-        afterDatasetsDraw(chart) {
+    function createPerformanceChart(config) {
 
-            const { ctx } = chart;
-            const meta = chart.getDatasetMeta(0);
-            const dataset = chart.data.datasets[0];
+        const {
+            canvasId,
+            data,
+            emptyId,
+            titleId,
+            subtitleId,
+            speedButtonId,
+            accuracyButtonId,
+            color
+        } = config;
 
-            ctx.save();
+        const canvas = document.getElementById(canvasId);
+        const emptyState = document.getElementById(emptyId);
 
-            meta.data.forEach((point, index) => {
-
-                const value = dataset.data[index];
-
-                const suffix = currentMode === "speed" ? " WPM" : "%";
-                const label = `${value}${suffix}`;
-
-                const x = point.x;
-                const y = point.y - 25;
-
-                ctx.font = "bold 13px Arial";
-
-                const textWidth = ctx.measureText(label).width;
-
-                const boxWidth = textWidth + 16;
-                const boxHeight = 25;
-
-                const boxX = x - boxWidth / 2;
-                const boxY = y - boxHeight / 2;
-
-                ctx.beginPath();
-
-                ctx.roundRect(
-                    boxX,
-                    boxY,
-                    boxWidth,
-                    boxHeight,
-                    6
-                );
-
-                ctx.fillStyle =
-                    index === meta.data.length - 1
-                        ? "#ede9fe"
-                        : "#f3f4f6";
-
-                ctx.fill();
-
-                ctx.fillStyle =
-                    index === meta.data.length - 1
-                        ? "#6d28d9"
-                        : "#404040";
-
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-
-                ctx.fillText(label, x, y);
-
-            });
-
-            ctx.restore();
+        if (!data.length) {
+            canvas.classList.add("hidden");
+            emptyState.classList.remove("hidden");
+            return null;
         }
-    };
 
+        const labels = data.map(item => item.date);
+        const speedValues = data.map(item => Number(item.wpm));
+        const accuracyValues = data.map(item => Number(item.accuracy));
 
-    // Chart configuration
-    const chart = new Chart(canvas, {
+        const title = document.getElementById(titleId);
+        const subtitle = document.getElementById(subtitleId);
 
-        type: "line",
+        const speedButton = document.getElementById(speedButtonId);
+        const accuracyButton = document.getElementById(accuracyButtonId);
 
-        plugins: [valueLabelsPlugin],
+        let currentMetric = "speed";
 
-        data: {
+        const chart = new Chart(canvas, {
 
-            labels: labels,
+            type: "line",
 
-            datasets: [{
+            data: {
+                labels: labels,
 
-                label: "Speed",
+                datasets: [{
+                    label: "Speed",
+                    data: speedValues,
+                    borderColor: color,
+                    backgroundColor: color + "18",
+                    fill: true,
+                    tension: 0.25,
+                    borderWidth: 2.5,
+                    pointRadius: 5,
+                    pointHoverRadius: 8,
+                    pointBackgroundColor: color,
+                    pointBorderColor: "#ffffff",
+                    pointBorderWidth: 2
+                }]
+            },
 
-                data: speedValues,
+            options: {
 
-                borderColor: "#7017ff",
+                responsive: true,
+                maintainAspectRatio: false,
 
-                backgroundColor: (context) => {
-
-                    const chart = context.chart;
-                    const { ctx, chartArea } = chart;
-
-                    if (!chartArea) return "rgba(112,23,255,0.12)";
-
-                    const gradient = ctx.createLinearGradient(
-                        0,
-                        chartArea.top,
-                        0,
-                        chartArea.bottom
-                    );
-
-                    gradient.addColorStop(0, "rgba(112,23,255,0.18)");
-                    gradient.addColorStop(1, "rgba(112,23,255,0.02)");
-
-                    return gradient;
+                layout: {
+                    padding: {
+                        top: 15,
+                        left: 8,
+                        right: 8,
+                        bottom: 5
+                    }
                 },
 
-                fill: true,
-
-                tension: 0.25,
-
-                borderWidth: 2.5,
-
-                pointRadius: (context) =>
-                    context.dataIndex === speedValues.length - 1 ? 7 : 5,
-
-                pointHoverRadius: 8,
-
-                pointBackgroundColor: "#7017ff",
-
-                pointBorderColor: "#ffffff",
-
-                pointBorderWidth: 2,
-
-                pointHitRadius: 12
-
-            }]
-
-        },
-
-        options: {
-
-            responsive: true,
-
-            maintainAspectRatio: false,
-
-            layout: {
-                padding: {
-                    top: 32,
-                    left: 8,
-                    right: 8,
-                    bottom: 5
-                }
-            },
-
-            interaction: {
-                intersect: false,
-                mode: "index"
-            },
-
-            plugins: {
-
-                legend: {
-                    display: false
+                interaction: {
+                    intersect: false,
+                    mode: "index"
                 },
 
-                tooltip: {
+                plugins: {
 
-                    backgroundColor: "#171717",
-
-                    titleFont: {
-                        weight: "bold"
-                    },
-
-                    bodyFont: {
-                        weight: "bold"
-                    },
-
-                    padding: 12,
-
-                    displayColors: false
-
-                }
-
-            },
-
-            scales: {
-
-                x: {
-
-                    grid: {
+                    legend: {
                         display: false
                     },
 
-                    border: {
-                        display: false
+                    tooltip: {
+                        backgroundColor: "#171717",
+                        padding: 12,
+                        displayColors: false
+                    }
+                },
+
+                scales: {
+
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        border: {
+                            display: false
+                        },
+                        ticks: {
+                            color: "#a3a3a3"
+                        }
                     },
 
-                    ticks: {
-                        color: "#a3a3a3",
-                        font: {
-                            size: 11,
-                            weight: "600"
+                    y: {
+                        position: "right",
+                        beginAtZero: true,
+                        border: {
+                            display: false
+                        },
+                        grid: {
+                            color: "#e5e5e5"
+                        },
+                        ticks: {
+                            color: "#737373",
+                            precision: 0
                         }
                     }
-
-                },
-
-                y: {
-
-                    position: "right",
-
-                    beginAtZero: true,
-
-                    border: {
-                        display: false
-                    },
-
-                    grid: {
-                        color: "#e5e5e5",
-                        drawTicks: false
-                    },
-
-                    ticks: {
-                        color: "#737373",
-                        padding: 12,
-                        precision: 0
-                    }
-
                 }
-
             }
+        });
 
+
+        function setMetric(metric) {
+
+            currentMetric = metric;
+
+            const isSpeed = metric === "speed";
+
+            chart.data.datasets[0].data =
+                isSpeed ? speedValues : accuracyValues;
+
+            chart.data.datasets[0].label =
+                isSpeed ? "Speed" : "Accuracy";
+
+            chart.options.scales.y.max =
+                isSpeed ? undefined : 100;
+
+            title.textContent = isSpeed
+                ? (canvasId.startsWith("typing")
+                    ? "Typing Speed"
+                    : "Coding Speed")
+                : (canvasId.startsWith("typing")
+                    ? "Typing Accuracy"
+                    : "Coding Accuracy");
+
+            subtitle.textContent = isSpeed
+                ? "Words per minute"
+                : "Accuracy percentage";
+
+            speedButton.className = isSpeed
+                ? "px-5 py-2 rounded-lg bg-white shadow-sm text-neutral-900 text-xs font-extrabold"
+                : "px-5 py-2 rounded-lg text-neutral-500 text-xs font-extrabold";
+
+            accuracyButton.className = !isSpeed
+                ? "px-5 py-2 rounded-lg bg-white shadow-sm text-neutral-900 text-xs font-extrabold"
+                : "px-5 py-2 rounded-lg text-neutral-500 text-xs font-extrabold";
+
+            chart.update();
         }
 
-    });
+        speedButton.addEventListener("click", () => setMetric("speed"));
+        accuracyButton.addEventListener("click", () => setMetric("accuracy"));
 
-
-    function setActiveButton(activeButton, inactiveButton) {
-
-        activeButton.className =
-            "px-5 py-2 rounded-lg bg-white shadow-sm text-neutral-900 text-xs font-extrabold transition";
-
-        inactiveButton.className =
-            "px-5 py-2 rounded-lg text-neutral-500 text-xs font-extrabold transition";
-
+        return chart;
     }
 
 
-    function updateChart(mode) {
-
-        currentMode = mode;
-
-        const dataset = chart.data.datasets[0];
-
-        if (mode === "speed") {
-
-            dataset.data = speedValues;
-            dataset.label = "Speed";
-            dataset.borderColor = "#7017ff";
-            dataset.pointBackgroundColor = "#7017ff";
-
-            chart.options.scales.y.max = undefined;
-
-            chartTitle.textContent = "Speed";
-            chartSubtitle.textContent = "Words per minute";
-            legendText.textContent = "Typing Speed (WPM)";
-
-            legendDot.className =
-                "w-2.5 h-2.5 rounded-full bg-violet-600";
-
-            setActiveButton(speedButton, accuracyButton);
-
-        } else {
-
-            dataset.data = accuracyValues;
-            dataset.label = "Accuracy";
-            dataset.borderColor = "#16a34a";
-            dataset.pointBackgroundColor = "#16a34a";
-
-            chart.options.scales.y.max = 100;
-
-            chartTitle.textContent = "Accuracy";
-            chartSubtitle.textContent = "Accuracy percentage";
-            legendText.textContent = "Typing Accuracy (%)";
-
-            legendDot.className =
-                "w-2.5 h-2.5 rounded-full bg-green-600";
-
-            setActiveButton(accuracyButton, speedButton);
-
-        }
-
-        chart.update();
-
-    }
-
-
-    speedButton.addEventListener("click", () => {
-        updateChart("speed");
+    createPerformanceChart({
+        canvasId: "typingPerformanceChart",
+        data: typingData,
+        emptyId: "typingEmptyState",
+        titleId: "typingChartTitle",
+        subtitleId: "typingChartSubtitle",
+        speedButtonId: "typingSpeedBtn",
+        accuracyButtonId: "typingAccuracyBtn",
+        color: "#7017ff"
     });
 
-    accuracyButton.addEventListener("click", () => {
-        updateChart("accuracy");
+    createPerformanceChart({
+        canvasId: "codePerformanceChart",
+        data: codeData,
+        emptyId: "codeEmptyState",
+        titleId: "codeChartTitle",
+        subtitleId: "codeChartSubtitle",
+        speedButtonId: "codeSpeedBtn",
+        accuracyButtonId: "codeAccuracyBtn",
+        color: "#16a34a"
     });
-
 
 })();
 </script>
-
-{% endif %}
