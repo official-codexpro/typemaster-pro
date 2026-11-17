@@ -12,19 +12,13 @@
 
     <!-- MODE SELECTOR -->
     <div class="flex gap-2 mb-5">
-        <button
-            type="button"
-            id="typingPerformanceBtn"
-            class="px-5 py-2.5 rounded-xl bg-neutral-900 text-white text-xs font-extrabold transition"
-        >
+        <button type="button" id="typingPerformanceBtn"
+            class="px-5 py-2.5 rounded-xl bg-neutral-900 text-white text-xs font-extrabold transition">
             Normal Typing
         </button>
 
-        <button
-            type="button"
-            id="codePerformanceBtn"
-            class="px-5 py-2.5 rounded-xl bg-neutral-100 text-neutral-600 text-xs font-extrabold transition"
-        >
+        <button type="button" id="codePerformanceBtn"
+            class="px-5 py-2.5 rounded-xl bg-neutral-100 text-neutral-600 text-xs font-extrabold transition">
             Code Practice
         </button>
     </div>
@@ -34,25 +28,16 @@
          class="bg-white border border-neutral-200 rounded-2xl p-5 md:p-7 shadow-sm">
 
         <div class="flex items-center justify-between flex-wrap gap-4 mb-5">
-
             <div class="flex items-center gap-1 bg-neutral-100 p-1 rounded-xl">
-
-                <button
-                    type="button"
-                    id="typingSpeedBtn"
-                    class="px-5 py-2 rounded-lg bg-white shadow-sm text-neutral-900 text-xs font-extrabold"
-                >
+                <button type="button" id="typingSpeedBtn"
+                    class="px-5 py-2 rounded-lg bg-white shadow-sm text-neutral-900 text-xs font-extrabold">
                     Speed
                 </button>
 
-                <button
-                    type="button"
-                    id="typingAccuracyBtn"
-                    class="px-5 py-2 rounded-lg text-neutral-500 text-xs font-extrabold"
-                >
+                <button type="button" id="typingAccuracyBtn"
+                    class="px-5 py-2 rounded-lg text-neutral-500 text-xs font-extrabold">
                     Accuracy
                 </button>
-
             </div>
 
             <div class="text-right">
@@ -63,10 +48,9 @@
                     Words per minute
                 </p>
             </div>
-
         </div>
 
-        <div id="typingChartContainer" class="relative w-full" style="height: 320px;">
+        <div class="relative w-full" style="height: 320px;">
             <canvas id="typingPerformanceChart"></canvas>
         </div>
 
@@ -77,7 +61,6 @@
                 Complete an Easy, Normal or Hard test to see your performance.
             </p>
         </div>
-
     </div>
 
 
@@ -85,26 +68,80 @@
     <div id="codePerformancePanel"
          class="hidden bg-white border border-neutral-200 rounded-2xl p-5 md:p-7 shadow-sm">
 
+        <!-- CODE SUMMARY -->
+        <div class="mb-8">
+            <h4 class="text-sm font-black text-neutral-900 mb-4">
+                Coding Overview
+            </h4>
+
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+
+                <div class="rounded-xl border border-neutral-200 p-4">
+                    <p class="text-xs text-neutral-400">Total Tests</p>
+                    <p class="text-2xl font-black text-neutral-900 mt-2">
+                        {{ code_summary.total_tests|default:0 }}
+                    </p>
+                </div>
+
+                <div class="rounded-xl border border-neutral-200 p-4">
+                    <p class="text-xs text-neutral-400">Average WPM</p>
+                    <p class="text-2xl font-black text-neutral-900 mt-2">
+                        {{ code_summary.average_wpm|default:0 }}
+                    </p>
+                </div>
+
+                <div class="rounded-xl border border-neutral-200 p-4">
+                    <p class="text-xs text-neutral-400">Average Accuracy</p>
+                    <p class="text-2xl font-black text-neutral-900 mt-2">
+                        {{ code_summary.average_accuracy|default:0 }}%
+                    </p>
+                </div>
+
+                <div class="rounded-xl border border-neutral-200 p-4">
+                    <p class="text-xs text-neutral-400">Total Mistakes</p>
+                    <p class="text-2xl font-black text-red-500 mt-2">
+                        {{ code_summary.total_mistakes|default:0 }}
+                    </p>
+                </div>
+
+                <div class="rounded-xl border border-neutral-200 p-4">
+                    <p class="text-xs text-neutral-400">Best WPM</p>
+                    <p class="text-2xl font-black text-neutral-900 mt-2">
+                        {{ code_summary.best_wpm|default:0 }}
+                    </p>
+                </div>
+
+                <div class="rounded-xl border border-neutral-200 p-4">
+                    <p class="text-xs text-neutral-400">Best Accuracy</p>
+                    <p class="text-2xl font-black text-neutral-900 mt-2">
+                        {{ code_summary.best_accuracy|default:0 }}%
+                    </p>
+                </div>
+
+                <div class="rounded-xl border border-neutral-200 p-4">
+                    <p class="text-xs text-neutral-400">Average Mistakes</p>
+                    <p class="text-2xl font-black text-neutral-900 mt-2">
+                        {{ code_summary.average_mistakes|default:0 }}
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- CODE CHART -->
         <div class="flex items-center justify-between flex-wrap gap-4 mb-5">
 
             <div class="flex items-center gap-1 bg-neutral-100 p-1 rounded-xl">
-
-                <button
-                    type="button"
-                    id="codeSpeedBtn"
-                    class="px-5 py-2 rounded-lg bg-white shadow-sm text-neutral-900 text-xs font-extrabold"
-                >
+                <button type="button" id="codeSpeedBtn"
+                    class="px-5 py-2 rounded-lg bg-white shadow-sm text-neutral-900 text-xs font-extrabold">
                     Speed
                 </button>
 
-                <button
-                    type="button"
-                    id="codeAccuracyBtn"
-                    class="px-5 py-2 rounded-lg text-neutral-500 text-xs font-extrabold"
-                >
+                <button type="button" id="codeAccuracyBtn"
+                    class="px-5 py-2 rounded-lg text-neutral-500 text-xs font-extrabold">
                     Accuracy
                 </button>
-
             </div>
 
             <div class="text-right">
@@ -115,10 +152,9 @@
                     Words per minute
                 </p>
             </div>
-
         </div>
 
-        <div id="codeChartContainer" class="relative w-full" style="height: 320px;">
+        <div class="relative w-full" style="height: 320px;">
             <canvas id="codePerformanceChart"></canvas>
         </div>
 
@@ -130,14 +166,16 @@
             </p>
         </div>
 
-        <!-- Language-wise performance -->
+
+        <!-- LANGUAGE-WISE PERFORMANCE -->
         <div class="mt-8 border-t border-neutral-100 pt-6">
 
             <h4 class="text-sm font-black text-neutral-900 mb-4">
                 Language-wise Performance
             </h4>
 
-            <div id="codeLanguageStats" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+
                 {% for item in code_language_stats %}
                 <div class="border border-neutral-200 rounded-xl p-4">
 
@@ -145,7 +183,7 @@
                         {{ item.language_name }}
                     </p>
 
-                    <div class="grid grid-cols-3 gap-2 mt-4">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4">
 
                         <div>
                             <p class="text-xs text-neutral-400">Tests</p>
@@ -168,24 +206,121 @@
                             </p>
                         </div>
 
-                    </div>
+                        <div>
+                            <p class="text-xs text-neutral-400">Best WPM</p>
+                            <p class="font-bold text-neutral-800">
+                                {{ item.best_wpm }}
+                            </p>
+                        </div>
 
+                        <div>
+                            <p class="text-xs text-neutral-400">Mistakes</p>
+                            <p class="font-bold text-red-500">
+                                {{ item.total_mistakes }}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p class="text-xs text-neutral-400">Avg Mistakes</p>
+                            <p class="font-bold text-neutral-800">
+                                {{ item.average_mistakes }}
+                            </p>
+                        </div>
+
+                    </div>
                 </div>
+
                 {% empty %}
                 <p class="text-sm text-neutral-500 col-span-full">
                     No language statistics available yet.
                 </p>
                 {% endfor %}
+
+            </div>
+        </div>
+
+
+        <!-- RECENT CODE HISTORY -->
+        <div class="mt-8 border-t border-neutral-100 pt-6">
+
+            <div class="flex items-center justify-between mb-4">
+                <h4 class="text-sm font-black text-neutral-900">
+                    Recent Code Practice
+                </h4>
+
+                <span class="text-xs text-neutral-400">
+                    Latest 10 tests
+                </span>
             </div>
 
+            <div class="overflow-x-auto">
+
+                <table class="w-full text-left min-w-[650px]">
+
+                    <thead>
+                        <tr class="border-b border-neutral-200">
+                            <th class="py-3 text-xs font-bold text-neutral-400">Date</th>
+                            <th class="py-3 text-xs font-bold text-neutral-400">Language</th>
+                            <th class="py-3 text-xs font-bold text-neutral-400">WPM</th>
+                            <th class="py-3 text-xs font-bold text-neutral-400">Accuracy</th>
+                            <th class="py-3 text-xs font-bold text-neutral-400">Mistakes</th>
+                            <th class="py-3 text-xs font-bold text-neutral-400">Duration</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for result in code_recent_results %}
+                        <tr class="border-b border-neutral-100">
+
+                            <td class="py-3 text-xs text-neutral-600">
+                                {{ result.created_at|date:"d M Y" }}
+                            </td>
+
+                            <td class="py-3 text-xs font-bold text-neutral-800">
+                                {{ result.get_language_display }}
+                            </td>
+
+                            <td class="py-3 text-xs font-bold text-neutral-800">
+                                {{ result.wpm }}
+                            </td>
+
+                            <td class="py-3 text-xs font-bold text-green-600">
+                                {{ result.accuracy }}%
+                            </td>
+
+                            <td class="py-3 text-xs font-bold text-red-500">
+                                {{ result.mistakes }}
+                            </td>
+
+                            <td class="py-3 text-xs text-neutral-600">
+                                {{ result.duration }}s
+                            </td>
+
+                        </tr>
+
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="py-8 text-center text-sm text-neutral-500">
+                                No Code Practice history available yet.
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
         </div>
 
     </div>
 
 </section>
 
+
+<!-- CHART DATA -->
 {{ typing_chart_data|json_script:"typing-chart-data" }}
 {{ code_chart_data|json_script:"code-chart-data" }}
+
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 
@@ -206,11 +341,6 @@
         document.getElementById("code-chart-data").textContent
     );
 
-    if (typeof Chart === "undefined") {
-        console.error("Chart.js failed to load.");
-        return;
-    }
-
     function setMode(mode) {
 
         const isTyping = mode === "typing";
@@ -229,6 +359,12 @@
 
     typingModeBtn.addEventListener("click", () => setMode("typing"));
     codeModeBtn.addEventListener("click", () => setMode("code"));
+
+
+    if (typeof Chart === "undefined") {
+        console.error("Chart.js failed to load.");
+        return;
+    }
 
 
     function createPerformanceChart(config) {
@@ -262,8 +398,6 @@
 
         const speedButton = document.getElementById(speedButtonId);
         const accuracyButton = document.getElementById(accuracyButtonId);
-
-        let currentMetric = "speed";
 
         const chart = new Chart(canvas, {
 
@@ -308,7 +442,6 @@
                 },
 
                 plugins: {
-
                     legend: {
                         display: false
                     },
@@ -354,8 +487,6 @@
 
 
         function setMetric(metric) {
-
-            currentMetric = metric;
 
             const isSpeed = metric === "speed";
 

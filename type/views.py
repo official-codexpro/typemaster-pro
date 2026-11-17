@@ -598,6 +598,7 @@ def generate_code_passage(language):
 # DASHBOARD
 # =========================================================
 
+
 @ensure_csrf_cookie
 def home(request):
 
@@ -610,11 +611,22 @@ def home(request):
         'total_characters': 0,
     }
 
+    code_summary = {
+        'total_tests': 0,
+        'average_wpm': 0,
+        'average_accuracy': 0,
+        'best_wpm': 0,
+        'best_accuracy': 0,
+        'total_mistakes': 0,
+        'average_mistakes': 0,
+    }
+
     recent_results = []
     chart_data = []
     typing_chart_data = []
     code_chart_data = []
     code_language_stats = []
+    code_recent_results = []
 
     page_obj = None
     max_wpm = 0
@@ -642,7 +654,7 @@ def home(request):
 
     if request.user.is_authenticated:
 
-        # Every query is restricted to the logged-in user.
+        # User-specific results only.
         results = TestResult.objects.filter(
             user=request.user
         )
@@ -656,7 +668,7 @@ def home(request):
             difficulty='code'
         )
 
-        # Normal typing summary only.
+        # NORMAL TYPING SUMMARY
         summary = typing_results.aggregate(
             best_wpm=Max('wpm'),
             best_accuracy=Max('accuracy'),
@@ -676,7 +688,7 @@ def home(request):
             'total_characters': summary['total_characters'] or 0,
         }
 
-        # Normal difficulty cards.
+        # NORMAL DIFFICULTY CARDS
         difficulty_data = (
             typing_results
             .values('difficulty')
@@ -689,17 +701,22 @@ def home(request):
 
         for item in difficulty_data:
             for card in difficulty_stats:
+
                 if card['difficulty'].lower() == item['difficulty']:
+
                     card['total_tests'] = item['total_tests']
+
                     card['average_wpm'] = round(
                         item['average_wpm'] or 0
                     )
+
                     card['average_accuracy'] = round(
                         item['average_accuracy'] or 0, 1
                     )
+
                     break
 
-        # Existing history filters.
+        # EXISTING HISTORY FILTERS
         difficulty = request.GET.get('difficulty', '')
         date_from = request.GET.get('date_from', '')
         date_to = request.GET.get('date_to', '')
@@ -729,7 +746,7 @@ def home(request):
                 created_at__date__lte=parsed_date_to
             )
 
-        # Pagination: 5 results per page.
+        # PAGINATION: 5 RESULTS PER PAGE
         paginator = Paginator(
             filtered_results.order_by('-created_at'),
             5
@@ -746,7 +763,7 @@ def home(request):
             default=0
         )
 
-        # Separate normal typing chart.
+        # NORMAL TYPING CHART
         typing_chart_results = list(
             typing_results.order_by('-created_at')[:10]
         )
@@ -762,7 +779,7 @@ def home(request):
             for result in typing_chart_results
         ]
 
-        # Separate code typing chart.
+        # CODE MODE CHART
         code_chart_results = list(
             code_results.order_by('-created_at')[:10]
         )
@@ -778,7 +795,34 @@ def home(request):
             for result in code_chart_results
         ]
 
-        # Language-wise code analytics.
+        # CODE MODE SUMMARY
+        code_aggregate = code_results.aggregate(
+            total_tests=Count('id'),
+            average_wpm=Avg('wpm'),
+            average_accuracy=Avg('accuracy'),
+            best_wpm=Max('wpm'),
+            best_accuracy=Max('accuracy'),
+            total_mistakes=Sum('mistakes'),
+            average_mistakes=Avg('mistakes'),
+        )
+
+        code_summary = {
+            'total_tests': code_aggregate['total_tests'] or 0,
+            'average_wpm': round(
+                code_aggregate['average_wpm'] or 0
+            ),
+            'average_accuracy': round(
+                code_aggregate['average_accuracy'] or 0, 1
+            ),
+            'best_wpm': code_aggregate['best_wpm'] or 0,
+            'best_accuracy': code_aggregate['best_accuracy'] or 0,
+            'total_mistakes': code_aggregate['total_mistakes'] or 0,
+            'average_mistakes': round(
+                code_aggregate['average_mistakes'] or 0, 1
+            ),
+        }
+
+        # LANGUAGE-WISE CODE ANALYTICS
         language_data = (
             code_results
             .values('language')
@@ -786,6 +830,9 @@ def home(request):
                 total_tests=Count('id'),
                 average_wpm=Avg('wpm'),
                 average_accuracy=Avg('accuracy'),
+                best_wpm=Max('wpm'),
+                total_mistakes=Sum('mistakes'),
+                average_mistakes=Avg('mistakes'),
             )
             .order_by('language')
         )
@@ -806,20 +853,32 @@ def home(request):
                 'average_accuracy': round(
                     item['average_accuracy'] or 0, 1
                 ),
+                'best_wpm': item['best_wpm'] or 0,
+                'total_mistakes': item['total_mistakes'] or 0,
+                'average_mistakes': round(
+                    item['average_mistakes'] or 0, 1
+                ),
             }
             for item in language_data
         ]
 
-        # Keep old chart_data context for existing templates.
+        # LATEST 10 CODE TESTS
+        code_recent_results = list(
+            code_results.order_by('-created_at')[:10]
+        )
+
+        # Keep existing chart_data compatibility.
         chart_data = typing_chart_data
 
     return render(request, 'index.html', {
         'stats': stats,
+        'code_summary': code_summary,
         'recent_results': recent_results,
         'chart_data': chart_data,
         'typing_chart_data': typing_chart_data,
         'code_chart_data': code_chart_data,
         'code_language_stats': code_language_stats,
+        'code_recent_results': code_recent_results,
         'page_obj': page_obj,
         'max_wpm': max_wpm,
         'difficulty_stats': difficulty_stats,
