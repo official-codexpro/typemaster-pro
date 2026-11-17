@@ -1,5 +1,5 @@
 
-<section class="results-history mt-10 mb-10">
+<section id="resultsHistory" class="results-history mt-10 mb-10">
 
     <!-- Header -->
     <div class="flex items-end justify-between mb-6">
@@ -30,14 +30,24 @@
                     <label class="block text-xs font-bold text-neutral-600 mb-2">
                         Difficulty
                     </label>
-                    <select
-                        name="difficulty"
-                        class="w-full px-4 py-3 rounded-xl border border-neutral-200 bg-neutral-50 text-sm font-semibold outline-none focus:border-indigo-500">
-                        <option value="">All Difficulties</option>
-                        <option value="easy" {% if selected_difficulty == 'easy' %}selected{% endif %}>Easy</option>
-                        <option value="normal" {% if selected_difficulty == 'normal' %}selected{% endif %}>Normal</option>
-                        <option value="hard" {% if selected_difficulty == 'hard' %}selected{% endif %}>Hard</option>
-                    </select>
+                  <div class="relative">
+    <select
+        name="difficulty"
+        class="block w-full min-w-0 max-w-full box-border px-4 py-3 pr-10 rounded-xl border border-neutral-200 bg-neutral-50 text-sm font-semibold outline-none focus:border-indigo-500 appearance-none">
+
+        <option value="">All Difficulties</option>
+        <option value="easy" {% if selected_difficulty == 'easy' %}selected{% endif %}>Easy</option>
+        <option value="normal" {% if selected_difficulty == 'normal' %}selected{% endif %}>Normal</option>
+        <option value="hard" {% if selected_difficulty == 'hard' %}selected{% endif %}>Hard</option>
+    </select>
+
+    <svg class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+         width="16" height="16" viewBox="0 0 24 24"
+         fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m6 9 6 6 6-6"/>
+    </svg>
+</div>
                 </div>
 
                 <div>
@@ -228,3 +238,69 @@
 
     </div>
 </section>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    async function loadResults(url, updateHistory = true) {
+        const section = document.getElementById("resultsHistory");
+
+        try {
+            section.style.opacity = "0.5";
+
+            const response = await fetch(url, {
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            });
+
+            if (!response.ok) throw new Error("Request failed");
+
+            const html = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, "text/html");
+            const newSection = doc.getElementById("resultsHistory");
+
+            if (!newSection) throw new Error("Section not found");
+
+            section.innerHTML = newSection.innerHTML;
+
+            if (updateHistory) {
+                history.pushState({}, "", url);
+            }
+
+        } catch (error) {
+            window.location.href = url;
+        } finally {
+            section.style.opacity = "1";
+        }
+    }
+
+    // Filter form
+    document.addEventListener("submit", function (e) {
+        const form = e.target.closest("#resultsHistory form");
+
+        if (!form) return;
+
+        e.preventDefault();
+
+        const params = new URLSearchParams(new FormData(form));
+        loadResults(`${window.location.pathname}?${params.toString()}`);
+    });
+
+    // Pagination
+    document.addEventListener("click", function (e) {
+        const link = e.target.closest("#resultsHistory a[href]");
+
+        if (!link) return;
+
+        e.preventDefault();
+        loadResults(link.href);
+    });
+
+    // Browser back / forward
+    window.addEventListener("popstate", function () {
+        loadResults(window.location.href, false);
+    });
+
+});
+</script>
