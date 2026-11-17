@@ -2,7 +2,7 @@
 import random
 import re
 import json
-from django.db.models import Avg, Max, Sum
+from django.db.models import Avg, Max, Sum, Count
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_protect
@@ -29,10 +29,12 @@ from .models import UserProfile
 @ensure_csrf_cookie
 def home(request):
 
-    from django.db.models import Avg, Max
+    from django.db.models import Avg, Max, Sum, Count
     from django.core.paginator import Paginator
+    from django.utils.dateparse import parse_date
     from .models import TestResult
 
+    # Default dashboard statistics
     stats = {
         'total_tests': 0,
         'best_wpm': 0,
@@ -46,12 +48,14 @@ def home(request):
     chart_data = []
     page_obj = None
     max_wpm = 0
+    difficulty_stats = []
 
     if request.user.is_authenticated:
 
-        # All results for dashboard statistics
+        # All results belonging to the current user
         results = TestResult.objects.filter(user=request.user)
 
+        # Overall statistics
         summary = results.aggregate(
             best_wpm=Max('wpm'),
             best_accuracy=Max('accuracy'),
@@ -65,11 +69,36 @@ def home(request):
             'best_wpm': summary['best_wpm'] or 0,
             'best_accuracy': summary['best_accuracy'] or 0,
             'average_wpm': round(summary['average_wpm'] or 0),
-            'average_accuracy': round(summary['average_accuracy'] or 0, 1),
+            'average_accuracy': round(
+                summary['average_accuracy'] or 0, 1
+            ),
             'total_characters': summary['total_characters'] or 0,
         }
 
-        # Filters
+        # Difficulty-wise performance analytics
+        difficulty_data = (
+            results.values('difficulty')
+            .annotate(
+                total_tests=Count('id'),
+                average_wpm=Avg('wpm'),
+                average_accuracy=Avg('accuracy'),
+            )
+            .order_by('difficulty')
+        )
+
+        difficulty_stats = [
+            {
+                'difficulty': item['difficulty'].title(),
+                'total_tests': item['total_tests'],
+                'average_wpm': round(item['average_wpm'] or 0),
+                'average_accuracy': round(
+                    item['average_accuracy'] or 0, 1
+                ),
+            }
+            for item in difficulty_data
+        ]
+
+        # Dashboard filters
         difficulty = request.GET.get('difficulty', '')
         date_from = request.GET.get('date_from', '')
         date_to = request.GET.get('date_to', '')
@@ -81,14 +110,17 @@ def home(request):
                 difficulty=difficulty
             )
 
-        if date_from:
+        parsed_date_from = parse_date(date_from) if date_from else None
+        parsed_date_to = parse_date(date_to) if date_to else None
+
+        if parsed_date_from:
             filtered_results = filtered_results.filter(
-                created_at__date__gte=date_from
+                created_at__date__gte=parsed_date_from
             )
 
-        if date_to:
+        if parsed_date_to:
             filtered_results = filtered_results.filter(
-                created_at__date__lte=date_to
+                created_at__date__lte=parsed_date_to
             )
 
         # Pagination: 5 results per page
@@ -100,12 +132,13 @@ def home(request):
         page_obj = paginator.get_page(request.GET.get('page'))
         recent_results = page_obj.object_list
 
+        # Dynamic WPM progress bar
         max_wpm = max(
             (result.wpm for result in recent_results),
             default=0
         )
 
-        # Last 5 results for performance chart
+        # Last 5 tests for performance chart
         chart_results = list(
             results.order_by('-created_at')[:5]
         )
@@ -127,10 +160,13 @@ def home(request):
         'chart_data': chart_data,
         'page_obj': page_obj,
         'max_wpm': max_wpm,
+        'difficulty_stats': difficulty_stats,
         'selected_difficulty': request.GET.get('difficulty', ''),
         'date_from': request.GET.get('date_from', ''),
         'date_to': request.GET.get('date_to', ''),
     })
+
+
 
 def signup(request):
 
