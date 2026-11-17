@@ -685,7 +685,7 @@ def home(request):
             'time': personal_stats['time'] or 60,
         }
 
-    return render(request, 'home.html', {
+    return render(request, 'home/home.html', {
         'leaderboard': leaderboard[:10],
         'medal_counts': medal_counts,
         'total_players': len(user_results),
