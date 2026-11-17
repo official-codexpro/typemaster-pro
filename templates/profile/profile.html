@@ -27,16 +27,29 @@
         <div class="bg-white border border-neutral-200 rounded-3xl overflow-hidden shadow-sm">
 
             <!-- Cover -->
-            <div class="h-36 sm:h-48 bg-gradient-to-r from-indigo-700 via-violet-700 to-purple-600 relative">
-                <div class="absolute inset-0 opacity-20"
-                     style="background-image: radial-gradient(circle at 20% 30%, white 1px, transparent 1px); background-size: 24px 24px;">
-                </div>
+            <!-- Profile Cover Banner -->
+<div class="relative h-36 sm:h-48 overflow-hidden">
 
-                <div class="absolute right-6 bottom-5 text-white/20 text-6xl font-black">
-                    TP
-                </div>
-            </div>
+    {% if profile.cover_image %}
+        <img
+            src="{{ profile.cover_image.url }}"
+            alt="Profile Cover"
+            class="absolute inset-0 w-full h-full object-cover"
+        >
+    {% else %}
+        <div class="absolute inset-0 bg-gradient-to-r from-indigo-700 via-violet-700 to-purple-600">
+        </div>
 
+        <div class="absolute inset-0 flex items-center justify-center">
+            <span class="text-4xl font-black tracking-widest text-white">
+                TP
+            </span>
+        </div>
+    {% endif %}
+
+    <div class="absolute inset-0 bg-black/10"></div>
+
+</div>
 
             <!-- Profile Information -->
             <div class="px-6 sm:px-10 pb-8">

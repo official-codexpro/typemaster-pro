@@ -5,79 +5,332 @@
 
 {% block content %}
 
-<div class="min-h-screen bg-neutral-50 px-5 py-12">
+<div class="min-h-screen bg-[#f3f6f8] px-4 py-10 sm:px-6">
 
-    <div class="max-w-2xl mx-auto">
+    <div class="max-w-4xl mx-auto">
 
-        <div class="bg-white border border-neutral-200 rounded-2xl p-8 shadow-sm">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <a href="{% url 'profile' %}"
+               class="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-indigo-600 mb-5">
+                <span>←</span> Back to Profile
+            </a>
 
-            <h1 class="text-2xl font-bold mb-2">Edit Profile</h1>
+            <h1 class="text-3xl font-bold text-neutral-900 tracking-tight">
+                Edit your profile
+            </h1>
 
-            <p class="text-sm text-neutral-500 mb-8">
-                Update your personal information.
+            <p class="text-neutral-500 mt-2">
+                Manage your identity and personalize your TypeMaster profile.
             </p>
-
-            <form method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
-
-                <h2 class="font-semibold mb-4">Account Information</h2>
-
-                {% for field in user_form %}
-                    <div class="mb-5">
-                        <label class="block text-sm font-semibold mb-2">
-                            {{ field.label }}
-                        </label>
-
-                        {{ field }}
-
-                        {% for error in field.errors %}
-                            <p class="text-red-500 text-xs mt-1">
-                                {{ error }}
-                            </p>
-                        {% endfor %}
-                    </div>
-                {% endfor %}
-
-                <div class="border-t border-neutral-200 my-7"></div>
-
-                <h2 class="font-semibold mb-4">Profile Information</h2>
-
-                {% for field in profile_form %}
-                    <div class="mb-5">
-                        <label class="block text-sm font-semibold mb-2">
-                            {{ field.label }}
-                        </label>
-
-                        {{ field }}
-
-                        {% for error in field.errors %}
-                            <p class="text-red-500 text-xs mt-1">
-                                {{ error }}
-                            </p>
-                        {% endfor %}
-                    </div>
-                {% endfor %}
-
-                <div class="flex gap-3 mt-8">
-
-                    <button type="submit"
-                        class="flex-1 bg-neutral-900 text-white py-3 rounded-xl font-semibold hover:bg-neutral-700">
-                        Save Changes
-                    </button>
-
-                    <a href="{% url 'profile' %}"
-                       class="px-6 py-3 border rounded-xl font-semibold text-neutral-700">
-                        Cancel
-                    </a>
-
-                </div>
-
-            </form>
-
         </div>
 
-    </div>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
 
+            <!-- Account Information -->
+            <div class="bg-white rounded-2xl border border-neutral-200 shadow-sm mb-6 overflow-hidden">
+
+                <div class="px-6 py-5 border-b border-neutral-100">
+                    <h2 class="text-lg font-bold text-neutral-900">
+                        Account Information
+                    </h2>
+                    <p class="text-sm text-neutral-500 mt-1">
+                        Your basic account details.
+                    </p>
+                </div>
+
+                <div class="p-6 grid sm:grid-cols-2 gap-6">
+
+                    {% for field in user_form %}
+                        <div>
+                            <label class="block text-sm font-semibold text-neutral-700 mb-2">
+                                {{ field.label }}
+                            </label>
+
+                            {{ field }}
+
+                            {% for error in field.errors %}
+                                <p class="text-red-500 text-xs mt-2">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+
+                </div>
+            </div>
+
+
+            <!-- Profile Images -->
+            <div class="bg-white rounded-2xl border border-neutral-200 shadow-sm mb-6 overflow-hidden">
+
+                <div class="px-6 py-5 border-b border-neutral-100">
+                    <h2 class="text-lg font-bold text-neutral-900">
+                        Profile Appearance
+                    </h2>
+                    <p class="text-sm text-neutral-500 mt-1">
+                        Add a profile photo and optional cover image.
+                    </p>
+                </div>
+
+                <div class="p-6 space-y-8">
+
+                    <!-- Cover Image -->
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <div>
+                                <h3 class="font-semibold text-neutral-800">
+                                    Cover Image
+                                </h3>
+                                <p class="text-xs text-neutral-500 mt-1">
+                                    Optional · Recommended landscape image
+                                </p>
+                            </div>
+                        </div>
+
+                        <div id="coverPreview"
+                             class="relative h-44 sm:h-52 rounded-xl overflow-hidden border border-neutral-200 bg-gradient-to-r from-indigo-700 via-violet-700 to-purple-600">
+
+                            {% if profile_form.instance.cover_image %}
+                                <img id="coverPreviewImage"
+                                     src="{{ profile_form.instance.cover_image.url }}"
+                                     class="w-full h-full object-cover"
+                                     alt="Cover preview">
+                            {% else %}
+                                <img id="coverPreviewImage"
+                                     class="hidden w-full h-full object-cover"
+                                     alt="Cover preview">
+                            {% endif %}
+
+                            <div id="coverPlaceholder"
+                                 class="{% if profile_form.instance.cover_image %}hidden{% endif %} absolute inset-0 flex items-center justify-center">
+                                <div class="text-center text-white">
+                                    <div class="text-4xl font-black tracking-widest">TP</div>
+                                    <p class="text-xs text-white/70 mt-2 tracking-widest uppercase">
+                                        TypeMaster Pro
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="absolute bottom-3 right-3">
+                                <label for="{{ profile_form.cover_image.id_for_label }}"
+                                       class="cursor-pointer bg-white text-neutral-800 px-4 py-2 rounded-lg text-sm font-semibold shadow hover:bg-neutral-100 transition">
+                                    Change Cover
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="hidden">
+                            {{ profile_form.cover_image }}
+                        </div>
+
+                        {% for error in profile_form.cover_image.errors %}
+                            <p class="text-red-500 text-xs mt-2">{{ error }}</p>
+                        {% endfor %}
+
+                        <p class="text-xs text-neutral-400 mt-3">
+                            Leave empty to use the default gradient banner.
+                        </p>
+                    </div>
+
+
+                    <div class="border-t border-neutral-100"></div>
+
+
+                    <!-- Profile Picture -->
+                    <div>
+                        <h3 class="font-semibold text-neutral-800 mb-4">
+                            Profile Picture
+                        </h3>
+
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-5">
+
+                            <div class="w-24 h-24 rounded-full bg-indigo-100 border-4 border-white shadow-md overflow-hidden flex items-center justify-center shrink-0">
+
+                                {% if profile_form.instance.profile_picture %}
+                                    <img id="profilePreviewImage"
+                                         src="{{ profile_form.instance.profile_picture.url }}"
+                                         class="w-full h-full object-cover"
+                                         alt="Profile preview">
+                                {% else %}
+                                    <img id="profilePreviewImage"
+                                         class="hidden w-full h-full object-cover"
+                                         alt="Profile preview">
+
+                                    <span id="profilePlaceholder"
+                                          class="text-3xl font-bold text-indigo-700">
+                                        {{ request.user.username|first|upper }}
+                                    </span>
+                                {% endif %}
+
+                            </div>
+
+                            <div class="flex-1">
+                                <label for="{{ profile_form.profile_picture.id_for_label }}"
+                                       class="inline-flex cursor-pointer items-center gap-2 bg-neutral-900 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-neutral-700 transition">
+                                    Upload Photo
+                                </label>
+
+                                <div class="hidden">
+                                    {{ profile_form.profile_picture }}
+                                </div>
+
+                                <p class="text-xs text-neutral-500 mt-3">
+                                    Use a clear photo. Square images work best.
+                                </p>
+
+                                {% for error in profile_form.profile_picture.errors %}
+                                    <p class="text-red-500 text-xs mt-2">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+            <!-- Bio -->
+            <div class="bg-white rounded-2xl border border-neutral-200 shadow-sm mb-6 overflow-hidden">
+
+                <div class="px-6 py-5 border-b border-neutral-100">
+                    <h2 class="text-lg font-bold text-neutral-900">
+                        About You
+                    </h2>
+                    <p class="text-sm text-neutral-500 mt-1">
+                        Introduce yourself to the TypeMaster community.
+                    </p>
+                </div>
+
+                <div class="p-6">
+
+                    <label for="{{ profile_form.bio.id_for_label }}"
+                           class="block text-sm font-semibold text-neutral-700 mb-2">
+                        Bio
+                    </label>
+
+                    {{ profile_form.bio }}
+
+                    {% for error in profile_form.bio.errors %}
+                        <p class="text-red-500 text-xs mt-2">{{ error }}</p>
+                    {% endfor %}
+
+                </div>
+            </div>
+
+
+            <!-- Form Errors -->
+            {% if user_form.non_field_errors or profile_form.non_field_errors %}
+                <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+                    {% for error in user_form.non_field_errors %}
+                        <p class="text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+
+                    {% for error in profile_form.non_field_errors %}
+                        <p class="text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+
+            <!-- Actions -->
+            <div class="flex flex-col-reverse sm:flex-row justify-end gap-3">
+
+                <a href="{% url 'profile' %}"
+                   class="px-7 py-3 rounded-xl border border-neutral-300 bg-white text-neutral-700 text-sm font-semibold text-center hover:bg-neutral-50 transition">
+                    Cancel
+                </a>
+
+                <button type="submit"
+                        class="px-8 py-3 rounded-xl bg-indigo-600 text-white text-sm font-semibold shadow-sm hover:bg-indigo-700 transition">
+                    Save Changes
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
 </div>
+
+
+<!-- Image Preview Script -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const coverInput = document.getElementById(
+        "{{ profile_form.cover_image.id_for_label }}"
+    );
+
+    const coverImage = document.getElementById("coverPreviewImage");
+    const coverPlaceholder = document.getElementById("coverPlaceholder");
+
+    if (coverInput) {
+        coverInput.addEventListener("change", function () {
+            const file = this.files[0];
+
+            if (file) {
+                coverImage.src = URL.createObjectURL(file);
+                coverImage.classList.remove("hidden");
+
+                if (coverPlaceholder) {
+                    coverPlaceholder.classList.add("hidden");
+                }
+            }
+        });
+    }
+
+
+    const profileInput = document.getElementById(
+        "{{ profile_form.profile_picture.id_for_label }}"
+    );
+
+    const profileImage = document.getElementById("profilePreviewImage");
+    const profilePlaceholder = document.getElementById("profilePlaceholder");
+
+    if (profileInput) {
+        profileInput.addEventListener("change", function () {
+            const file = this.files[0];
+
+            if (file) {
+                profileImage.src = URL.createObjectURL(file);
+                profileImage.classList.remove("hidden");
+
+                if (profilePlaceholder) {
+                    profilePlaceholder.classList.add("hidden");
+                }
+            }
+        });
+    }
+
+});
+</script>
+
+<style>
+    #id_username,
+    #id_email,
+    #id_bio {
+        width: 100%;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 12px 14px;
+        background: #fff;
+        color: #171717;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    #id_username:focus,
+    #id_email:focus,
+    #id_bio:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    #id_bio {
+        min-height: 130px;
+        resize: vertical;
+    }
+</style>
 
 {% endblock %}
