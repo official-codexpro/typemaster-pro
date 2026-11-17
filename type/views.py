@@ -967,7 +967,7 @@ def results(request):
         # Keep existing chart_data compatibility.
         chart_data = typing_chart_data
 
-    return render(request, 'index.html', {
+    return render(request, 'base/index.html', {
         'stats': stats,
         'code_summary': code_summary,
         'recent_results': recent_results,
