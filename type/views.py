@@ -8,6 +8,7 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.utils.dateparse import parse_date
+from django.contrib.auth.models import User
 
 from django.views.decorators.csrf import (
     ensure_csrf_cookie,
@@ -599,8 +600,104 @@ def generate_code_passage(language):
 # =========================================================
 
 
-@ensure_csrf_cookie
 def home(request):
+    # Public leaderboard: normal typing results only
+    user_results = (
+        TestResult.objects
+        .filter(difficulty__in=['easy', 'normal', 'hard'])
+        .values('user_id', 'user__username')
+        .annotate(
+            total_tests=Count('id'),
+            average_accuracy=Avg('accuracy'),
+            average_wpm=Avg('wpm'),
+            highest_wpm=Max('wpm'),
+        )
+        .order_by('-highest_wpm', '-average_accuracy')
+    )
+
+    leaderboard = []
+    medal_counts = {
+        'gold': 0,
+        'silver': 0,
+        'bronze': 0,
+    }
+
+    user_ids = [item['user_id'] for item in user_results]
+
+    profiles = {
+        profile.user_id: profile
+        for profile in UserProfile.objects.filter(
+            user_id__in=user_ids
+        )
+    }
+
+    for item in user_results:
+        tests = item['total_tests']
+        accuracy = round(item['average_accuracy'] or 0, 1)
+
+        medal = None
+
+        if tests >= 20 and accuracy >= 97:
+            medal = 'Gold'
+            medal_counts['gold'] += 1
+        elif tests >= 10 and accuracy >= 92:
+            medal = 'Silver'
+            medal_counts['silver'] += 1
+        elif tests >= 5 and accuracy >= 85:
+            medal = 'Bronze'
+            medal_counts['bronze'] += 1
+
+        profile = profiles.get(item['user_id'])
+
+        leaderboard.append({
+            'username': item['user__username'],
+            'total_tests': tests,
+            'average_accuracy': accuracy,
+            'average_wpm': round(item['average_wpm'] or 0),
+            'highest_wpm': item['highest_wpm'] or 0,
+            'medal': medal,
+            'profile_picture': (
+                profile.profile_picture.url
+                if profile and profile.profile_picture
+                else None
+            ),
+        })
+
+    preview_stats = {
+        'speed': 72,
+        'accuracy': 98,
+        'time': 60,
+    }
+
+    if request.user.is_authenticated:
+        personal_stats = TestResult.objects.filter(
+            user=request.user,
+            difficulty__in=['easy', 'normal', 'hard']
+        ).aggregate(
+            speed=Max('wpm'),
+            accuracy=Max('accuracy'),
+            time=Max('duration'),
+        )
+
+        preview_stats = {
+            'speed': personal_stats['speed'] or 72,
+            'accuracy': round(personal_stats['accuracy'] or 98),
+            'time': personal_stats['time'] or 60,
+        }
+
+    return render(request, 'home.html', {
+        'leaderboard': leaderboard[:10],
+        'medal_counts': medal_counts,
+        'total_players': len(user_results),
+        'preview_stats': preview_stats,
+    })
+
+# =========================================================
+# Result
+# =========================================================
+
+@ensure_csrf_cookie
+def results(request):
 
     stats = {
         'total_tests': 0,

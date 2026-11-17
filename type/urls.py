@@ -8,6 +8,7 @@ urlpatterns = [
 
     # Main Pages
     path('', views.home, name='home'),
+    path('results/', views.results, name='results'),
 
     # Authentication
     path('signup/', views.signup, name='signup'),
@@ -26,7 +27,6 @@ urlpatterns = [
         ),
         name='password_reset'
     ),
-
     path(
         'password-reset/done/',
         auth_views.PasswordResetDoneView.as_view(
@@ -34,7 +34,6 @@ urlpatterns = [
         ),
         name='password_reset_done'
     ),
-
     path(
         'reset/<uidb64>/<token>/',
         auth_views.PasswordResetConfirmView.as_view(
@@ -42,7 +41,6 @@ urlpatterns = [
         ),
         name='password_reset_confirm'
     ),
-
     path(
         'reset/done/',
         auth_views.PasswordResetCompleteView.as_view(
@@ -60,7 +58,6 @@ urlpatterns = [
         ),
         name='password_change'
     ),
-
     path(
         'password-change/done/',
         auth_views.PasswordChangeDoneView.as_view(
@@ -75,11 +72,9 @@ urlpatterns = [
         views.generate_passage,
         name='generate_passage'
     ),
-
     path(
-    'api/save-result/',
-    views.save_test_result,
-    name='save_test_result'
+        'api/save-result/',
+        views.save_test_result,
+        name='save_test_result'
     ),
-
 ]
