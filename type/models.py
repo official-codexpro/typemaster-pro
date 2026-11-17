@@ -114,3 +114,51 @@ class TestResult(models.Model):
             )
 
         return f'{self.user.username} - {self.wpm} WPM'
+
+
+class SpaceShooterResult(models.Model):
+
+    DIFFICULTY_CHOICES = [
+        ('easy', 'Easy'),
+        ('normal', 'Normal'),
+        ('hard', 'Hard'),
+        ('extreme', 'Extreme'),
+    ]
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='space_shooter_results'
+    )
+
+    difficulty = models.CharField(
+        max_length=10,
+        choices=DIFFICULTY_CHOICES
+    )
+
+    score = models.PositiveIntegerField(default=0)
+    wpm = models.PositiveIntegerField(default=0)
+    accuracy = models.FloatField(default=0)
+
+    words_destroyed = models.PositiveIntegerField(default=0)
+    missed_words = models.PositiveIntegerField(default=0)
+    mistakes = models.PositiveIntegerField(default=0)
+    shots_fired = models.PositiveIntegerField(default=0)
+
+    highest_wave = models.PositiveIntegerField(default=1)
+    duration = models.PositiveIntegerField(default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', '-created_at']),
+            models.Index(fields=['user', 'difficulty']),
+        ]
+
+    def __str__(self):
+        return (
+            f'{self.user.username} - '
+            f'{self.difficulty} - {self.score}'
+        )

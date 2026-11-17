@@ -1,0 +1,337 @@
+
+#spaceShooterPage {
+    color: var(--text-primary);
+    background: var(--bg-primary);
+    padding-bottom: 40px;
+}
+
+#spaceShooterPage #game {
+    position: relative;
+    width: 100%;
+    height: min(760px, 85vh);
+    min-height: 540px;
+    overflow: hidden;
+    isolation: isolate;
+    background: radial-gradient(ellipse at 50% 110%, #172d61, #080f27 48%, #030611 82%);
+    color: #eef7ff;
+    font-family: Inter, system-ui, sans-serif;
+}
+
+#spaceShooterPage #cv {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#spaceShooterPage .top {
+    position: absolute;
+    z-index: 2;
+    top: 18px;
+    left: 22px;
+    right: 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+#spaceShooterPage .brand {
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: .16em;
+    color: #bcecff;
+}
+
+#spaceShooterPage .hud {
+    display: flex;
+    gap: 8px;
+}
+
+#spaceShooterPage .stat {
+    min-width: 82px;
+    padding: 8px 12px;
+    border: 1px solid #6bbdff33;
+    border-radius: 11px;
+    background: #07132acc;
+}
+
+#spaceShooterPage .stat small {
+    display: block;
+    color: #8098bb;
+    font-size: 9px;
+    letter-spacing: .15em;
+}
+
+#spaceShooterPage .stat strong {
+    font-size: 17px;
+}
+
+#spaceShooterPage .score { color: #63e8ff; }
+#spaceShooterPage .wave { color: #ffd166; }
+#spaceShooterPage .combo { color: #ff83bf; }
+
+#spaceShooterPage .actions {
+    position: absolute;
+    z-index: 3;
+    right: 22px;
+    top: 82px;
+    display: flex;
+    gap: 7px;
+}
+
+#spaceShooterPage button {
+    cursor: pointer;
+    color: #dcecff;
+    background: #0b1835;
+    border: 1px solid #6bbdff44;
+    border-radius: 8px;
+    padding: 8px 11px;
+    font-weight: 800;
+    font-size: 10px;
+    letter-spacing: .08em;
+}
+
+#spaceShooterPage button:hover {
+    border-color: #63e8ff;
+    background: #14284c;
+}
+
+#spaceShooterPage .bottom {
+    position: absolute;
+    z-index: 2;
+    bottom: 17px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(600px, calc(100% - 28px));
+    text-align: center;
+    pointer-events: none;
+}
+
+#spaceShooterPage .label,
+#spaceShooterPage .eyebrow {
+    font-size: 10px;
+    color: #7892bb;
+    letter-spacing: .22em;
+    font-weight: 900;
+    margin-bottom: 8px;
+}
+
+#spaceShooterPage .target {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    padding: 8px 18px;
+    border: 1px solid #63e8ff44;
+    border-radius: 11px;
+    background: #06132ddd;
+    font: 850 22px ui-monospace, monospace;
+    letter-spacing: .1em;
+}
+
+#spaceShooterPage .done {
+    color: #63e8ff;
+    text-shadow: 0 0 12px #63e8ff;
+}
+
+#spaceShooterPage .next {
+    color: white;
+    text-shadow: 0 0 12px white;
+}
+
+#spaceShooterPage .rest,
+#spaceShooterPage .hint {
+    color: #7892bb;
+}
+
+#spaceShooterPage .hint {
+    font-size: 11px;
+    margin-top: 8px;
+}
+
+#spaceShooterPage .bar {
+    height: 3px;
+    max-width: 260px;
+    margin: 10px auto;
+    background: #1a2948;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+#spaceShooterPage .bar span {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, #5577ff, #63e8ff);
+    box-shadow: 0 0 12px #63e8ff;
+}
+
+#spaceShooterPage .overlay {
+    position: absolute;
+    z-index: 5;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 18px;
+    background: #02051099;
+    backdrop-filter: blur(7px);
+    transition: opacity .25s;
+}
+
+#spaceShooterPage .overlay.hide {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#spaceShooterPage .modal {
+    width: min(430px, 100%);
+    text-align: center;
+    padding: 34px 28px 28px;
+    border: 1px solid #63e8ff55;
+    border-radius: 20px;
+    background: linear-gradient(145deg, #102344f5, #060d21f7);
+    box-shadow: 0 25px 90px #0009, 0 0 50px #387cff18;
+}
+
+#spaceShooterPage .modal h1 {
+    font-size: clamp(32px, 7vw, 45px);
+    line-height: 1;
+    margin: 14px 0;
+    color: #f3fbff;
+    letter-spacing: -.04em;
+}
+
+#spaceShooterPage .modal p {
+    font-size: 13px;
+    line-height: 1.7;
+    color: #9bb0d2;
+    margin: 14px auto 22px;
+    max-width: 330px;
+}
+
+#spaceShooterPage .primary {
+    padding: 13px 24px;
+    border: 0;
+    background: linear-gradient(100deg, #63e8ff, #8db4ff);
+    color: #06101e;
+    font-weight: 950;
+}
+
+#spaceShooterPage .result {
+    font-size: 42px;
+    font-weight: 950;
+    color: #63e8ff;
+    margin: 10px;
+}
+
+/* Performance section */
+
+#spaceShooterPage .space-performance {
+    max-width: 1200px;
+    margin: 35px auto 0;
+    padding: 0 22px;
+}
+
+#spaceShooterPage .space-performance h2 {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+}
+
+#spaceShooterPage .performance-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+}
+
+#spaceShooterPage .performance-stats .dashboard-card {
+    padding: 22px;
+}
+
+#spaceShooterPage .performance-stats small {
+    color: var(--text-secondary);
+}
+
+#spaceShooterPage .performance-stats h3 {
+    margin-top: 10px;
+    font-size: 27px;
+    font-weight: 800;
+    color: var(--accent-text);
+}
+
+@media (max-width: 700px) {
+    #spaceShooterPage #game {
+        height: 75vh;
+        min-height: 520px;
+    }
+
+    #spaceShooterPage .top {
+        top: 12px;
+        left: 10px;
+        right: 10px;
+        align-items: flex-start;
+    }
+
+    #spaceShooterPage .brand {
+        font-size: 8px;
+        margin-top: 10px;
+    }
+
+    #spaceShooterPage .hud { gap: 4px; }
+
+    #spaceShooterPage .stat {
+        min-width: 55px;
+        padding: 7px;
+    }
+
+    #spaceShooterPage .stat small { font-size: 7px; }
+    #spaceShooterPage .stat strong { font-size: 14px; }
+
+    #spaceShooterPage .actions {
+        top: 67px;
+        right: 10px;
+    }
+
+    #spaceShooterPage .actions button {
+        padding: 6px 8px;
+        font-size: 9px;
+    }
+
+    #spaceShooterPage .bottom { bottom: 13px; }
+    #spaceShooterPage .target { font-size: 18px; }
+
+    #spaceShooterPage .performance-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    #spaceShooterPage .performance-stats .dashboard-card {
+        padding: 16px;
+    }
+}
+
+
+#spaceShooterPage .difficulty-selector {
+    margin: 18px 0;
+}
+
+#spaceShooterPage .difficulty-selector label {
+    display: block;
+    color: #9bb0d2;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .15em;
+    margin-bottom: 8px;
+}
+
+#spaceShooterPage .difficulty-selector select {
+    width: 180px;
+    padding: 10px 14px;
+    border: 1px solid #63e8ff55;
+    border-radius: 8px;
+    background: #0b1835;
+    color: #fff;
+    outline: none;
+    cursor: pointer;
+}

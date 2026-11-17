@@ -1,7 +1,6 @@
 
 from django.contrib import admin
-from .models import UserProfile, TestResult
-
+from .models import UserProfile, TestResult, SpaceShooterResult
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
@@ -19,6 +18,26 @@ class TestResultAdmin(admin.ModelAdmin):
         'mistakes',
         'duration',
         'difficulty',
+        'created_at',
+    )
+
+    list_filter = ('difficulty', 'created_at')
+    search_fields = ('user__username', 'user__email')
+    readonly_fields = ('created_at',)
+    ordering = ('-created_at',)
+
+
+@admin.register(SpaceShooterResult)
+class SpaceShooterResultAdmin(admin.ModelAdmin):
+
+    list_display = (
+        'user',
+        'score',
+        'difficulty',
+        'wpm',
+        'accuracy',
+        'words_destroyed',
+        'highest_wave',
         'created_at',
     )
 

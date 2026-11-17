@@ -19,6 +19,7 @@ urlpatterns = [
     path('profile/', views.user_profile, name='profile'),
     path('profile/edit/', views.edit_profile, name='edit_profile'),
     path('space-shooter/',views.space_shooter,name='space_shooter'),
+    path('space-shooter/save/',views.save_space_shooter_result,name='save_space_shooter_result'),
 
     # Password Reset
     path(

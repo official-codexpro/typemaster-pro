@@ -1,47 +1,122 @@
-<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Space Typing Shooter</title>
-<style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#030611;color:#eef7ff;font-family:Inter,system-ui,sans-serif}#game{position:relative;width:100%;height:100%;background:radial-gradient(ellipse at 50% 110%,#172d61,#080f27 48%,#030611 82%)}canvas{position:absolute;inset:0;width:100%;height:100%}.top{position:absolute;z-index:2;top:18px;left:22px;right:22px;display:flex;justify-content:space-between;align-items:center;gap:12px}.brand{font-size:11px;font-weight:900;letter-spacing:.22em;color:#bcecff}.brand b{color:#63e8ff}.hud{display:flex;gap:8px}.stat{min-width:82px;padding:8px 12px;border:1px solid #6bbdff33;border-radius:11px;background:#07132acc}.stat small{display:block;color:#8098bb;font-size:9px;letter-spacing:.15em}.stat strong{font-size:17px}.score{color:#63e8ff}.wave{color:#ffd166}.combo{color:#ff83bf}.actions{position:absolute;z-index:3;right:22px;top:82px;display:flex;gap:7px}button{cursor:pointer;color:#dcecff;background:#0b1835;border:1px solid #6bbdff44;border-radius:8px;padding:8px 11px;font-weight:800;font-size:10px;letter-spacing:.08em}button:hover{border-color:#63e8ff;background:#14284c}.bottom{position:absolute;z-index:2;bottom:17px;left:50%;transform:translateX(-50%);width:min(600px,calc(100% - 28px));text-align:center;pointer-events:none}.label{font-size:10px;color:#7892bb;letter-spacing:.22em;font-weight:900;margin-bottom:8px}.target{display:inline-flex;min-height:42px;align-items:center;padding:8px 18px;border:1px solid #63e8ff44;border-radius:11px;background:#06132ddd;font:850 22px ui-monospace,monospace;letter-spacing:.1em}.done{color:#63e8ff;text-shadow:0 0 12px #63e8ff}.next{color:white;text-shadow:0 0 12px white}.rest{color:#7185a8}.hint{font-size:11px;color:#7185a8;margin-top:8px}.hint kbd{border:1px solid #49628a;border-radius:4px;padding:2px 5px;color:#d6f2ff}.bar{height:3px;max-width:260px;margin:10px auto;background:#1a2948;border-radius:8px;overflow:hidden}.bar span{display:block;height:100%;width:0;background:linear-gradient(90deg,#5577ff,#63e8ff);box-shadow:0 0 12px #63e8ff}.overlay{position:absolute;z-index:5;inset:0;display:grid;place-items:center;padding:18px;background:#02051099;backdrop-filter:blur(7px);transition:opacity .25s}.overlay.hide{opacity:0;pointer-events:none}.modal{width:min(430px,100%);text-align:center;padding:34px 28px 28px;border:1px solid #63e8ff55;border-radius:20px;background:linear-gradient(145deg,#102344f5,#060d21f7);box-shadow:0 25px 90px #0009,0 0 50px #387cff18}.eyebrow{font-size:10px;color:#63e8ff;letter-spacing:.25em;font-weight:900}h1{font-size:clamp(32px,7vw,45px);line-height:1;margin:14px 0;color:#f3fbff;letter-spacing:-.04em}h1 span{color:#63e8ff}.modal p{font-size:13px;line-height:1.7;color:#9bb0d2;margin:14px auto 22px;max-width:330px}.primary{padding:13px 24px;border:0;background:linear-gradient(100deg,#63e8ff,#8db4ff);color:#06101e;font-weight:950}.tips{font-size:10px;color:#7892bb;margin-top:18px}.result{font-size:42px;font-weight:950;color:#63e8ff;margin:10px}.mobile{display:none}
-@media(max-width:650px){.top{top:12px;left:10px;right:10px;align-items:flex-start}.brand{font-size:8px;margin-top:10px}.hud{gap:4px}.stat{min-width:55px;padding:7px}.stat small{font-size:7px}.stat strong{font-size:14px}.actions{top:67px;right:10px}.actions button{padding:6px 8px;font-size:9px}.bottom{bottom:13px}.target{font-size:18px}.mobile{display:block;font-size:10px;color:#7892bb;margin-top:6px}}
-</style></head>
-<body><div id="game"><canvas id="cv"></canvas>
-<div class="top"><div class="brand"><b>✦</b> TYPEMASTER // SPACE DEFENSE</div><div class="hud"><div class="stat"><small>SCORE</small><strong class="score" id="score">00000</strong></div><div class="stat"><small>WAVE</small><strong class="wave" id="wave">01</strong></div><div class="stat"><small>COMBO</small><strong class="combo" id="combo">×0</strong></div></div></div>
-<div class="actions"><button id="pause">Ⅱ PAUSE</button><button id="sound">♫ SOUND ON</button></div>
-<div class="bottom"><div class="label">TARGET LOCKED // TYPE TO FIRE</div><div class="target" id="target"><span class="rest">WAITING FOR TARGET</span></div><div class="hint">Type each character to fire · <kbd>ESC</kbd> pause</div><div class="mobile">Use your keyboard to defend the ship</div><div class="bar"><span id="progress"></span></div></div>
-<div class="overlay" id="start"><div class="modal"><div class="eyebrow">✦ DEEP SPACE TRAINING ✦</div><h1>SPACE<br><span>TYPING</span> SHOOTER</h1><p>Incoming words are falling toward your ship. Type each character to fire a laser. Destroy every word before it reaches the planet line.</p><button class="primary" id="launch">LAUNCH MISSION</button><div class="tips">TYPE TO FIRE　✦　DESTROY WORDS　✦　DEFEND THE SHIP</div></div></div>
-<div class="overlay hide" id="paused"><div class="modal"><div class="eyebrow">MISSION ON HOLD</div><h1>PAUSED<span>.</span></h1><p>Your ship is safe. Resume when you're ready.</p><button class="primary" id="resume">RESUME MISSION</button></div></div>
-<div class="overlay hide" id="over"><div class="modal"><div class="eyebrow">SIGNAL LOST // MISSION FAILED</div><h1>GAME <span>OVER</span></h1><div class="result" id="final">0</div><div class="eyebrow">FINAL SCORE</div><p id="stats">Mission complete.</p><button class="primary" id="retry">RETRY MISSION</button></div></div>
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}Space Shooter | TypeMaster Pro{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'games/space_shooter/css/game.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div id="spaceShooterPage">
+
+    <section id="game">
+        <canvas id="cv"></canvas>
+
+        <div class="top">
+            <div class="brand">✦ TYPEMASTER // SPACE DEFENSE</div>
+
+            <div class="hud">
+                <div class="stat">
+                    <small>SCORE</small>
+                    <strong class="score" id="score">00000</strong>
+                </div>
+
+                <div class="stat">
+                    <small>WAVE</small>
+                    <strong class="wave" id="wave">01</strong>
+                </div>
+
+                <div class="stat">
+                    <small>COMBO</small>
+                    <strong class="combo" id="combo">×0</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button id="pause">Ⅱ PAUSE</button>
+            <button id="sound">♫ SOUND ON</button>
+        </div>
+
+        <div class="bottom">
+            <div class="label">TARGET LOCKED // TYPE TO FIRE</div>
+            <div class="target" id="target">
+                <span class="rest">WAITING FOR TARGET</span>
+            </div>
+            <div class="hint">Type each character to fire · ESC pause</div>
+            <div class="bar"><span id="progress"></span></div>
+        </div>
+
+        <div class="overlay" id="start">
+            <div class="modal">
+                <div class="eyebrow">✦ DEEP SPACE TRAINING ✦</div>
+                <h1>SPACE<br> TYPING SHOOTER</h1>
+                <p>Type incoming words to fire lasers and defend your ship.</p>
+                <div class="difficulty-selector">
+    <label for="difficulty">SELECT DIFFICULTY</label>
+    <select id="difficulty">
+        <option value="easy">Easy</option>
+        <option value="normal" selected>Normal</option>
+        <option value="hard">Hard</option>
+        <option value="extreme">Extreme</option>
+    </select>
 </div>
-<script>
-(()=>{
-const canvas=document.querySelector("#cv"),c=canvas.getContext("2d"),$=id=>document.getElementById(id);
-let W,H,D=1,stars=[],words=[],bullets=[],sparks=[],texts=[],ship={x:0,y:0,recoil:0,flame:0},score=0,combo=0,wave=1,shots=0,kills=0,id=0,targetId=null,typed="",spawn=0,spawnGap=2.5,last=0,active=false,paused=false,ended=false,sound=true,audio=null,raf=0;
-const bank="code space laser orbit pixel focus speed galaxy rocket typing planet system binary matrix cosmic vector python javascript keyboard function gravity nebula asteroid mission developer algorithm interface database terminal velocity quantum firewall encryption protocol debugging framework technology spaceship".split(" ");
-function resize(){W=innerWidth;H=innerHeight;D=Math.min(devicePixelRatio||1,2);canvas.width=W*D;canvas.height=H*D;c.setTransform(D,0,0,D,0,0);ship.x=W/2;ship.y=H-105;stars=Array.from({length:Math.max(70,Math.floor(W*H/1800))},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.5+.25,v:8+Math.random()*24,a:.2+Math.random()*.7,p:Math.random()*8}))}
-addEventListener("resize",resize);resize();
-function tone(f=600,d=.07,type="sine",vol=.025){if(!sound)return;try{audio ||= new(window.AudioContext||window.webkitAudioContext)();if(audio.state==="suspended")audio.resume();let o=audio.createOscillator(),g=audio.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(vol,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+d);o.connect(g);g.connect(audio.destination);o.start();o.stop(audio.currentTime+d)}catch(e){}}
-const rand=(a,b)=>a+Math.random()*(b-a),clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-function burst(x,y,color,n=16){for(let i=0;i<n;i++){let a=rand(0,Math.PI*2),s=rand(35,190);sparks.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:rand(.3,.8),max:.8,size:rand(1,3),color})}}
-function say(x,y,t,color="#63e8ff"){texts.push({x,y,t,color,life:.8})}
-function target(){return words.find(w=>w.id===targetId)}
-function select(w){targetId=w?.id??null;typed="";drawTarget()}
-function drawTarget(){let w=target();$("target").innerHTML=w?w.text.split("").map((ch,i)=>`<span class="${i<typed.length?"done":i===typed.length?"next":"rest"}">${ch}</span>`).join():'<span class="rest">SCANNING FOR TARGETS...</span>';$("progress").style.width=w?(typed.length/w.text.length*100)+"%":"0%"}
-function spawnWord(){let used=new Set(words.map(w=>w.text)),pool=bank.filter(x=>!used.has(x)),text=(pool.length?pool:bank)[Math.floor(Math.random()*(pool.length?pool.length:bank.length))],margin=Math.min(90,W*.13);let w={id:++id,text,x:rand(margin,Math.max(margin+5,W-margin)),y:-35,speed:25+rand(0,13)+wave*2.7,phase:rand(0,7),drift:rand(-8,8),flash:0,boom:0};words.push(w);if(targetId===null)select(w)}
-function fire(w,ch){bullets.push({x:ship.x,y:ship.y-25,sx:ship.x,sy:ship.y-25,tx:w.x,ty:w.y,t:0,d:Math.max(.12,Math.hypot(w.x-ship.x,w.y-ship.y)/1000),id:w.id});ship.recoil=1;shots++;tone(500+Math.random()*180,.05,"triangle")}
-function end(){if(ended)return;ended=true;active=false;$("final").textContent=score.toLocaleString();$("stats").textContent=`${kills} words destroyed · ${shots} laser shots fired`;let best=+localStorage.spaceShooterBest||0;if(score>best)localStorage.spaceShooterBest=score;$("over").classList.remove("hide");tone(100,.5,"sawtooth",.04)}
-function reset(){score=combo=shots=kills=spawn=id=0;wave=1;words=[];bullets=[];sparks=[];texts=[];targetId=null;typed="";spawnGap=2.5;ended=paused=false;active=true;ship.x=W/2;ship.y=H-105;$("score").textContent="00000";$("combo").textContent="×0";$("wave").textContent="01";$("over").classList.add("hide");$("paused").classList.add("hide");$("pause").textContent="Ⅱ PAUSE";spawnWord();last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop)}
-function pauseGame(){if(!active||ended)return;paused=!paused;$("paused").classList.toggle("hide",!paused);$("pause").textContent=paused?"▶ RESUME":"Ⅱ PAUSE";if(!paused){last=performance.now();raf=requestAnimationFrame(loop)}}
-addEventListener("keydown",e=>{if(e.key==="Escape"){pauseGame();return}if(!active||paused||ended||e.ctrlKey||e.metaKey||e.altKey||e.key.length!==1||!/^[a-z0-9]$/i.test(e.key))return;e.preventDefault();let w=target();if(!w){select(words.slice().sort((a,b)=>a.y-b.y)[0]);w=target()}if(!w)return;if(e.key.toLowerCase()===w.text[typed.length]){fire(w,w.text[typed.length]);typed+=w.text[typed.length];w.flash=.13;drawTarget();if(typed.length===w.text.length){score+=w.text.length*12+(combo+1)*3;combo++;kills++;$("score").textContent=String(score).padStart(5,"0");$("combo").textContent="×"+combo;say(w.x,w.y-18,"+"+(w.text.length*12+combo*3));w.boom=.001;burst(w.x,w.y,"#63e8ff",26);tone(850,.14);select(words.filter(a=>a.id!==w.id).sort((a,b)=>a.y-b.y)[0])}}else{combo=0;$("combo").textContent="×0";ship.hit=.2;say(ship.x+rand(-25,25),ship.y-65,"MISS","#ff6484");tone(130,.08,"sawtooth")}} ,{passive:false});
-$("launch").onclick=()=>{$("start").classList.add("hide");reset()};$("retry").onclick=reset;$("resume").onclick=pauseGame;$("pause").onclick=pauseGame;$("sound").onclick=()=>{sound=!sound;$("sound").textContent=sound?"♫ SOUND ON":"♫ SOUND OFF";if(sound)tone(660)};
-function rr(x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
-function background(t){c.clearRect(0,0,W,H);let g=c.createRadialGradient(W/2,H*.85,0,W/2,H*.85,Math.max(W,H)*.8);g.addColorStop(0,"#172e60");g.addColorStop(.5,"#09142f");g.addColorStop(1,"#030611");c.fillStyle=g;c.fillRect(0,0,W,H);for(let s of stars){c.globalAlpha=s.a*(.65+.35*Math.sin(t*.001+s.p));c.fillStyle="#dff7ff";c.beginPath();c.arc(s.x,s.y,s.r,0,7);c.fill();if(active&&!paused){s.y+=s.v*.016;if(s.y>H){s.y=0;s.x=Math.random()*W}}}c.globalAlpha=1;let y=H-59;c.strokeStyle="#4a8fff55";c.beginPath();c.moveTo(0,y);c.lineTo(W,y);c.stroke();let gl=c.createLinearGradient(0,y-20,0,y+20);gl.addColorStop(0,"transparent");gl.addColorStop(.5,"#477cff20");gl.addColorStop(1,"transparent");c.fillStyle=gl;c.fillRect(0,y-20,W,40)}
-function drawShip(t){let x=ship.x,y=ship.y+ship.recoil*5;c.save();c.translate(x,y);let flame=23+Math.sin(ship.flame)*7,g=c.createLinearGradient(0,12,0,flame+22);g.addColorStop(0,"#e8ffff");g.addColorStop(.3,"#63e8ff");g.addColorStop(1,"transparent");c.fillStyle=g;c.beginPath();c.moveTo(-7,12);c.quadraticCurveTo(-3,flame,0,flame+18);c.quadraticCurveTo(4,flame,7,12);c.fill();let wing=c.createLinearGradient(-28,0,28,0);wing.addColorStop(0,"#263e83");wing.addColorStop(.5,"#c1f4ff");wing.addColorStop(1,"#263e83");c.fillStyle=wing;c.beginPath();c.moveTo(0,-29);c.lineTo(29,17);c.lineTo(11,12);c.lineTo(0,20);c.lineTo(-11,12);c.lineTo(-29,17);c.closePath();c.fill();c.strokeStyle="#8beeff";c.stroke();let cg=c.createLinearGradient(0,-25,0,10);cg.addColorStop(0,"white");cg.addColorStop(.4,"#63e8ff");cg.addColorStop(1,"#3459a8");c.fillStyle=cg;c.beginPath();c.moveTo(0,-27);c.quadraticCurveTo(12,-5,6,9);c.lineTo(-6,9);c.quadraticCurveTo(-12,-5,0,-27);c.fill();c.shadowColor="#63e8ff";c.shadowBlur=20;c.fillStyle="white";c.beginPath();c.arc(0,3,3,0,7);c.fill();c.restore();if(ship.hit>0){c.strokeStyle="#ff6484";c.globalAlpha=ship.hit*3;c.beginPath();c.arc(x,y,38,0,7);c.stroke();c.globalAlpha=1}}
-function drawWords(t){for(let w of words){if(w.boom)continue;c.save();c.translate(w.x,w.y);c.scale(1+Math.sin(t*.004+w.phase)*.025,1);c.font="800 17px ui-monospace,monospace";let width=c.measureText(w.text).width,active=w.id===targetId; c.shadowColor=active?"#63e8ff":"#5577ff";c.shadowBlur=active?18:7;c.fillStyle=active?"#0d2d4b":"#08122b";rr(-width/2-10,-15,width+20,30,7);c.fill();c.shadowBlur=0;c.strokeStyle=w.flash?"white":active?"#63e8ff":"#526b9b";c.lineWidth=active?1.4:1;c.stroke();c.textBaseline="middle";if(active){let pre=w.text.slice(0,typed.length),rest=w.text.slice(typed.length),sx=-width/2;c.textAlign="left";c.fillStyle="#63e8ff";c.fillText(pre,sx,0);c.fillStyle="#f3fbff";c.fillText(rest,sx+c.measureText(pre).width,0)}else{c.textAlign="center";c.fillStyle="#c2d5f4";c.fillText(w.text,0,0)}c.restore()}}
-function drawEffects(){for(let b of bullets){let q=clamp(b.t,0,1),e=1-Math.pow(1-q,3),x=b.sx+(b.tx-b.sx)*e,y=b.sy+(b.ty-b.sy)*e;c.save();c.strokeStyle="#9df5ff";c.lineWidth=3;c.shadowColor="#63e8ff";c.shadowBlur=18;c.beginPath();c.moveTo(x,y+13);c.lineTo(x,y-10);c.stroke();c.restore()}for(let p of sparks){c.globalAlpha=clamp(p.life/p.max,0,1);c.fillStyle=p.color;c.shadowColor=p.color;c.shadowBlur=9;c.beginPath();c.arc(p.x,p.y,p.size,0,7);c.fill()}c.globalAlpha=1;c.shadowBlur=0;for(let f of texts){c.globalAlpha=clamp(f.life/.8,0,1);c.fillStyle=f.color;c.font="900 13px system-ui";c.textAlign="center";c.fillText(f.t,f.x,f.y)}c.globalAlpha=1}
-function update(dt){spawn+=dt;if(spawn>spawnGap){spawn=0;spawnWord()}let nw=1+Math.floor(kills/8);if(nw!==wave){wave=nw;$("wave").textContent=String(wave).padStart(2,"0");say(W/2,115,"WAVE "+wave,"#ffd166")}spawnGap=Math.max(1.05,2.55-wave*.13);ship.flame+=dt*12;ship.recoil=Math.max(0,ship.recoil-dt*7);ship.hit=Math.max(0,ship.hit-dt*5);for(let i=words.length-1;i>=0;i--){let w=words[i];w.phase+=dt*2;if(w.boom){w.boom+=dt;if(w.boom>.2)words.splice(i,1);continue}w.y+=w.speed*dt;w.x+=Math.sin(w.phase)*w.drift*dt;w.flash=Math.max(0,w.flash-dt);if(w.y>H-76){burst(w.x,w.y,"#ff557c",30);end();return}}for(let i=bullets.length-1;i>=0;i--){let b=bullets[i];b.t+=dt/b.d;if(b.t>=1){let w=words.find(x=>x.id===b.id);if(w)w.flash=.1;burst(b.tx,b.ty,"#63e8ff",4);bullets.splice(i,1)}}for(let i=sparks.length-1;i>=0;i--){let p=sparks[i];p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.92;p.vy*=.92;p.vy+=30*dt;if(p.life<=0)sparks.splice(i,1)}for(let i=texts.length-1;i>=0;i--){let f=texts[i];f.life-=dt;f.y-=25*dt;if(f.life<=0)texts.splice(i,1)}}
-function render(t){background(t);drawWords(t);drawEffects();drawShip(t)}
-function loop(t){if(!active||paused||ended)return;let dt=Math.min((t-last)/1000,.035);last=t;update(dt);render(t);if(active&&!paused&&!ended)raf=requestAnimationFrame(loop)}
-function idle(t){if(active)return;render(t);raf=requestAnimationFrame(idle)}
-render(0);raf=requestAnimationFrame(idle);
-})();
-</script></body></html>
+                <button class="primary" id="launch">LAUNCH MISSION</button>
+            </div>
+        </div>
+
+        <div class="overlay hide" id="paused">
+            <div class="modal">
+                <h1>PAUSED.</h1>
+                <button class="primary" id="resume">RESUME MISSION</button>
+            </div>
+        </div>
+
+        <div class="overlay hide" id="over">
+            <div class="modal">
+                <h1>GAME OVER</h1>
+                <div class="result" id="final">0</div>
+                <div class="eyebrow">FINAL SCORE</div>
+                <p id="stats">Mission complete.</p>
+                <button class="primary" id="retry">RETRY MISSION</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="space-performance">
+        <h2>Your Space Shooter Performance</h2>
+
+        <div class="performance-stats">
+            <div class="dashboard-card">
+                <small>Total Games</small>
+                <h3>{{ stats.total_games }}</h3>
+            </div>
+
+            <div class="dashboard-card">
+                <small>Best Score</small>
+                <h3>{{ stats.best_score }}</h3>
+            </div>
+
+            <div class="dashboard-card">
+                <small>Average WPM</small>
+                <h3>{{ stats.average_wpm }}</h3>
+            </div>
+
+            <div class="dashboard-card">
+                <small>Average Accuracy</small>
+                <h3>{{ stats.average_accuracy }}%</h3>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+{{ chart_data|json_script:"space-chart-data" }}
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'games/space_shooter/js/game.js' %}"></script>
+{% endblock %}
