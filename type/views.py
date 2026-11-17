@@ -951,6 +951,7 @@ def user_logout(request):
 # PROFILE
 # =========================================================
 
+
 @login_required
 def user_profile(request):
 
@@ -958,8 +959,44 @@ def user_profile(request):
         user=request.user
     )
 
+    results = TestResult.objects.filter(user=request.user)
+
+    summary = results.aggregate(
+        total_tests=Count('id'),
+        best_wpm=Max('wpm'),
+        best_accuracy=Max('accuracy'),
+        average_wpm=Avg('wpm'),
+        average_accuracy=Avg('accuracy'),
+        total_characters=Sum('correct_characters'),
+        total_mistakes=Sum('mistakes'),
+    )
+
+    code_results = results.filter(difficulty='code')
+    typing_results = results.exclude(difficulty='code')
+
+    best_result = results.order_by(
+        '-wpm',
+        '-created_at'
+    ).first()
+
+    profile_stats = {
+        'total_tests': summary['total_tests'] or 0,
+        'best_wpm': summary['best_wpm'] or 0,
+        'best_accuracy': round(summary['best_accuracy'] or 0, 1),
+        'average_wpm': round(summary['average_wpm'] or 0),
+        'average_accuracy': round(
+            summary['average_accuracy'] or 0, 1
+        ),
+        'total_characters': summary['total_characters'] or 0,
+        'total_mistakes': summary['total_mistakes'] or 0,
+        'typing_tests': typing_results.count(),
+        'code_tests': code_results.count(),
+    }
+
     return render(request, 'profile/profile.html', {
-        'profile': profile
+        'profile': profile,
+        'profile_stats': profile_stats,
+        'best_result': best_result,
     })
 
 
