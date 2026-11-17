@@ -1302,3 +1302,11 @@ def generate_passage(request):
         'success': False,
         'message': 'Invalid difficulty selected.'
     }, status=400)
+
+
+# =========================================================
+# SPACE TYPING SHOOTER
+# =========================================================
+
+def space_shooter(request):
+    return render(request, 'games/space_shooter/game.html')
