@@ -1,0 +1,73 @@
+
+{% extends "base.html" %}
+
+{% block title %}Login | TypeMaster Pro{% endblock %}
+
+{% block content %}
+
+<div class="min-h-screen flex items-center justify-center px-5 py-12 bg-neutral-50">
+
+    <div class="w-full max-w-md bg-white border border-neutral-200 rounded-2xl p-8 shadow-sm">
+
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-extrabold">Welcome Back</h1>
+            <p class="text-sm text-neutral-500 mt-2">
+                Login to continue your typing journey.
+            </p>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="bg-red-50 text-red-600 text-sm p-3 rounded-lg mb-5">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="space-y-5">
+
+                {% for field in form %}
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">
+                            {{ field.label }}
+                        </label>
+
+                        {{ field }}
+
+                        {% if field.errors %}
+                            <p class="text-red-500 text-xs mt-1">
+                                {{ field.errors }}
+                            </p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+            <div class="text-right mt-3">
+                <a href="{% url 'password_reset' %}"
+                   class="text-sm text-purple-600 hover:underline">
+                    Forgot Password?
+                </a>
+            </div>
+
+            <button type="submit"
+                class="w-full mt-7 bg-neutral-900 hover:bg-neutral-700 text-white py-3 rounded-xl font-semibold transition">
+                Login
+            </button>
+
+        </form>
+
+        <p class="text-center text-sm text-neutral-500 mt-6">
+            Don't have an account?
+            <a href="{% url 'signup' %}" class="text-purple-600 font-semibold">
+                Sign up
+            </a>
+        </p>
+
+    </div>
+
+</div>
+
+{% endblock %}

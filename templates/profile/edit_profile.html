@@ -1,0 +1,83 @@
+
+{% extends "base.html" %}
+
+{% block title %}Edit Profile | TypeMaster Pro{% endblock %}
+
+{% block content %}
+
+<div class="min-h-screen bg-neutral-50 px-5 py-12">
+
+    <div class="max-w-2xl mx-auto">
+
+        <div class="bg-white border border-neutral-200 rounded-2xl p-8 shadow-sm">
+
+            <h1 class="text-2xl font-bold mb-2">Edit Profile</h1>
+
+            <p class="text-sm text-neutral-500 mb-8">
+                Update your personal information.
+            </p>
+
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <h2 class="font-semibold mb-4">Account Information</h2>
+
+                {% for field in user_form %}
+                    <div class="mb-5">
+                        <label class="block text-sm font-semibold mb-2">
+                            {{ field.label }}
+                        </label>
+
+                        {{ field }}
+
+                        {% for error in field.errors %}
+                            <p class="text-red-500 text-xs mt-1">
+                                {{ error }}
+                            </p>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+
+                <div class="border-t border-neutral-200 my-7"></div>
+
+                <h2 class="font-semibold mb-4">Profile Information</h2>
+
+                {% for field in profile_form %}
+                    <div class="mb-5">
+                        <label class="block text-sm font-semibold mb-2">
+                            {{ field.label }}
+                        </label>
+
+                        {{ field }}
+
+                        {% for error in field.errors %}
+                            <p class="text-red-500 text-xs mt-1">
+                                {{ error }}
+                            </p>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+
+                <div class="flex gap-3 mt-8">
+
+                    <button type="submit"
+                        class="flex-1 bg-neutral-900 text-white py-3 rounded-xl font-semibold hover:bg-neutral-700">
+                        Save Changes
+                    </button>
+
+                    <a href="{% url 'profile' %}"
+                       class="px-6 py-3 border rounded-xl font-semibold text-neutral-700">
+                        Cancel
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

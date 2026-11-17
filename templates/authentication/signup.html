@@ -1,0 +1,67 @@
+
+{% extends "base.html" %}
+
+{% block title %}Create Account | TypeMaster Pro{% endblock %}
+
+{% block content %}
+
+<div class="min-h-screen flex items-center justify-center px-5 py-12 bg-neutral-50">
+
+    <div class="w-full max-w-md bg-white border border-neutral-200 rounded-2xl p-8 shadow-sm">
+
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-extrabold">Create Account</h1>
+            <p class="text-sm text-neutral-500 mt-2">
+                Join TypeMaster Pro and improve your typing.
+            </p>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            {% if form.errors %}
+                <div class="bg-red-50 text-red-600 text-sm p-3 rounded-lg mb-5">
+                    Please correct the errors below.
+                    {{ form.errors }}
+                </div>
+            {% endif %}
+
+            <div class="space-y-4">
+
+                {% for field in form %}
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">
+                            {{ field.label }}
+                        </label>
+
+                        {{ field }}
+
+                        {% if field.help_text %}
+                            <p class="text-xs text-neutral-400 mt-1">
+                                {{ field.help_text|safe }}
+                            </p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+            <button type="submit"
+                class="w-full mt-7 bg-neutral-900 hover:bg-neutral-700 text-white py-3 rounded-xl font-semibold transition">
+                Create Account
+            </button>
+
+        </form>
+
+        <p class="text-center text-sm text-neutral-500 mt-6">
+            Already have an account?
+            <a href="{% url 'login' %}" class="text-purple-600 font-semibold">
+                Login
+            </a>
+        </p>
+
+    </div>
+
+</div>
+
+{% endblock %}

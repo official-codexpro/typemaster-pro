@@ -1,0 +1,61 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.dashboard-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 15px;
+    background: #fff;
+}
+
+.nav-item.active {
+    background: #f0f0f0;
+}
+
+.chart-line {
+    fill: none;
+    stroke: #702cff;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.chart-area {
+    fill: rgba(112, 44, 255, 0.10);
+}
+
+.chart-dot {
+    fill: #702cff;
+    stroke: white;
+    stroke-width: 2;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Django Authentication Forms */
+
+form input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #e5e7eb;
+    border-radius: 9px;
+    outline: none;
+    font-size: 14px;
+}
+
+form input:focus {
+    border-color: #9333ea;
+    box-shadow: 0 0 0 2px rgba(147, 51, 234, 0.1);
+}
+
+form ul {
+    font-size: 12px;
+    color: #dc2626;
+    margin-top: 5px;
+}

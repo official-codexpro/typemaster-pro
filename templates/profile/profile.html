@@ -1,0 +1,71 @@
+
+{% extends "base.html" %}
+
+{% block title %}My Profile | TypeMaster Pro{% endblock %}
+
+{% block content %}
+
+<div class="min-h-screen bg-neutral-50 px-5 py-12">
+
+    <div class="max-w-2xl mx-auto">
+
+        <div class="bg-white border border-neutral-200 rounded-2xl p-8 shadow-sm">
+
+            <div class="text-center mb-8">
+
+                {% if profile.profile_picture %}
+                    <img src="{{ profile.profile_picture.url }}"
+                         alt="Profile Picture"
+                         class="w-24 h-24 rounded-full object-cover mx-auto mb-4">
+                {% else %}
+                    <div class="w-24 h-24 rounded-full bg-teal-100 text-teal-800 flex items-center justify-center text-3xl font-bold uppercase mx-auto mb-4">
+                        {{ request.user.username|first }}
+                    </div>
+                {% endif %}
+
+                <h1 class="text-2xl font-bold">
+                    {{ request.user.username }}
+                </h1>
+
+                <p class="text-neutral-500 text-sm mt-2">
+                    {{ request.user.email }}
+                </p>
+
+            </div>
+
+            <div class="border-t border-neutral-100 pt-6 space-y-4">
+
+                <div>
+                    <p class="text-xs text-neutral-400">Username</p>
+                    <p class="font-semibold">{{ request.user.username }}</p>
+                </div>
+
+                <div>
+                    <p class="text-xs text-neutral-400">Email Address</p>
+                    <p class="font-semibold">{{ request.user.email|default:"Not provided" }}</p>
+                </div>
+
+                <div>
+                    <p class="text-xs text-neutral-400">Bio</p>
+                    <p class="font-semibold">{{ profile.bio|default:"No bio added yet." }}</p>
+                </div>
+
+                <div>
+                    <p class="text-xs text-neutral-400">Member Since</p>
+                    <p class="font-semibold">{{ request.user.date_joined|date:"d M Y" }}</p>
+                </div>
+
+            </div>
+
+            <a href="{% url 'home' %}"
+               class="block text-center mt-8 bg-neutral-900 hover:bg-neutral-700 text-white py-3 rounded-xl font-semibold">
+                Back to Dashboard
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

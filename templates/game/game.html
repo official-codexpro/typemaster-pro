@@ -1,0 +1,119 @@
+<div id="gameScreen" class="hidden min-h-screen bg-white text-neutral-800 font-mono">
+
+    <header class="max-w-6xl mx-auto px-6 py-7 flex justify-between items-center">
+
+        <a href="/" class="text-xl font-bold tracking-tight">
+            <span class="text-red-500">●</span> TypeMaster
+        </a>
+
+        <div class="flex items-center gap-3">
+
+            <select id="difficulty" class="bg-white border border-neutral-200 rounded-lg px-3 py-2 text-sm">
+                <option value="easy">Easy</option>
+                <option value="normal" selected>Normal</option>
+                <option value="hard">Hard</option>
+                <option value="code">Code</option>
+            </select>
+
+            <select id="duration" class="bg-white border border-neutral-200 rounded-lg px-3 py-2 text-sm">
+                <option value="15">15s</option>
+                <option value="30" selected>30s</option>
+                <option value="60">60s</option>
+                <option value="120">120s</option>
+            </select>
+
+            <button id="restart" class="text-2xl text-neutral-500 hover:text-red-500" title="Restart">
+                ↻
+            </button>
+
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-6 pt-20">
+
+        <section class="mb-16">
+
+            <div class="flex justify-between items-end mb-5">
+
+                <div>
+                    <p class="text-xs text-neutral-400 uppercase tracking-widest">
+                        Time Remaining
+                    </p>
+
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <span id="timer" class="text-7xl font-semibold tracking-tighter text-neutral-900">30</span>
+                        <span class="text-xl text-neutral-400">sec</span>
+                    </div>
+                </div>
+
+                <div class="flex gap-8 pb-2">
+
+                    <div>
+                        <p class="text-xs text-neutral-400 uppercase tracking-wider">WPM</p>
+                        <strong id="wpm" class="text-2xl font-semibold">0</strong>
+                    </div>
+
+                    <div>
+                        <p class="text-xs text-neutral-400 uppercase tracking-wider">Accuracy</p>
+                        <strong id="accuracy" class="text-2xl font-semibold">100%</strong>
+                    </div>
+
+                    <div>
+                        <p class="text-xs text-neutral-400 uppercase tracking-wider">Mistakes</p>
+                        <strong id="mistakes" class="text-2xl font-semibold">0</strong>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="w-full h-2 bg-neutral-100 rounded-full overflow-hidden">
+                <div id="timeProgress" class="h-full bg-red-500 rounded-full" style="width: 100%"></div>
+            </div>
+
+        </section>
+
+        <section id="typingArea" class="relative">
+
+            <div id="textDisplay" class="h-36 w-full overflow-hidden text-justify text-2xl md:text-3xl leading-9 tracking-wide break-words text-neutral-300 select-none">
+            </div>
+
+            <div id="pacman" class="absolute top-0 left-0 z-10 pointer-events-none">
+
+                <svg viewBox="0 0 100 100" width="42" height="42">
+
+                    <circle id="pacmanFace" cx="50" cy="50" r="45" fill="#FACC15"/>
+
+                    <polygon id="pacmanMouth" points="50,50 100,25 100,75" fill="white"/>
+
+                    <circle cx="57" cy="24" r="5" fill="#222"/>
+
+                </svg>
+
+            </div>
+
+        </section>
+
+        <input
+            type="text"
+            id="typingInput"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            class="fixed top-0 left-0 opacity-0 w-1 h-1"
+        >
+
+        <div class="mt-20 text-center">
+
+            <p class="text-sm text-neutral-400">
+                Start typing to begin your test
+            </p>
+
+            <p class="text-xs text-neutral-300 mt-3">
+                Choose your difficulty · Improve your speed · Beat your record
+            </p>
+
+        </div>
+
+    </main>
+
+</div>
