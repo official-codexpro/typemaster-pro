@@ -10,209 +10,31 @@
     <title>{% block title %}TypeMaster Pro{% endblock %}</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
+
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-
-    <style>
-        /* PRELOADER */
-        #typing-loader {
-            position: fixed;
-            inset: 0;
-            z-index: 99999;
-            background: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 0.7s ease, visibility 0.7s ease;
-        }
-
-        #typing-loader.loader-hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-
-        .loader-content {
-            width: min(90%, 540px);
-            text-align: center;
-        }
-
-        .keyboard-scene {
-            width: 100%;
-            max-width: 430px;
-            margin: 0 auto;
-        }
-
-        .keyboard-key {
-            animation: keyPress 1.2s infinite ease-in-out;
-            transform-box: fill-box;
-            transform-origin: center;
-        }
-
-        .keyboard-key:nth-of-type(2) { animation-delay: .15s; }
-        .keyboard-key:nth-of-type(3) { animation-delay: .30s; }
-        .keyboard-key:nth-of-type(4) { animation-delay: .45s; }
-        .keyboard-key:nth-of-type(5) { animation-delay: .60s; }
-        .keyboard-key:nth-of-type(6) { animation-delay: .75s; }
-
-        @keyframes keyPress {
-            0%, 15%, 100% { transform: translateY(0); }
-            7% { transform: translateY(4px); }
-        }
-
-        .finger-left {
-            animation: fingerLeft 1.2s infinite ease-in-out;
-            transform-box: fill-box;
-            transform-origin: bottom center;
-        }
-
-        .finger-right {
-            animation: fingerRight 1.2s infinite ease-in-out;
-            transform-box: fill-box;
-            transform-origin: bottom center;
-        }
-
-        @keyframes fingerLeft {
-            0%, 100% { transform: translateY(0) rotate(0); }
-            20%, 35% { transform: translateY(9px) rotate(-4deg); }
-            50% { transform: translateY(0); }
-        }
-
-        @keyframes fingerRight {
-            0%, 100% { transform: translateY(0) rotate(0); }
-            50%, 65% { transform: translateY(9px) rotate(4deg); }
-            80% { transform: translateY(0); }
-        }
-
-        .loader-progress {
-            width: 0%;
-            animation: loaderProgress 5s linear forwards;
-        }
-
-        @keyframes loaderProgress {
-            to { width: 100%; }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            .keyboard-key,
-            .finger-left,
-            .finger-right,
-            .loader-progress {
-                animation-duration: 5s;
-            }
-        }
-    </style>
 
     {% block extra_css %}{% endblock %}
 </head>
 
 <body class="min-h-screen bg-white text-neutral-800">
 
-    <!-- TYPING PRELOADER -->
-    <div id="typing-loader">
-        <div class="loader-content">
+    <!-- Separate Loading Component -->
+    {% include "components/loader.html" %}
 
-            <div class="keyboard-scene">
-                <svg viewBox="0 0 440 290" xmlns="http://www.w3.org/2000/svg">
-
-                    <!-- Keyboard body -->
-                    <rect x="42" y="153" width="356" height="105"
-                          rx="15" fill="#171717"/>
-
-                    <rect x="50" y="160" width="340" height="87"
-                          rx="10" fill="#262626"/>
-
-                    <!-- Keyboard keys -->
-                    <g fill="#ffffff">
-                        <rect class="keyboard-key" x="65" y="174" width="36" height="25" rx="5"/>
-                        <rect class="keyboard-key" x="108" y="174" width="36" height="25" rx="5"/>
-                        <rect class="keyboard-key" x="151" y="174" width="36" height="25" rx="5"/>
-                        <rect class="keyboard-key" x="194" y="174" width="36" height="25" rx="5"/>
-                        <rect class="keyboard-key" x="237" y="174" width="36" height="25" rx="5"/>
-                        <rect class="keyboard-key" x="280" y="174" width="36" height="25" rx="5"/>
-                        <rect class="keyboard-key" x="323" y="174" width="36" height="25" rx="5"/>
-
-                        <rect x="75" y="208" width="36" height="25" rx="5"/>
-                        <rect x="118" y="208" width="36" height="25" rx="5"/>
-                        <rect x="161" y="208" width="36" height="25" rx="5"/>
-                        <rect x="204" y="208" width="90" height="25" rx="5"/>
-                        <rect x="301" y="208" width="36" height="25" rx="5"/>
-                    </g>
-
-                    <!-- Left hand -->
-                    <g fill="#e8b99d" stroke="#bd8d72" stroke-width="2">
-                        <path d="M68 142 C55 132 55 112 63 101 L75 77
-                                 C79 69 91 73 89 83 L82 110
-                                 L98 79 C103 69 115 75 111 85
-                                 L98 116 C111 107 122 116 115 127
-                                 L100 149 Z"/>
-
-                        <path class="finger-left"
-                              d="M70 133 L78 91 C80 80 93 82 91 94
-                                 L85 137 Z"/>
-                    </g>
-
-                    <!-- Right hand -->
-                    <g fill="#e8b99d" stroke="#bd8d72" stroke-width="2">
-                        <path d="M371 142 C385 132 385 112 377 101 L365 77
-                                 C361 69 349 73 351 83 L358 110
-                                 L342 79 C337 69 325 75 329 85
-                                 L342 116 C329 107 318 116 325 127
-                                 L340 149 Z"/>
-
-                        <path class="finger-right"
-                              d="M370 133 L362 91 C360 80 347 82 349 94
-                                 L355 137 Z"/>
-                    </g>
-
-                    <!-- Small decorative details -->
-                    <circle cx="220" cy="267" r="3" fill="#d4af37"/>
-                </svg>
-            </div>
-
-            <h2 class="text-2xl font-bold tracking-widest text-neutral-900 mt-5">
-                TYPEMASTER <span class="text-yellow-500">PRO</span>
-            </h2>
-
-            <p class="text-sm text-neutral-500 mt-2 tracking-wide">
-                Initializing your typing experience...
-            </p>
-
-            <div class="w-48 h-1 bg-neutral-200 rounded-full mx-auto mt-7 overflow-hidden">
-                <div class="loader-progress h-full bg-yellow-400 rounded-full"></div>
-            </div>
-
-            <p class="text-xs text-neutral-400 mt-3 tracking-widest">
-                PLEASE WAIT
-            </p>
-
-        </div>
-    </div>
-
+    <!-- Navbar -->
     {% include "components/navbar.html" %}
 
+    <!-- Page Content -->
     {% block content %}{% endblock %}
 
+    <!-- Footer -->
     {% include "components/footer.html" %}
 
+    <!-- GSAP -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.14.2/gsap.min.js"></script>
 
     {% block extra_js %}{% endblock %}
-
-    <script>
-        window.addEventListener("load", function () {
-            const loader = document.getElementById("typing-loader");
-
-            setTimeout(function () {
-                loader.classList.add("loader-hidden");
-
-                setTimeout(function () {
-                    loader.remove();
-                }, 750);
-
-            }, 5000);
-        });
-    </script>
 
 </body>
 </html>

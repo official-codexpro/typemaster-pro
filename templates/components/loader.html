@@ -1,0 +1,463 @@
+
+{% load static %}
+
+<div id="typing-loader">
+    <div class="loader-content">
+
+        <!-- Original TypeMaster Logo -->
+        <a href="{% url 'home' %}" class="loader-logo">
+            <span class="logo-icon">⌨</span>
+            <span class="logo-name">TypeMaster</span>
+            <span class="logo-pro">PRO</span>
+        </a>
+
+        <p class="loader-subtitle">Preparing your typing experience</p>
+
+        <!-- Mechanical Keyboard -->
+        <div class="keyboard-scene">
+
+            <div class="keyboard-glow"></div>
+
+            <div class="keyboard">
+
+                <div class="keyboard-header">
+                    <span>TYPEMASTER MECHANICAL</span>
+                    <div class="keyboard-lights">
+                        <i></i><i></i><i></i>
+                    </div>
+                </div>
+
+                <div class="key-row">
+                    <div class="key">ESC</div>
+                    <div class="key animated">1</div>
+                    <div class="key animated">2</div>
+                    <div class="key">3</div>
+                    <div class="key animated">4</div>
+                    <div class="key">5</div>
+                    <div class="key animated">6</div>
+                    <div class="key">7</div>
+                    <div class="key animated">8</div>
+                    <div class="key">9</div>
+                    <div class="key animated">0</div>
+                </div>
+
+                <div class="key-row">
+                    <div class="key">TAB</div>
+                    <div class="key animated">Q</div>
+                    <div class="key">W</div>
+                    <div class="key animated">E</div>
+                    <div class="key">R</div>
+                    <div class="key animated">T</div>
+                    <div class="key">Y</div>
+                    <div class="key animated">U</div>
+                    <div class="key">I</div>
+                    <div class="key animated">O</div>
+                    <div class="key">P</div>
+                </div>
+
+                <div class="key-row">
+                    <div class="key">CAPS</div>
+                    <div class="key animated">A</div>
+                    <div class="key">S</div>
+                    <div class="key animated">D</div>
+                    <div class="key">F</div>
+                    <div class="key animated">G</div>
+                    <div class="key">H</div>
+                    <div class="key animated">J</div>
+                    <div class="key">K</div>
+                    <div class="key animated">L</div>
+                </div>
+
+                <div class="key-row">
+                    <div class="key">SHIFT</div>
+                    <div class="key animated">Z</div>
+                    <div class="key">X</div>
+                    <div class="key animated">C</div>
+                    <div class="key">V</div>
+                    <div class="key animated">B</div>
+                    <div class="key">N</div>
+                    <div class="key animated">M</div>
+                    <div class="key">SHIFT</div>
+                </div>
+
+                <div class="key-row bottom-row">
+                    <div class="key modifier">CTRL</div>
+                    <div class="key modifier">ALT</div>
+                    <div class="key spacebar animated"></div>
+                    <div class="key modifier">ALT</div>
+                    <div class="key modifier">CTRL</div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Loading Status -->
+        <div class="loader-info">
+            <div class="loader-info-text">
+                <span id="loader-message">Initializing typing engine...</span>
+                <span id="loader-percent">0%</span>
+            </div>
+
+            <div class="loader-track">
+                <div id="loader-progress"></div>
+            </div>
+        </div>
+
+        <p class="loader-footer">
+            BUILT FOR SPEED. DESIGNED FOR PRECISION.
+        </p>
+
+    </div>
+</div>
+
+
+<style>
+#typing-loader {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    transition: opacity .55s ease, visibility .55s ease;
+}
+
+#typing-loader.loader-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.loader-content {
+    width: min(92%, 480px);
+    text-align: center;
+    padding: 24px 0;
+}
+
+/* LOGO */
+
+.loader-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    text-decoration: none;
+    color: #171717;
+}
+
+.logo-icon {
+    font-size: 25px;
+}
+
+.logo-name {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -.8px;
+}
+
+.logo-pro {
+    color: #7c3aed;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 7px;
+}
+
+.loader-subtitle {
+    color: #737373;
+    font-size: 12px;
+    margin-top: 8px;
+}
+
+/* KEYBOARD */
+
+.keyboard-scene {
+    position: relative;
+    width: 100%;
+    margin: 35px auto 30px;
+    padding: 0 5px;
+    perspective: 900px;
+}
+
+.keyboard-glow {
+    position: absolute;
+    width: 75%;
+    height: 80px;
+    left: 12.5%;
+    bottom: -10px;
+    background: #8b5cf6;
+    filter: blur(55px);
+    opacity: .15;
+}
+
+.keyboard {
+    position: relative;
+    padding: 16px 12px 18px;
+    border-radius: 13px;
+    background: linear-gradient(145deg, #292929, #111111);
+    border: 1px solid #444;
+    box-shadow:
+        0 8px 0 #090909,
+        0 20px 30px rgba(0,0,0,.18),
+        inset 0 1px 2px rgba(255,255,255,.15);
+    transform: rotateX(8deg);
+}
+
+.keyboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 5px 13px;
+    color: #777;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.keyboard-lights {
+    display: flex;
+    gap: 5px;
+}
+
+.keyboard-lights i {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #a78bfa;
+    box-shadow: 0 0 7px #8b5cf6;
+}
+
+.key-row {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    margin-bottom: 5px;
+}
+
+.key {
+    flex: 1;
+    min-width: 0;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    color: #d4d4d4;
+    font-size: 10px;
+    font-weight: 700;
+    background: linear-gradient(145deg, #414141, #242424);
+    border: 1px solid #505050;
+    border-bottom: 4px solid #151515;
+    box-shadow: inset 0 1px 1px rgba(255,255,255,.1);
+    transition: background .1s, transform .1s;
+}
+
+.key.animated {
+    animation: keyPress 1.35s infinite ease-in-out;
+}
+
+.key-row:nth-of-type(2) .key:nth-child(3) { animation-delay: .2s; }
+.key-row:nth-of-type(2) .key:nth-child(6) { animation-delay: .6s; }
+.key-row:nth-of-type(3) .key:nth-child(4) { animation-delay: .4s; }
+.key-row:nth-of-type(3) .key:nth-child(8) { animation-delay: .8s; }
+.key-row:nth-of-type(4) .key:nth-child(3) { animation-delay: .3s; }
+.key-row:nth-of-type(4) .key:nth-child(6) { animation-delay: .7s; }
+
+@keyframes keyPress {
+    0%, 70%, 100% {
+        transform: translateY(0);
+        background: linear-gradient(145deg, #414141, #242424);
+        border-bottom-width: 4px;
+        color: #d4d4d4;
+    }
+
+    12%, 27% {
+        transform: translateY(3px);
+        background: linear-gradient(145deg, #8b5cf6, #5b21b6);
+        border-bottom-width: 1px;
+        color: white;
+        box-shadow: 0 0 12px rgba(139,92,246,.4);
+    }
+}
+
+.bottom-row {
+    margin-bottom: 0;
+}
+
+.modifier {
+    max-width: 48px;
+    font-size: 8px;
+}
+
+.spacebar {
+    flex: 4;
+}
+
+/* PROGRESS */
+
+.loader-info {
+    width: min(100%, 320px);
+    margin: 0 auto;
+    text-align: left;
+}
+
+.loader-info-text {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 9px;
+    color: #737373;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+#loader-percent {
+    color: #171717;
+    font-variant-numeric: tabular-nums;
+}
+
+.loader-track {
+    width: 100%;
+    height: 4px;
+    overflow: hidden;
+    border-radius: 20px;
+    background: #e5e7eb;
+}
+
+#loader-progress {
+    width: 0%;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #7c3aed, #c084fc);
+}
+
+.loader-footer {
+    margin-top: 22px;
+    color: #a3a3a3;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+}
+
+/* MOBILE */
+
+@media (max-width: 480px) {
+    .loader-content {
+        width: 94%;
+    }
+
+    .keyboard-scene {
+        margin: 30px auto;
+    }
+
+    .keyboard {
+        padding: 12px 7px;
+    }
+
+    .key-row {
+        gap: 3px;
+    }
+
+    .key {
+        height: 29px;
+        font-size: 8px;
+    }
+
+    .modifier {
+        font-size: 6px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .key.animated {
+        animation: none;
+    }
+}
+</style>
+
+
+<script>
+(function () {
+
+    const loader = document.getElementById("typing-loader");
+
+    if (!loader) return;
+
+    const progress = document.getElementById("loader-progress");
+    const percent = document.getElementById("loader-percent");
+    const message = document.getElementById("loader-message");
+
+    const MINIMUM_TIME = 2000;
+    const startTime = Date.now();
+
+    let pageLoaded = document.readyState === "complete";
+    let finished = false;
+
+    const messages = [
+        "Initializing typing engine...",
+        "Preparing your keyboard...",
+        "Loading your workspace...",
+        "Calibrating performance...",
+        "Almost ready..."
+    ];
+
+    function updateProgress() {
+
+        if (finished) return;
+
+        const elapsed = Date.now() - startTime;
+        const percentage = Math.min(
+            Math.floor((elapsed / MINIMUM_TIME) * 100),
+            95
+        );
+
+        progress.style.width = percentage + "%";
+        percent.textContent = percentage + "%";
+
+        const index = Math.min(
+            Math.floor(percentage / 20),
+            messages.length - 1
+        );
+
+        message.textContent = messages[index];
+
+        if (elapsed >= MINIMUM_TIME && pageLoaded) {
+            hideLoader();
+        }
+    }
+
+    function hideLoader() {
+
+        if (finished) return;
+
+        finished = true;
+
+        progress.style.width = "100%";
+        percent.textContent = "100%";
+        message.textContent = "Ready!";
+
+        setTimeout(function () {
+            loader.classList.add("loader-hidden");
+
+            setTimeout(function () {
+                loader.remove();
+            }, 600);
+
+        }, 200);
+    }
+
+    const progressInterval = setInterval(function () {
+        updateProgress();
+
+        if (finished) {
+            clearInterval(progressInterval);
+        }
+    }, 50);
+
+    if (!pageLoaded) {
+        window.addEventListener("load", function () {
+            pageLoaded = true;
+            updateProgress();
+        }, { once: true });
+    }
+
+})();
+</script>
