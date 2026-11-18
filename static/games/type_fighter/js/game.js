@@ -1,1071 +1,473 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const root = document.getElementById('spaceShooterGame');
+    const root = document.getElementById('typeFighterGame');
     if (!root) return;
 
     const $ = id => document.getElementById(id);
-
-    const canvas = $('gameCanvas');
-    const ctx = canvas.getContext('2d');
 
     const arena = $('gameArena');
     const input = $('typingInput');
     const enemyLayer = $('enemyLayer');
 
     const scoreEl = $('score');
-    const waveEl = $('wave');
+    const roundEl = $('round') || $('wave');
     const wpmEl = $('wpm');
     const accuracyEl = $('accuracy');
     const comboEl = $('combo');
-    const timerEl = $('missionTimer');
+
+    const timerEl = $('missionTimer') || $('matchTimer');
     const statusEl = $('arenaStatus');
     const messageEl = $('gameMessage');
-    const shipStatus = $('shipStatus');
-    const destroyedEl = $('destroyedCount');
+
+    const playerStatus = $('shipStatus') || $('playerStatus');
+    const knockoutsEl = $('destroyedCount') || $('knockouts');
 
     const pauseButton = $('pauseGame');
     const quitButton = $('quitGame');
 
+    if (!arena || !input) {
+        console.error('Type Fighter: Required game elements missing.');
+        return;
+    }
+
     const difficulty = root.dataset.difficulty || 'normal';
     const saveUrl = root.dataset.saveUrl;
-    const homeUrl = root.dataset.homeUrl;
+    const homeUrl = root.dataset.homeUrl || '/type-fighter/';
 
-    const CONFIG = {
+    // ======================================
+    // DIFFICULTY
+    // ======================================
+
+    const DIFFICULTY = {
         easy: {
             words: [
-                'cat', 'dog', 'sun', 'moon', 'star', 'ship', 'fire',
-                'book', 'game', 'tree', 'fish', 'bird', 'home', 'road',
-                'water', 'happy', 'green', 'light', 'smile', 'cloud',
-                'apple', 'music', 'river', 'plant', 'dream', 'space'
+                'fire', 'kick', 'punch', 'move', 'fast',
+                'jump', 'fight', 'power', 'block', 'hero'
             ],
-            speed: 27,
-            spawn: 2.7,
-            maxEnemies: 4
+            aiDelay: 7,
+            aiDamage: 8
         },
 
         normal: {
             words: [
-                'planet', 'rocket', 'galaxy', 'cosmic', 'system', 'meteor',
-                'nebula', 'orbit', 'asteroid', 'satellite', 'captain',
-                'mission', 'engine', 'oxygen', 'module', 'launch',
-                'signal', 'comet', 'lunar', 'gravity', 'energy', 'radar'
+                'dragon', 'strike', 'combat', 'warrior',
+                'attack', 'defense', 'fighter', 'shadow',
+                'counter', 'victory', 'battle', 'danger'
             ],
-            speed: 37,
-            spawn: 2.05,
-            maxEnemies: 5
+            aiDelay: 5,
+            aiDamage: 12
         },
 
         hard: {
             words: [
-                'cat', 'orbit', 'ship', 'rocket', 'gravity', 'mission',
-                'asteroid', 'velocity', 'universe', 'keyboard', 'collision',
-                'spaceship', 'magnetic', 'telescope', 'astronaut',
-                'radiation', 'navigation', 'dimension', 'turbulence',
-                'trajectory', 'frequency', 'propulsion'
+                'counterattack', 'uppercut', 'combination',
+                'devastating', 'powerstrike', 'defensive',
+                'unbreakable', 'masterstrike', 'finishing'
             ],
-            speed: 46,
-            spawn: 1.65,
-            maxEnemies: 6
+            aiDelay: 3.5,
+            aiDamage: 16
         },
 
         extreme: {
             words: [
-                'dev@2026', 'X9#code', '7*space', 'run!42', 'AI_2049',
-                'root#99', 'Q3!nova', '0rb1t$', 'ship@7', '4x+2=10',
-                'neo%2026', 'Z8&star', 'go2Mars!', 'sys_404', 'H@ck5'
+                'function(){return 404}',
+                'const fighter=2026',
+                'player.hp-=100',
+                'if(enemy.alive){attack()}',
+                'class Warrior extends Hero',
+                'while(opponent.hp>0){fight()}'
             ],
-            speed: 53,
-            spawn: 1.4,
-            maxEnemies: 7
+            aiDelay: 2.3,
+            aiDamage: 22
         }
     };
 
-    const config = CONFIG[difficulty] || CONFIG.normal;
+    const config = DIFFICULTY[difficulty] || DIFFICULTY.normal;
 
-    const recentWords = [];
-    const RECENT_WORD_LIMIT = 12;
-
-    function generateExtremeWord() {
-        const letters = 'abcdefghijklmnopqrstuvwxyz';
-        const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        const digits = '0123456789';
-        const symbols = '@#$%&*!?+-_=';
-
-        const pick = pool =>
-            pool[Math.floor(Math.random() * pool.length)];
-
-        const patterns = [
-            () => `${pick(letters)}${pick(letters)}${pick(digits)}${pick(symbols)}${pick(letters)}${pick(digits)}`,
-            () => `${pick(upper)}${pick(digits)}${pick(symbols)}${pick(letters)}${pick(letters)}${pick(digits)}`,
-            () => `${pick(letters)}${pick(letters)}${pick(letters)}${pick(symbols)}${pick(digits)}${pick(digits)}`,
-            () => `${pick(digits)}${pick(symbols)}${pick(letters)}${pick(letters)}${pick(digits)}${pick(symbols)}`,
-            () => `${pick(letters)}${pick(digits)}${pick(letters)}${pick(digits)}${pick(symbols)}${pick(letters)}${pick(digits)}`
-        ];
-
-        return pick(patterns)();
-    }
-
-    function getRandomWord() {
-        let candidate = '';
-        let attempts = 0;
-
-        do {
-            if (difficulty === 'extreme' && Math.random() < 0.65) {
-                candidate = generateExtremeWord();
-            } else {
-                candidate = config.words[
-                    Math.floor(Math.random() * config.words.length)
-                ];
-            }
-
-            attempts++;
-        } while (
-            recentWords.includes(candidate) &&
-            attempts < 40
-        );
-
-        recentWords.push(candidate);
-
-        if (recentWords.length > RECENT_WORD_LIMIT) {
-            recentWords.shift();
-        }
-
-        return candidate;
-    }
-
+    // ======================================
     // GAME STATE
+    // ======================================
 
-    let width = 0;
-    let height = 0;
-    let dpr = 1;
+    const GAME_DURATION = 60;
 
     let score = 0;
+    let combo = 0;
+    let knockouts = 0;
+
     let correctChars = 0;
     let totalChars = 0;
     let mistakes = 0;
 
-    let wordsDestroyed = 0;
-    let missedWords = 0;
-    let shotsFired = 0;
-
-    let combo = 0;
-    let wave = 1;
-
-    let remainingTime = 60;
+    let remainingTime = GAME_DURATION;
     let elapsedTime = 0;
-    let spawnTimer = 0;
 
-    let enemies = [];
-    let bullets = [];
-    let particles = [];
-    let stars = [];
+    let playerHealth = 100;
+    let enemyHealth = 100;
 
-    let activeEnemy = null;
+    let currentWord = '';
+    let typedWord = '';
 
     let paused = false;
     let ended = false;
     let saving = false;
 
+    let aiTimer = 0;
+    let lastFrame = 0;
     let animationId = null;
-    let previousFrame = 0;
-    let lastStatsUpdate = 0;
 
-    let wrongTimeout = null;
+    let wordElement = null;
+    let recentWords = [];
 
-    const ship = {
-        x: 0,
-        y: 0
-    };
+    // ======================================
+    // HELPERS
+    // ======================================
 
-    // CANVAS SIZE
+    function randomWord() {
+        let word;
 
-    function resizeCanvas() {
-        const rect = arena.getBoundingClientRect();
+        do {
+            word = config.words[
+                Math.floor(Math.random() * config.words.length)
+            ];
+        } while (
+            recentWords.includes(word) &&
+            recentWords.length < config.words.length
+        );
 
-        if (!rect.width || !rect.height) return;
+        recentWords.push(word);
 
-        width = rect.width;
-        height = rect.height;
+        if (recentWords.length > 5) {
+            recentWords.shift();
+        }
 
-        dpr = Math.min(window.devicePixelRatio || 1, 2);
-
-        canvas.width = Math.round(width * dpr);
-        canvas.height = Math.round(height * dpr);
-
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-        ship.x = width / 2;
-        ship.y = height - 65;
-
-        stars = Array.from({ length: 130 }, () => ({
-            x: Math.random() * width,
-            y: Math.random() * height,
-            size: Math.random() * 1.8 + 0.3,
-            speed: Math.random() * 35 + 12,
-            alpha: Math.random() * 0.7 + 0.2
-        }));
-
-        enemies.forEach(updateEnemyPosition);
+        return word;
     }
 
-    window.addEventListener('resize', resizeCanvas);
+    function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+    }
 
-    // BACKGROUND
+    function setText(element, value) {
+        if (element) element.textContent = value;
+    }
 
-    function drawBackground(dt) {
-        const gradient = ctx.createLinearGradient(
-            0, 0, 0, height
-        );
+    function showStatus(message) {
+        setText(statusEl, message);
+    }
 
-        gradient.addColorStop(0, '#030714');
-        gradient.addColorStop(0.55, '#09152b');
-        gradient.addColorStop(1, '#050a19');
+    // ======================================
+    // ENEMY WORD DISPLAY
+    // ======================================
 
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, width, height);
+    function createWordDisplay() {
+        if (!enemyLayer) return;
 
-        const glow = ctx.createRadialGradient(
-            width * 0.5,
-            height * 0.35,
-            5,
-            width * 0.5,
-            height * 0.35,
-            width * 0.55
-        );
+        enemyLayer.replaceChildren();
 
-        glow.addColorStop(0, 'rgba(35, 80, 155, 0.18)');
-        glow.addColorStop(1, 'rgba(3, 7, 20, 0)');
+        wordElement = document.createElement('div');
+        wordElement.className = 'enemy-word type-fighter-word';
 
-        ctx.fillStyle = glow;
-        ctx.fillRect(0, 0, width, height);
-
-        stars.forEach(star => {
-            star.y += star.speed * dt;
-
-            if (star.y > height) {
-                star.y = 0;
-                star.x = Math.random() * width;
-            }
-
-            ctx.globalAlpha = star.alpha;
-            ctx.fillStyle = '#d9edff';
-
-            ctx.fillRect(
-                star.x,
-                star.y,
-                star.size,
-                star.size
-            );
+        Object.assign(wordElement.style, {
+            position: 'absolute',
+            left: '50%',
+            top: '42%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: '5',
+            fontSize: 'clamp(18px, 2vw, 30px)',
+            fontWeight: '800',
+            letterSpacing: '3px',
+            color: '#ffffff',
+            textShadow: '0 0 15px rgba(255, 60, 80, 0.7)',
+            whiteSpace: 'nowrap',
+            pointerEvents: 'none'
         });
 
-        ctx.globalAlpha = 1;
-
-        ctx.strokeStyle = 'rgba(74, 151, 255, 0.055)';
-        ctx.lineWidth = 1;
-
-        for (let y = 0; y < height; y += 55) {
-            ctx.beginPath();
-            ctx.moveTo(0, y);
-            ctx.lineTo(width, y);
-            ctx.stroke();
-        }
-
-        for (let x = 0; x < width; x += 55) {
-            ctx.beginPath();
-            ctx.moveTo(x, 0);
-            ctx.lineTo(x, height);
-            ctx.stroke();
-        }
+        enemyLayer.appendChild(wordElement);
     }
 
-    // SPACESHIP
+    function renderWord() {
+        if (!wordElement) return;
 
-    function drawShip() {
-        ctx.save();
-        ctx.translate(ship.x, ship.y);
+        wordElement.replaceChildren();
 
-        const flame = ctx.createLinearGradient(0, 15, 0, 55);
-
-        flame.addColorStop(0, '#ffffff');
-        flame.addColorStop(0.3, '#42e8ff');
-        flame.addColorStop(1, 'rgba(40, 110, 255, 0)');
-
-        ctx.fillStyle = flame;
-
-        ctx.beginPath();
-        ctx.moveTo(-9, 17);
-        ctx.lineTo(0, 53 + Math.random() * 8);
-        ctx.lineTo(9, 17);
-        ctx.closePath();
-        ctx.fill();
-
-        ctx.shadowBlur = 25;
-        ctx.shadowColor = '#249bff';
-
-        ctx.fillStyle = '#173c77';
-
-        ctx.beginPath();
-        ctx.moveTo(-31, 12);
-        ctx.lineTo(-13, -15);
-        ctx.lineTo(-8, -30);
-        ctx.lineTo(8, -30);
-        ctx.lineTo(13, -15);
-        ctx.lineTo(31, 12);
-        ctx.lineTo(10, 7);
-        ctx.lineTo(0, 18);
-        ctx.lineTo(-10, 7);
-        ctx.closePath();
-        ctx.fill();
-
-        ctx.shadowBlur = 0;
-
-        const hull = ctx.createLinearGradient(
-            -20, -25, 20, 20
-        );
-
-        hull.addColorStop(0, '#e7f7ff');
-        hull.addColorStop(0.35, '#5fa7e8');
-        hull.addColorStop(1, '#152f59');
-
-        ctx.fillStyle = hull;
-
-        ctx.beginPath();
-        ctx.moveTo(0, -39);
-        ctx.lineTo(13, -7);
-        ctx.lineTo(10, 14);
-        ctx.lineTo(0, 20);
-        ctx.lineTo(-10, 14);
-        ctx.lineTo(-13, -7);
-        ctx.closePath();
-        ctx.fill();
-
-        ctx.fillStyle = '#42e8ff';
-        ctx.shadowColor = '#42e8ff';
-        ctx.shadowBlur = 14;
-
-        ctx.beginPath();
-        ctx.ellipse(0, -13, 5, 13, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.shadowBlur = 0;
-
-        ctx.fillStyle = '#3577ba';
-
-        ctx.beginPath();
-        ctx.moveTo(-10, -4);
-        ctx.lineTo(-34, 13);
-        ctx.lineTo(-13, 10);
-        ctx.closePath();
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.moveTo(10, -4);
-        ctx.lineTo(34, 13);
-        ctx.lineTo(13, 10);
-        ctx.closePath();
-        ctx.fill();
-
-        ctx.restore();
-    }
-
-    // ENEMY CREATION
-
-    function createEnemy() {
-        const word = getRandomWord();
-
-        const enemy = {
-            id: Math.random().toString(36).slice(2),
-            word,
-
-            x: 45 + Math.random() * Math.max(1, width - 90),
-            y: -45,
-
-            speed: config.speed * (1 + (wave - 1) * 0.09),
-            phase: Math.random() * Math.PI * 2,
-
-            progress: 0,
-            pendingShots: 0,
-
-            wrong: false,
-            wrongIndex: -1,
-
-            element: null,
-            characterElements: []
-        };
-
-        const element = document.createElement('div');
-
-        element.className = 'enemy-word';
-        element.dataset.enemyId = enemy.id;
-
-        enemy.element = element;
-
-        enemyLayer.appendChild(element);
-        enemies.push(enemy);
-
-        renderEnemyWord(enemy);
-        updateEnemyPosition(enemy);
-
-        return enemy;
-    }
-
-    // CHARACTER RENDERING
-
-    function renderEnemyWord(enemy) {
-        if (!enemy.element) return;
-
-        enemy.element.replaceChildren();
-
-        enemy.characterElements = [];
-
-        [...enemy.word].forEach((character, index) => {
+        [...currentWord].forEach((character, index) => {
             const span = document.createElement('span');
 
-            span.className = 'letter';
             span.textContent = character;
 
-            enemy.characterElements.push(span);
-
-            if (index < enemy.progress) {
-                span.classList.add('destroyed');
+            if (index < typedWord.length) {
+                span.style.color = '#42e8ff';
+                span.style.textShadow = '0 0 12px #42e8ff';
+            } else {
+                span.style.color = '#ffffff';
             }
 
-            if (enemy.wrong && index === enemy.wrongIndex) {
-                span.classList.add('wrong');
-            }
-
-            enemy.element.appendChild(span);
+            wordElement.appendChild(span);
         });
-
-        enemy.element.classList.toggle(
-            'locked',
-            enemy === activeEnemy
-        );
     }
 
-    function updateEnemyPosition(enemy) {
-        if (!enemy.element) return;
+    function nextWord() {
+        currentWord = randomWord();
+        typedWord = '';
 
-        enemy.element.style.left = `${enemy.x}px`;
-        enemy.element.style.top = `${enemy.y + 38}px`;
-        enemy.element.style.transform = 'translateX(-50%)';
-    }
+        renderWord();
 
-    // ENEMY DRAWING
-
-    function drawEnemy(enemy) {
-        const pulse = 1 + Math.sin(enemy.phase) * 0.05;
-
-        ctx.save();
-        ctx.translate(enemy.x, enemy.y);
-        ctx.scale(pulse, pulse);
-
-        ctx.shadowBlur = 25;
-        ctx.shadowColor = '#ff416d';
-
-        ctx.strokeStyle = 'rgba(255, 76, 113, 0.65)';
-        ctx.lineWidth = 2;
-
-        ctx.beginPath();
-        ctx.arc(0, 0, 25, 0, Math.PI * 2);
-        ctx.stroke();
-
-        const body = ctx.createRadialGradient(
-            -7, -8, 2, 0, 0, 25
-        );
-
-        body.addColorStop(0, '#ffb2bd');
-        body.addColorStop(0.3, '#ed4768');
-        body.addColorStop(1, '#5d112d');
-
-        ctx.fillStyle = body;
-
-        ctx.beginPath();
-        ctx.arc(0, 0, 20, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.shadowBlur = 0;
-
-        ctx.fillStyle = '#fff2f4';
-        ctx.shadowColor = '#ff456d';
-        ctx.shadowBlur = 15;
-
-        ctx.beginPath();
-        ctx.arc(0, 0, 6, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.restore();
-
-        if (enemy === activeEnemy) {
-            ctx.save();
-
-            ctx.strokeStyle = '#42e8ff';
-            ctx.lineWidth = 2;
-            ctx.setLineDash([5, 5]);
-
-            ctx.beginPath();
-
-            ctx.arc(
-                enemy.x,
-                enemy.y,
-                34,
-                elapsedTime * 2,
-                elapsedTime * 2 + Math.PI * 2
-            );
-
-            ctx.stroke();
-            ctx.restore();
+        if (input) {
+            input.value = '';
+            input.focus();
         }
     }
 
-    // TARGET LOCK
+    // ======================================
+    // PLAYER ATTACK
+    // ======================================
 
-    function selectTarget(enemy) {
-        if (!enemy || !enemies.includes(enemy)) return;
-        if (activeEnemy) return;
-
-        activeEnemy = enemy;
-
-        enemies.forEach(item => {
-            item.element.classList.toggle(
-                'locked',
-                item === activeEnemy
-            );
-        });
-
-        statusEl.textContent = 'TARGET LOCKED';
-    }
-
-    function releaseTarget(enemy) {
-        if (activeEnemy !== enemy) return;
-
-        activeEnemy = null;
-
-        enemy.element?.classList.remove('locked');
-    }
-
-    // WRONG CHARACTER
-
-    function showWrongCharacter(enemy) {
-        const index = enemy.progress;
-        const character = enemy.characterElements[index];
-
-        if (!character) return;
-
-        enemy.wrong = true;
-        enemy.wrongIndex = index;
-
-        character.classList.remove('wrong');
-        void character.offsetWidth;
-        character.classList.add('wrong');
-
-        clearTimeout(wrongTimeout);
-
-        wrongTimeout = setTimeout(() => {
-            enemy.wrong = false;
-            enemy.wrongIndex = -1;
-
-            character.classList.remove('wrong');
-        }, 350);
-    }
-
-    // CHARACTER BULLET TARGET POSITION
-
-    function getCharacterPosition(character) {
-        const rect = character.getBoundingClientRect();
-        const arenaRect = arena.getBoundingClientRect();
-
-        return {
-            x: rect.left + rect.width / 2 - arenaRect.left,
-            y: rect.top + rect.height / 2 - arenaRect.top
-        };
-    }
-
-    // FIRE ONE BULLET PER CHARACTER
-
-    function fireCharacterBullet(enemy, character) {
-        const target = getCharacterPosition(character);
-
-        shotsFired++;
-
-        bullets.push({
-            x: ship.x,
-            y: ship.y - 35,
-
-            targetElement: character,
-
-            targetX: target.x,
-            targetY: target.y,
-
-            progress: 0,
-            duration: 0.18
-        });
-    }
-
-    // BULLET ANIMATION
-
-    function drawBullets(dt) {
-        const completedBullets = [];
-
-        bullets.forEach(bullet => {
-            bullet.progress += dt / bullet.duration;
-
-            const t = Math.min(bullet.progress, 1);
-
-            if (bullet.targetElement?.isConnected) {
-                const target = getCharacterPosition(
-                    bullet.targetElement
-                );
-
-                bullet.targetX = target.x;
-                bullet.targetY = target.y;
-            }
-
-            const x = bullet.x +
-                (bullet.targetX - bullet.x) * t;
-
-            const y = bullet.y +
-                (bullet.targetY - bullet.y) * t;
-
-            ctx.save();
-
-            ctx.shadowColor = '#42e8ff';
-            ctx.shadowBlur = 20;
-
-            ctx.strokeStyle = '#aaf8ff';
-            ctx.lineWidth = 3;
-
-            ctx.beginPath();
-            ctx.moveTo(x, y + 15);
-            ctx.lineTo(x, y - 15);
-            ctx.stroke();
-
-            ctx.fillStyle = '#ffffff';
-
-            ctx.beginPath();
-            ctx.arc(x, y, 3, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.restore();
-
-            if (bullet.progress >= 1) {
-                completedBullets.push(bullet);
-            }
-        });
-
-        bullets = bullets.filter(
-            bullet => !completedBullets.includes(bullet)
+    function playerAttack() {
+        const damage = Math.min(
+            8 + combo * 1.5,
+            25
         );
 
-        completedBullets.forEach(handleBulletImpact);
-    }
+        enemyHealth = clamp(enemyHealth - damage, 0, 100);
 
-    // BULLET IMPACT
+        score += Math.round(damage * 10);
 
-    function handleBulletImpact(bullet) {
-        const character = bullet.targetElement;
-
-        if (!character || !character.isConnected) return;
-
-        const rect = character.getBoundingClientRect();
-        const arenaRect = arena.getBoundingClientRect();
-
-        const x = rect.left + rect.width / 2 - arenaRect.left;
-        const y = rect.top + rect.height / 2 - arenaRect.top;
-
-        createCharacterImpact(x, y);
-
-        character.classList.add('destroyed');
-
-        const enemy = enemies.find(item =>
-            item.characterElements.includes(character)
-        );
-
-        if (!enemy) return;
-
-        enemy.pendingShots = Math.max(
-            0,
-            enemy.pendingShots - 1
-        );
-
-        if (
-            enemy.progress === enemy.word.length &&
-            enemy.pendingShots === 0
-        ) {
-            destroyEnemy(enemy);
-        }
-    }
-
-    // CHARACTER IMPACT EFFECT
-
-    function createCharacterImpact(x, y) {
-        for (let i = 0; i < 9; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const speed = Math.random() * 100 + 35;
-
-            particles.push({
-                x,
-                y,
-
-                vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed,
-
-                life: 0.2 + Math.random() * 0.2,
-                maxLife: 0.4,
-
-                size: Math.random() * 2.5 + 1
-            });
-        }
-    }
-
-    // WORD EXPLOSION
-
-    function createExplosion(x, y) {
-        for (let i = 0; i < 32; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const speed = Math.random() * 180 + 45;
-
-            particles.push({
-                x,
-                y,
-
-                vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed,
-
-                life: 0.7 + Math.random() * 0.5,
-                maxLife: 1.2,
-
-                size: Math.random() * 4 + 1
-            });
-        }
-    }
-
-    function updateParticles(dt) {
-        particles.forEach(particle => {
-            particle.x += particle.vx * dt;
-            particle.y += particle.vy * dt;
-
-            particle.vx *= 0.98;
-            particle.vy *= 0.98;
-
-            particle.life -= dt;
-
-            const alpha = Math.max(
-                0,
-                particle.life / particle.maxLife
-            );
-
-            ctx.globalAlpha = alpha;
-            ctx.fillStyle = '#56eaff';
-            ctx.shadowBlur = 12;
-            ctx.shadowColor = '#42e8ff';
-
-            ctx.beginPath();
-
-            ctx.arc(
-                particle.x,
-                particle.y,
-                particle.size,
-                0,
-                Math.PI * 2
-            );
-
-            ctx.fill();
-        });
-
-        ctx.globalAlpha = 1;
-        ctx.shadowBlur = 0;
-
-        particles = particles.filter(
-            particle => particle.life > 0
-        );
-    }
-
-    // DESTROY COMPLETE WORD
-
-    function destroyEnemy(enemy) {
-        if (!enemies.includes(enemy)) return;
-
-        createExplosion(enemy.x, enemy.y);
-
-        enemy.element?.remove();
-
-        enemies = enemies.filter(item => item !== enemy);
-
-        releaseTarget(enemy);
-
-        score += enemy.word.length * 100 + combo * 20;
-
-        wordsDestroyed++;
         combo++;
+        knockouts += enemyHealth <= 0 ? 1 : 0;
 
-        wave = Math.floor(wordsDestroyed / 5) + 1;
+        if (enemyHealth <= 0) {
+            score += 500;
+            enemyHealth = 100;
 
-        destroyedEl.textContent = wordsDestroyed;
-
-        statusEl.textContent = 'ENEMY DESTROYED';
+            showStatus('KNOCKOUT!');
+        } else {
+            showStatus('PLAYER ATTACK!');
+        }
 
         updateStats();
     }
 
-    // KEYBOARD COMBAT
+    // ======================================
+    // TYPING INPUT
+    // ======================================
 
-    function handleKeydown(event) {
+    function handleTyping(event) {
         if (paused || ended || saving) return;
 
-        if (event.repeat) return;
-
-        if (
-            event.ctrlKey ||
-            event.metaKey ||
-            event.altKey
-        ) return;
-
-        if (event.key.length !== 1) return;
-
-        if (difficulty === 'extreme') {
-            if (!/^[a-zA-Z0-9@#$%&*!?+\-_=]$/.test(event.key)) {
-                return;
-            }
-        } else if (!/^[a-zA-Z]$/.test(event.key)) {
+        if (event.inputType === 'insertFromPaste') {
+            input.value = typedWord;
             return;
         }
 
-        event.preventDefault();
+        const value = input.value;
 
-        const character = /^[a-zA-Z]$/.test(event.key)
-            ? event.key.toLowerCase()
-            : event.key;
+        if (value.length < typedWord.length) {
+            typedWord = value;
+            renderWord();
+            return;
+        }
 
-        totalChars++;
+        const newCharacters = value.slice(typedWord.length);
 
-        if (!activeEnemy) {
-            const matchingEnemy = enemies
-                .filter(enemy =>
-                    enemy.word.startsWith(character)
-                )
-                .sort((a, b) => b.y - a.y)[0];
+        for (const character of newCharacters) {
+            const expected = currentWord[typedWord.length];
 
-            if (!matchingEnemy) {
+            totalChars++;
+
+            if (
+                character.toLowerCase() ===
+                expected.toLowerCase()
+            ) {
+                typedWord += character;
+                correctChars++;
+
+                if (typedWord.length === currentWord.length) {
+                    playerAttack();
+                    nextWord();
+                }
+            } else {
                 mistakes++;
                 combo = 0;
 
-                statusEl.textContent = 'NO TARGET MATCH';
-
-                updateStats();
-                return;
+                showStatus('WRONG INPUT!');
             }
-
-            selectTarget(matchingEnemy);
         }
 
-        const expectedCharacter =
-            activeEnemy.word[activeEnemy.progress];
+        input.value = typedWord;
+        renderWord();
+        updateStats();
+    }
 
-        if (character !== expectedCharacter) {
-            mistakes++;
-            combo = 0;
+    input.addEventListener('input', handleTyping);
 
-            showWrongCharacter(activeEnemy);
+    // ======================================
+    // AI OPPONENT
+    // ======================================
 
-            statusEl.textContent = 'WRONG CHARACTER';
+    function aiAttack() {
+        const damage = config.aiDamage;
 
-            updateStats();
+        playerHealth = clamp(
+            playerHealth - damage,
+            0,
+            100
+        );
+
+        combo = 0;
+
+        showStatus('ENEMY ATTACK!');
+
+        if (playerHealth <= 0) {
+            endGame('loss');
             return;
         }
-
-        const enemy = activeEnemy;
-        const characterElement =
-            enemy.characterElements[enemy.progress];
-
-        if (!characterElement) return;
-
-        enemy.progress++;
-        enemy.pendingShots++;
-
-        correctChars++;
-
-        enemy.wrong = false;
-
-        fireCharacterBullet(enemy, characterElement);
-
-        statusEl.textContent = 'FIRING';
 
         updateStats();
     }
 
-    document.addEventListener('keydown', handleKeydown);
+    function updateAI(dt) {
+        aiTimer += dt;
 
-    // ENEMY MOVEMENT
-
-    function updateEnemies(dt) {
-        for (const enemy of [...enemies]) {
-            enemy.y += enemy.speed * dt;
-            enemy.phase += dt * 2;
-
-            updateEnemyPosition(enemy);
-
-            if (enemy.y >= ship.y - 35) {
-                missedWords++;
-
-                createExplosion(enemy.x, ship.y - 15);
-
-                enemy.element?.remove();
-
-                enemies = enemies.filter(
-                    item => item !== enemy
-                );
-
-                bullets = bullets.filter(
-                    bullet =>
-                        !enemy.characterElements.includes(
-                            bullet.targetElement
-                        )
-                );
-
-                if (enemy === activeEnemy) {
-                    releaseTarget(enemy);
-                }
-
-                combo = 0;
-
-                shipStatus.textContent = 'UNDER ATTACK';
-                statusEl.textContent = 'ENEMY BREACHED';
-            }
+        if (aiTimer >= config.aiDelay) {
+            aiTimer = 0;
+            aiAttack();
         }
     }
 
-    // GAME UPDATE
-
-    function updateGame(dt) {
-        elapsedTime += dt;
-        remainingTime -= dt;
-
-        spawnTimer += dt;
-
-        const spawnInterval = Math.max(
-            difficulty === 'extreme' ? 0.95 : 1.0,
-            config.spawn - (wave - 1) * 0.045
-        );
-
-        if (
-            spawnTimer >= spawnInterval &&
-            enemies.length < config.maxEnemies
-        ) {
-            spawnTimer = 0;
-            createEnemy();
-        }
-
-        updateEnemies(dt);
-
-        if (missedWords >= 3) {
-            endGame();
-            return;
-        }
-
-        if (remainingTime <= 0) {
-            remainingTime = 0;
-            endGame();
-            return;
-        }
-
-        if (elapsedTime - lastStatsUpdate >= 0.5) {
-            lastStatsUpdate = elapsedTime;
-            updateStats();
-        }
-    }
-
-    // DRAW FRAME
-
-    function drawFrame(dt) {
-        drawBackground(dt);
-
-        enemies.forEach(drawEnemy);
-
-        drawBullets(dt);
-
-        updateParticles(dt);
-
-        drawShip();
-
-        const danger = ctx.createLinearGradient(
-            0,
-            ship.y - 45,
-            0,
-            height
-        );
-
-        danger.addColorStop(0, 'rgba(255, 60, 90, 0)');
-        danger.addColorStop(1, 'rgba(255, 60, 90, 0.08)');
-
-        ctx.fillStyle = danger;
-
-        ctx.fillRect(
-            0,
-            ship.y - 45,
-            width,
-            height
-        );
-    }
-
+    // ======================================
     // STATS
+    // ======================================
 
     function updateStats() {
-        const minutes = Math.max(
-            elapsedTime / 60,
-            1 / 60
-        );
+        const minutes = Math.max(elapsedTime / 60, 1 / 60);
 
         const wpm = Math.round(
             (correctChars / 5) / minutes
         );
 
-        const accuracy = totalChars
+        const accuracy = totalChars > 0
             ? Math.round((correctChars / totalChars) * 100)
             : 100;
 
-        scoreEl.textContent = String(score).padStart(6, '0');
-        waveEl.textContent = String(wave).padStart(2, '0');
-        wpmEl.textContent = String(wpm).padStart(3, '0');
+        setText(scoreEl, String(score).padStart(6, '0'));
+        setText(roundEl, '01');
+        setText(wpmEl, String(wpm).padStart(3, '0'));
+        setText(accuracyEl, `${accuracy}%`);
+        setText(comboEl, `×${combo}`);
 
-        accuracyEl.textContent = `${accuracy}%`;
-        comboEl.textContent = `×${combo}`;
-
-        destroyedEl.textContent = wordsDestroyed;
+        setText(knockoutsEl, knockouts);
 
         const seconds = Math.ceil(remainingTime);
 
-        timerEl.textContent =
-            `00:${String(seconds).padStart(2, '0')}`;
-    }
+        setText(
+            timerEl,
+            `00:${String(seconds).padStart(2, '0')}`
+        );
 
-    // GAME LOOP
+        // Update health bars if present in HTML.
+        const playerBar = $('playerHealthBar');
+        const enemyBar = $('enemyHealthBar');
 
-    function gameLoop(timestamp) {
-        if (ended || paused) return;
-
-        const dt = previousFrame
-            ? Math.min((timestamp - previousFrame) / 1000, 0.05)
-            : 0;
-
-        previousFrame = timestamp;
-
-        updateGame(dt);
-
-        if (!ended) {
-            drawFrame(dt);
-            animationId = requestAnimationFrame(gameLoop);
+        if (playerBar) {
+            playerBar.style.width = `${playerHealth}%`;
         }
+
+        if (enemyBar) {
+            enemyBar.style.width = `${enemyHealth}%`;
+        }
+
+        setText($('playerHealth'), `${playerHealth}%`);
+        setText($('enemyHealth'), `${enemyHealth}%`);
     }
 
-    function startLoop() {
-        previousFrame = 0;
+    // ======================================
+    // GAME END
+    // ======================================
+
+    async function endGame(result = 'draw') {
+        if (ended || saving) return;
+
+        ended = true;
+        saving = true;
 
         cancelAnimationFrame(animationId);
 
-        animationId = requestAnimationFrame(gameLoop);
+        input.disabled = true;
+
+        if (playerHealth <= 0) {
+            result = 'loss';
+        } else if (enemyHealth <= 0) {
+            result = 'win';
+        }
+
+        showStatus('MATCH FINISHED');
+        setText(playerStatus, 'MATCH ENDED');
+
+        const duration = Math.max(1, Math.round(elapsedTime));
+
+        const accuracy = totalChars > 0
+            ? (correctChars / totalChars) * 100
+            : 100;
+
+        const wpm = Math.round(
+            (correctChars / 5) /
+            Math.max(elapsedTime / 60, 1 / 60)
+        );
+
+        const payload = {
+            difficulty,
+            result,
+            score,
+            wpm,
+            accuracy,
+            words_typed: knockouts,
+            mistakes,
+            wins: result === 'win' ? 1 : 0,
+            losses: result === 'loss' ? 1 : 0,
+            knockouts,
+            duration
+        };
+
+        try {
+            if (!saveUrl) {
+                throw new Error('Result save URL is missing.');
+            }
+
+            const response = await fetch(saveUrl, {
+                method: 'POST',
+
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.error || 'Unable to save match result.'
+                );
+            }
+
+            window.location.href =
+                `/type-fighter/result/${data.result_id}/`;
+
+        } catch (error) {
+            console.error(error);
+
+            saving = false;
+
+            showStatus('RESULT SAVE FAILED');
+
+            alert(error.message);
+        }
     }
 
+    // ======================================
     // CSRF
+    // ======================================
 
     function getCookie(name) {
         const cookies = document.cookie.split(';');
@@ -1083,145 +485,124 @@ document.addEventListener('DOMContentLoaded', () => {
         return '';
     }
 
-    // END GAME AND SAVE
-
-    async function endGame() {
-        if (ended || saving) return;
-
-        ended = true;
-        saving = true;
-
-        cancelAnimationFrame(animationId);
-
-        input.disabled = true;
-
-        statusEl.textContent = 'MISSION COMPLETED';
-        shipStatus.textContent = 'MISSION ENDED';
-
-        const duration = Math.max(
-            1,
-            Math.round(elapsedTime)
-        );
-
-        const accuracy = totalChars
-            ? (correctChars / totalChars) * 100
-            : 100;
-
-        const wpm = Math.round(
-            (correctChars / 5) /
-            Math.max(elapsedTime / 60, 1 / 60)
-        );
-
-        const matchResult = missedWords >= 3 ? 'loss' : 'win';
-
-        const result = {
-            difficulty,
-            result: matchResult,
-            score,
-            wpm,
-            accuracy,
-            words_typed: wordsDestroyed,
-            mistakes,
-            wins: matchResult === 'win' ? 1 : 0,
-            losses: matchResult === 'loss' ? 1 : 0,
-            knockouts: wordsDestroyed,
-            duration
-        };
-
-        try {
-            const response = await fetch(saveUrl, {
-                method: 'POST',
-
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-
-                body: JSON.stringify(result)
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(
-                    data.error || 'Unable to save result'
-                );
-            }
-
-            window.location.href =
-                `/space-shooter/result/${data.result_id}/`;
-
-        } catch (error) {
-            saving = false;
-            ended = false;
-
-            input.disabled = false;
-
-            statusEl.textContent = 'SAVE FAILED';
-
-            alert(error.message);
-        }
-    }
-
+    // ======================================
     // PAUSE / RESUME
+    // ======================================
 
-    pauseButton.addEventListener('click', () => {
+    function pauseGame() {
         if (ended || saving) return;
 
         paused = !paused;
 
-        pauseButton.innerHTML = paused
-            ? '▶ RESUME'
-            : 'Ⅱ PAUSE';
+        if (pauseButton) {
+            pauseButton.textContent = paused
+                ? '▶ RESUME'
+                : 'Ⅱ PAUSE';
+        }
+
+        if (messageEl) {
+            messageEl.style.display = paused ? 'flex' : 'none';
+
+            const title = messageEl.querySelector('strong');
+            const subtitle = messageEl.querySelector('small');
+
+            if (title) {
+                title.textContent = 'MATCH PAUSED';
+            }
+
+            if (subtitle) {
+                subtitle.textContent = 'Resume when ready';
+            }
+        }
 
         if (paused) {
             cancelAnimationFrame(animationId);
-
-            messageEl.querySelector('strong').textContent =
-                'MISSION PAUSED';
-
-            messageEl.querySelector('small').textContent =
-                'Resume when ready';
-
-            messageEl.style.display = 'flex';
-
         } else {
-            messageEl.style.display = 'none';
-
-            shipStatus.textContent = 'OPERATIONAL';
-
+            lastFrame = 0;
+            input.focus();
             startLoop();
         }
-    });
+    }
 
-    // QUIT MISSION
+    pauseButton?.addEventListener('click', pauseGame);
 
-    quitButton.addEventListener('click', () => {
+    // ======================================
+    // QUIT MATCH
+    // ======================================
+
+    quitButton?.addEventListener('click', () => {
         if (
-            confirm('End this mission and save your result?')
+            confirm('End this match and save your result?')
         ) {
-            endGame();
+            endGame('draw');
         }
     });
 
+    // ======================================
+    // GAME LOOP
+    // ======================================
+
+    function gameLoop(timestamp) {
+        if (paused || ended) return;
+
+        const dt = lastFrame
+            ? Math.min((timestamp - lastFrame) / 1000, 0.05)
+            : 0;
+
+        lastFrame = timestamp;
+
+        elapsedTime += dt;
+        remainingTime = Math.max(0, remainingTime - dt);
+
+        updateAI(dt);
+        updateStats();
+
+        if (remainingTime <= 0) {
+            if (playerHealth > 0 && playerHealth > enemyHealth) {
+                endGame('win');
+            } else if (playerHealth < enemyHealth) {
+                endGame('loss');
+            } else {
+                endGame('draw');
+            }
+
+            return;
+        }
+
+        animationId = requestAnimationFrame(gameLoop);
+    }
+
+    function startLoop() {
+        lastFrame = 0;
+
+        cancelAnimationFrame(animationId);
+
+        animationId = requestAnimationFrame(gameLoop);
+    }
+
+    // ======================================
     // INITIALIZE
+    // ======================================
 
-    resizeCanvas();
+    createWordDisplay();
+    nextWord();
 
-    messageEl.style.display = 'none';
+    if (messageEl) {
+        messageEl.style.display = 'none';
+    }
 
-    shipStatus.textContent = 'OPERATIONAL';
-    statusEl.textContent = 'ENEMY SCANNING';
+    setText(playerStatus, 'READY');
+    showStatus('FIGHT MODE ACTIVE');
 
     updateStats();
 
-    createEnemy();
+    arena.addEventListener('click', () => {
+        if (!paused && !ended) input.focus();
+    });
 
     input.focus();
 
-    arena.addEventListener('click', () => {
-        input.focus();
-    });
-
     startLoop();
+
+    console.log('Type Fighter combat system initialized.');
 });

@@ -18,7 +18,6 @@
     <main class="game-screen">
 
         <header class="game-header">
-
             <a href="{% url 'type_fighter' %}" class="back-home">
                 ✕ EXIT
             </a>
@@ -35,11 +34,9 @@
                 <span class="status-dot"></span>
                 {{ difficulty|upper }}
             </div>
-
         </header>
 
         <section class="game-hud">
-
             <div class="hud-item">
                 <span>SCORE</span>
                 <strong id="score">000000</strong>
@@ -47,7 +44,7 @@
 
             <div class="hud-item">
                 <span>ROUND</span>
-                <strong id="wave">01</strong>
+                <strong id="round">01</strong>
             </div>
 
             <div class="hud-item">
@@ -64,17 +61,40 @@
                 <span>COMBO</span>
                 <strong id="combo">×0</strong>
             </div>
-
         </section>
 
         <section class="game-arena" id="gameArena">
 
-            <canvas id="gameCanvas"></canvas>
+            <!-- Background is created by src/main.js -->
+            <canvas id="gameCanvas" style="display:none;"></canvas>
 
+            <!-- Fighter health -->
+            <div class="fighter-health-ui">
+                <div class="fighter-health player-health">
+                    <div class="fighter-name">PLAYER</div>
+                    <div class="health-track">
+                        <div id="playerHealthBar"
+                             class="health-fill"
+                             style="width:100%;"></div>
+                    </div>
+                    <span id="playerHealth">100%</span>
+                </div>
+
+                <div class="fighter-health enemy-health">
+                    <div class="fighter-name">ENEMY</div>
+                    <div class="health-track">
+                        <div id="enemyHealthBar"
+                             class="health-fill"
+                             style="width:100%;"></div>
+                    </div>
+                    <span id="enemyHealth">100%</span>
+                </div>
+            </div>
+
+            <!-- Typing word layer -->
             <div class="enemy-layer" id="enemyLayer"></div>
 
             <div class="arena-top">
-
                 <div class="arena-location">
                     <span class="live-indicator"></span>
                     FIGHTING ARENA
@@ -83,21 +103,15 @@
                 <div class="arena-warning" id="arenaStatus">
                     ENEMY INCOMING
                 </div>
-
             </div>
 
             <div class="game-message" id="gameMessage">
-
                 <span class="message-icon">⚔</span>
-
                 <strong>PREPARE TO FIGHT</strong>
-
                 <small>Type words to attack your opponent</small>
-
             </div>
 
             <div class="arena-bottom">
-
                 <div class="ship-status">
                     <span>PLAYER STATUS</span>
                     <strong id="shipStatus">READY</strong>
@@ -112,30 +126,20 @@
                     <span>KNOCKOUTS</span>
                     <strong id="destroyedCount">0</strong>
                 </div>
-
             </div>
 
         </section>
 
         <footer class="game-controls">
-
             <div class="controls-hint">
                 <strong>FIGHT MODE ACTIVE</strong>
-                <small>Type directly to attack your opponent</small>
+                <small>Type the displayed word to attack your opponent</small>
             </div>
 
             <div class="control-buttons">
-
-                <button type="button" id="pauseGame">
-                    Ⅱ PAUSE
-                </button>
-
-                <button type="button" id="quitGame">
-                    ✕ END MATCH
-                </button>
-
+                <button type="button" id="pauseGame">Ⅱ PAUSE</button>
+                <button type="button" id="quitGame">✕ END MATCH</button>
             </div>
-
         </footer>
 
     </main>
@@ -147,7 +151,7 @@
         autocomplete="off"
         autocapitalize="off"
         spellcheck="false"
-        aria-label="Game keyboard controls"
+        aria-label="Type words to attack"
     >
 
 </div>
@@ -155,5 +159,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'games/type_fighter/js/game.js' %}"></script>
+<script type="module" src="{% static 'games/type_fighter/dist/game.js' %}"></script>
+<script src="{% static 'games/type_fighter/js/game.js' %}" defer></script>
 {% endblock %}
