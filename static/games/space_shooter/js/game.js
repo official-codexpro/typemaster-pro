@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', () => {
     const root = document.getElementById('spaceShooterGame');
     if (!root) return;
@@ -33,49 +32,107 @@ document.addEventListener('DOMContentLoaded', () => {
     const CONFIG = {
         easy: {
             words: [
-                'cat', 'moon', 'star', 'ship',
-                'fire', 'planet', 'rocket', 'comet'
+                'cat', 'dog', 'sun', 'moon', 'star', 'ship', 'fire',
+                'book', 'game', 'tree', 'fish', 'bird', 'home', 'road',
+                'water', 'happy', 'green', 'light', 'smile', 'cloud',
+                'apple', 'music', 'river', 'plant', 'dream', 'space'
             ],
-            speed: 30,
-            spawn: 2.2
+            speed: 27,
+            spawn: 2.7,
+            maxEnemies: 4
         },
 
         normal: {
             words: [
-                'planet', 'rocket', 'galaxy', 'cosmic',
-                'system', 'meteor', 'nebula', 'orbit',
-                'asteroid', 'satellite'
+                'planet', 'rocket', 'galaxy', 'cosmic', 'system', 'meteor',
+                'nebula', 'orbit', 'asteroid', 'satellite', 'captain',
+                'mission', 'engine', 'oxygen', 'module', 'launch',
+                'signal', 'comet', 'lunar', 'gravity', 'energy', 'radar'
             ],
-            speed: 43,
-            spawn: 1.8
+            speed: 37,
+            spawn: 2.05,
+            maxEnemies: 5
         },
 
         hard: {
             words: [
-                'asteroid', 'velocity', 'universe',
-                'keyboard', 'mission', 'collision',
-                'gravity', 'spaceship'
+                'cat', 'orbit', 'ship', 'rocket', 'gravity', 'mission',
+                'asteroid', 'velocity', 'universe', 'keyboard', 'collision',
+                'spaceship', 'magnetic', 'telescope', 'astronaut',
+                'radiation', 'navigation', 'dimension', 'turbulence',
+                'trajectory', 'frequency', 'propulsion'
             ],
-            speed: 56,
-            spawn: 1.4
+            speed: 46,
+            spawn: 1.65,
+            maxEnemies: 6
         },
 
         extreme: {
             words: [
-                'javascript', 'technology', 'development',
-                'programming', 'interstellar',
-                'communication', 'exploration'
+                'dev@2026', 'X9#code', '7*space', 'run!42', 'AI_2049',
+                'root#99', 'Q3!nova', '0rb1t$', 'ship@7', '4x+2=10',
+                'neo%2026', 'Z8&star', 'go2Mars!', 'sys_404', 'H@ck5'
             ],
-            speed: 70,
-            spawn: 1.15
+            speed: 53,
+            spawn: 1.4,
+            maxEnemies: 7
         }
     };
 
     const config = CONFIG[difficulty] || CONFIG.normal;
 
-    // =====================================
+    const recentWords = [];
+    const RECENT_WORD_LIMIT = 12;
+
+    function generateExtremeWord() {
+        const letters = 'abcdefghijklmnopqrstuvwxyz';
+        const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const digits = '0123456789';
+        const symbols = '@#$%&*!?+-_=';
+
+        const pick = pool =>
+            pool[Math.floor(Math.random() * pool.length)];
+
+        const patterns = [
+            () => `${pick(letters)}${pick(letters)}${pick(digits)}${pick(symbols)}${pick(letters)}${pick(digits)}`,
+            () => `${pick(upper)}${pick(digits)}${pick(symbols)}${pick(letters)}${pick(letters)}${pick(digits)}`,
+            () => `${pick(letters)}${pick(letters)}${pick(letters)}${pick(symbols)}${pick(digits)}${pick(digits)}`,
+            () => `${pick(digits)}${pick(symbols)}${pick(letters)}${pick(letters)}${pick(digits)}${pick(symbols)}`,
+            () => `${pick(letters)}${pick(digits)}${pick(letters)}${pick(digits)}${pick(symbols)}${pick(letters)}${pick(digits)}`
+        ];
+
+        return pick(patterns)();
+    }
+
+    function getRandomWord() {
+        let candidate = '';
+        let attempts = 0;
+
+        do {
+            if (difficulty === 'extreme' && Math.random() < 0.65) {
+                candidate = generateExtremeWord();
+            } else {
+                candidate = config.words[
+                    Math.floor(Math.random() * config.words.length)
+                ];
+            }
+
+            attempts++;
+        } while (
+            recentWords.includes(candidate) &&
+            attempts < 40
+        );
+
+        recentWords.push(candidate);
+
+        if (recentWords.length > RECENT_WORD_LIMIT) {
+            recentWords.shift();
+        }
+
+        return candidate;
+    }
+
     // GAME STATE
-    // =====================================
 
     let width = 0;
     let height = 0;
@@ -102,7 +159,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let particles = [];
     let stars = [];
 
-    // Only one word can be locked at a time.
     let activeEnemy = null;
 
     let paused = false;
@@ -120,9 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
         y: 0
     };
 
-    // =====================================
     // CANVAS SIZE
-    // =====================================
 
     function resizeCanvas() {
         const rect = arena.getBoundingClientRect();
@@ -155,9 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('resize', resizeCanvas);
 
-    // =====================================
     // BACKGROUND
-    // =====================================
 
     function drawBackground(dt) {
         const gradient = ctx.createLinearGradient(
@@ -225,9 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // =====================================
     // SPACESHIP
-    // =====================================
 
     function drawShip() {
         ctx.save();
@@ -317,14 +367,10 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.restore();
     }
 
-    // =====================================
     // ENEMY CREATION
-    // =====================================
 
     function createEnemy() {
-        const word = config.words[
-            Math.floor(Math.random() * config.words.length)
-        ];
+        const word = getRandomWord();
 
         const enemy = {
             id: Math.random().toString(36).slice(2),
@@ -362,9 +408,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return enemy;
     }
 
-    // =====================================
     // CHARACTER RENDERING
-    // =====================================
 
     function renderEnemyWord(enemy) {
         if (!enemy.element) return;
@@ -406,9 +450,7 @@ document.addEventListener('DOMContentLoaded', () => {
         enemy.element.style.transform = 'translateX(-50%)';
     }
 
-    // =====================================
     // ENEMY DRAWING
-    // =====================================
 
     function drawEnemy(enemy) {
         const pulse = 1 + Math.sin(enemy.phase) * 0.05;
@@ -453,8 +495,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         ctx.restore();
 
-        // Target ring around the selected enemy.
-
         if (enemy === activeEnemy) {
             ctx.save();
 
@@ -477,9 +517,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // =====================================
     // TARGET LOCK
-    // =====================================
 
     function selectTarget(enemy) {
         if (!enemy || !enemies.includes(enemy)) return;
@@ -505,9 +543,7 @@ document.addEventListener('DOMContentLoaded', () => {
         enemy.element?.classList.remove('locked');
     }
 
-    // =====================================
     // WRONG CHARACTER
-    // =====================================
 
     function showWrongCharacter(enemy) {
         const index = enemy.progress;
@@ -519,10 +555,7 @@ document.addEventListener('DOMContentLoaded', () => {
         enemy.wrongIndex = index;
 
         character.classList.remove('wrong');
-
-        // Restart red animation.
         void character.offsetWidth;
-
         character.classList.add('wrong');
 
         clearTimeout(wrongTimeout);
@@ -535,9 +568,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 350);
     }
 
-    // =====================================
     // CHARACTER BULLET TARGET POSITION
-    // =====================================
 
     function getCharacterPosition(character) {
         const rect = character.getBoundingClientRect();
@@ -549,9 +580,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // =====================================
     // FIRE ONE BULLET PER CHARACTER
-    // =====================================
 
     function fireCharacterBullet(enemy, character) {
         const target = getCharacterPosition(character);
@@ -572,9 +601,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // =====================================
     // BULLET ANIMATION
-    // =====================================
 
     function drawBullets(dt) {
         const completedBullets = [];
@@ -584,7 +611,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const t = Math.min(bullet.progress, 1);
 
-            // Follow the character while the enemy moves.
             if (bullet.targetElement?.isConnected) {
                 const target = getCharacterPosition(
                     bullet.targetElement
@@ -600,7 +626,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const y = bullet.y +
                 (bullet.targetY - bullet.y) * t;
 
-            // Laser trail.
             ctx.save();
 
             ctx.shadowColor = '#42e8ff';
@@ -614,7 +639,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.lineTo(x, y - 15);
             ctx.stroke();
 
-            // Bullet core.
             ctx.fillStyle = '#ffffff';
 
             ctx.beginPath();
@@ -635,9 +659,7 @@ document.addEventListener('DOMContentLoaded', () => {
         completedBullets.forEach(handleBulletImpact);
     }
 
-    // =====================================
     // BULLET IMPACT
-    // =====================================
 
     function handleBulletImpact(bullet) {
         const character = bullet.targetElement;
@@ -652,7 +674,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         createCharacterImpact(x, y);
 
-        // Destroy only the character that was hit.
         character.classList.add('destroyed');
 
         const enemy = enemies.find(item =>
@@ -666,7 +687,6 @@ document.addEventListener('DOMContentLoaded', () => {
             enemy.pendingShots - 1
         );
 
-        // Complete the enemy only after every bullet hits.
         if (
             enemy.progress === enemy.word.length &&
             enemy.pendingShots === 0
@@ -675,9 +695,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // =====================================
     // CHARACTER IMPACT EFFECT
-    // =====================================
 
     function createCharacterImpact(x, y) {
         for (let i = 0; i < 9; i++) {
@@ -699,9 +717,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // =====================================
     // WORD EXPLOSION
-    // =====================================
 
     function createExplosion(x, y) {
         for (let i = 0; i < 32; i++) {
@@ -764,9 +780,7 @@ document.addEventListener('DOMContentLoaded', () => {
         );
     }
 
-    // =====================================
     // DESTROY COMPLETE WORD
-    // =====================================
 
     function destroyEnemy(enemy) {
         if (!enemies.includes(enemy)) return;
@@ -793,9 +807,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateStats();
     }
 
-    // =====================================
     // KEYBOARD COMBAT
-    // =====================================
 
     function handleKeydown(event) {
         if (paused || ended || saving) return;
@@ -810,16 +822,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (event.key.length !== 1) return;
 
-        if (!/^[a-zA-Z]$/.test(event.key)) return;
+        if (difficulty === 'extreme') {
+            if (!/^[a-zA-Z0-9@#$%&*!?+\-_=]$/.test(event.key)) {
+                return;
+            }
+        } else if (!/^[a-zA-Z]$/.test(event.key)) {
+            return;
+        }
 
         event.preventDefault();
 
-        const character = event.key.toLowerCase();
+        const character = /^[a-zA-Z]$/.test(event.key)
+            ? event.key.toLowerCase()
+            : event.key;
 
         totalChars++;
 
-        // No active target:
-        // First character selects an enemy word.
         if (!activeEnemy) {
             const matchingEnemy = enemies
                 .filter(enemy =>
@@ -840,7 +858,6 @@ document.addEventListener('DOMContentLoaded', () => {
             selectTarget(matchingEnemy);
         }
 
-        // Lock stays on this enemy until it is destroyed.
         const expectedCharacter =
             activeEnemy.word[activeEnemy.progress];
 
@@ -856,8 +873,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Correct character:
-        // Fire a separate bullet at this exact character.
         const enemy = activeEnemy;
         const characterElement =
             enemy.characterElements[enemy.progress];
@@ -875,18 +890,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         statusEl.textContent = 'FIRING';
 
-        // Do not switch targets here.
-        // The current target remains locked until all its
-        // character bullets hit and the word is destroyed.
-
         updateStats();
     }
 
     document.addEventListener('keydown', handleKeydown);
 
-    // =====================================
     // ENEMY MOVEMENT
-    // =====================================
 
     function updateEnemies(dt) {
         for (const enemy of [...enemies]) {
@@ -906,7 +915,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     item => item !== enemy
                 );
 
-                // Remove bullets targeting this enemy.
                 bullets = bullets.filter(
                     bullet =>
                         !enemy.characterElements.includes(
@@ -926,9 +934,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // =====================================
     // GAME UPDATE
-    // =====================================
 
     function updateGame(dt) {
         elapsedTime += dt;
@@ -937,11 +943,14 @@ document.addEventListener('DOMContentLoaded', () => {
         spawnTimer += dt;
 
         const spawnInterval = Math.max(
-            0.55,
-            config.spawn - (wave - 1) * 0.07
+            difficulty === 'extreme' ? 0.95 : 1.0,
+            config.spawn - (wave - 1) * 0.045
         );
 
-        if (spawnTimer >= spawnInterval) {
+        if (
+            spawnTimer >= spawnInterval &&
+            enemies.length < config.maxEnemies
+        ) {
             spawnTimer = 0;
             createEnemy();
         }
@@ -965,9 +974,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // =====================================
     // DRAW FRAME
-    // =====================================
 
     function drawFrame(dt) {
         drawBackground(dt);
@@ -1000,9 +1007,7 @@ document.addEventListener('DOMContentLoaded', () => {
         );
     }
 
-    // =====================================
     // STATS
-    // =====================================
 
     function updateStats() {
         const minutes = Math.max(
@@ -1033,9 +1038,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `00:${String(seconds).padStart(2, '0')}`;
     }
 
-    // =====================================
     // GAME LOOP
-    // =====================================
 
     function gameLoop(timestamp) {
         if (ended || paused) return;
@@ -1062,9 +1065,7 @@ document.addEventListener('DOMContentLoaded', () => {
         animationId = requestAnimationFrame(gameLoop);
     }
 
-    // =====================================
     // CSRF
-    // =====================================
 
     function getCookie(name) {
         const cookies = document.cookie.split(';');
@@ -1082,9 +1083,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return '';
     }
 
-    // =====================================
     // END GAME AND SAVE
-    // =====================================
 
     async function endGame() {
         if (ended || saving) return;
@@ -1161,9 +1160,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // =====================================
     // PAUSE / RESUME
-    // =====================================
 
     pauseButton.addEventListener('click', () => {
         if (ended || saving) return;
@@ -1194,9 +1191,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // =====================================
     // QUIT MISSION
-    // =====================================
 
     quitButton.addEventListener('click', () => {
         if (
@@ -1206,9 +1201,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // =====================================
     // INITIALIZE
-    // =====================================
 
     resizeCanvas();
 
