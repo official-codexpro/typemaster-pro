@@ -1376,3 +1376,327 @@ html[data-theme="dark"] .theme-toggle-btn:hover {
     border-color: #7250c7;
     box-shadow: 0 5px 16px rgba(139, 92, 246, 0.16);
 }
+
+
+/* =========================================================
+   TYPEMASTER PRO — GAMES NAVIGATION DROPDOWN
+========================================================= */
+
+.games-nav-dropdown {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    z-index: 150;
+}
+
+/* TRIGGER */
+
+.games-nav-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+
+    padding: 10px 16px;
+    border: none;
+    border-radius: 9px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+    user-select: none;
+    background: transparent;
+
+    transition: color .2s ease, background-color .2s ease;
+}
+
+.games-nav-arrow {
+    flex-shrink: 0;
+    transition: transform .2s ease;
+}
+
+/* DROPDOWN PANEL */
+
+.games-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+
+    width: 290px;
+    padding: 8px;
+    margin-top: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+
+    box-shadow: 0 12px 35px rgba(0,0,0,.10);
+
+    z-index: 200;
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(8px);
+
+    transition:
+        opacity .2s ease,
+        visibility .2s ease,
+        transform .2s ease;
+}
+
+/* INVISIBLE HOVER BRIDGE — NO GAP */
+
+.games-dropdown-menu::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -14px;
+    height: 14px;
+}
+
+/* DESKTOP HOVER */
+
+@media (hover: hover) and (pointer: fine) {
+
+    .games-nav-dropdown:hover .games-dropdown-menu,
+    .games-nav-dropdown:focus-within .games-dropdown-menu {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transform: translateY(0);
+    }
+
+    .games-nav-dropdown:hover .games-nav-arrow,
+    .games-nav-dropdown:focus-within .games-nav-arrow {
+        transform: rotate(180deg);
+    }
+
+    .games-nav-dropdown:hover .games-nav-trigger,
+    .games-nav-dropdown:focus-within .games-nav-trigger {
+        color: var(--accent-text);
+    }
+}
+
+/* MOBILE CLICK SUPPORT */
+
+@media (hover: none), (pointer: coarse) {
+
+    .games-nav-dropdown:focus-within .games-dropdown-menu {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transform: translateY(0);
+    }
+}
+
+/* LINKS */
+
+.games-dropdown-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    width: 100%;
+    min-width: 0;
+    padding: 12px;
+
+    border-radius: 10px;
+    text-decoration: none;
+
+    color: #262626;
+    background: transparent;
+
+    transition:
+        background-color .2s ease,
+        color .2s ease,
+        transform .2s ease;
+}
+
+/* ICONS */
+
+.games-dropdown-icon {
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+    font-size: 21px;
+    border-radius: 11px;
+}
+
+.shooter-icon {
+    background: #eef2ff;
+}
+
+.racing-icon {
+    background: #fff7ed;
+}
+
+/* TEXT */
+
+.games-dropdown-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    flex: 1;
+    min-width: 0;
+}
+
+.games-dropdown-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #262626;
+}
+
+.games-dropdown-description {
+    font-size: 11px;
+    line-height: 1.4;
+    color: #737373;
+}
+
+/* LINK ARROW */
+
+.games-dropdown-arrow {
+    flex-shrink: 0;
+    color: #a3a3a3;
+    opacity: 0;
+    transform: translateX(-4px);
+
+    transition: opacity .2s ease, transform .2s ease;
+}
+
+/* COMING SOON */
+
+.games-coming-soon {
+    flex-shrink: 0;
+    padding: 4px 7px;
+
+    border-radius: 5px;
+    background: #f3f4f6;
+    color: #737373;
+
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .6px;
+}
+
+/* LIGHT HOVER */
+
+.games-dropdown-link:hover {
+    background: #f5f3ff;
+    transform: translateX(2px);
+}
+
+.games-dropdown-link:hover .games-dropdown-title {
+    color: #6d28d9;
+}
+
+.games-dropdown-link:hover .games-dropdown-arrow {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* =========================================================
+   DARK THEME
+========================================================= */
+
+html[data-theme="dark"] .games-dropdown-menu {
+    background: #151821;
+    border-color: #303543;
+
+    box-shadow: 0 15px 40px rgba(0,0,0,.45);
+}
+
+html[data-theme="dark"] .theme-header .games-nav-trigger {
+    color: #a1a1aa !important;
+    background: transparent !important;
+}
+
+html[data-theme="dark"] .games-dropdown-title {
+    color: #f5f5f5;
+}
+
+html[data-theme="dark"] .games-dropdown-description {
+    color: #858b99;
+}
+
+html[data-theme="dark"] .shooter-icon {
+    background: rgba(99,102,241,.15);
+}
+
+html[data-theme="dark"] .racing-icon {
+    background: rgba(249,115,22,.12);
+}
+
+html[data-theme="dark"] .games-coming-soon {
+    background: #292e3b;
+    color: #a1a1aa;
+}
+
+html[data-theme="dark"] .theme-header .games-dropdown-link:hover {
+    background: #222633 !important;
+    transform: translateX(2px);
+}
+
+html[data-theme="dark"] .games-dropdown-link:hover .games-dropdown-title {
+    color: #b69aff !important;
+}
+
+html[data-theme="dark"] .games-dropdown-arrow {
+    color: #a78bfa;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    html[data-theme="dark"] .games-nav-dropdown:hover .games-nav-trigger {
+        color: #b69aff !important;
+        background: rgba(139,92,246,.12) !important;
+    }
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 640px) {
+
+    .games-dropdown-menu {
+        width: min(290px, calc(100vw - 32px));
+        left: auto;
+        right: 0;
+    }
+
+    .games-nav-trigger {
+        padding: 9px 12px;
+    }
+
+    .games-dropdown-link {
+        padding: 11px;
+    }
+}
+
+/* ACCESSIBILITY */
+
+.games-nav-trigger:focus-visible,
+.games-dropdown-link:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+/* REDUCED MOTION */
+
+@media (prefers-reduced-motion: reduce) {
+    .games-dropdown-menu,
+    .games-dropdown-link,
+    .games-nav-arrow {
+        transition: none;
+    }
+}
