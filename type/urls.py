@@ -24,6 +24,12 @@ urlpatterns = [
     path('space-shooter/result/<int:result_id>/',views.space_shooter_result,name='space_shooter_result'),
     path('space-shooter/save/',views.save_space_shooter_result,name='save_space_shooter_result'),
 
+    # Car Racing
+    path('car-racing/', views.car_racing, name='car_racing'),
+    path('car-racing/play/', views.car_racing_game, name='car_racing_game'),
+    path('car-racing/result/<int:result_id>/', views.car_racing_result, name='car_racing_result'),
+    path('car-racing/save/', views.save_car_racing_result, name='save_car_racing_result'),
+
 
     # Password Reset
     path(

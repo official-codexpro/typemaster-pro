@@ -26,7 +26,7 @@ from .forms import (
     ProfileUpdateForm,
 )
 
-from .models import UserProfile, TestResult, SpaceShooterResult
+from .models import (UserProfile, TestResult, SpaceShooterResult, CarRacingResult,)
 
 
 # =========================================================
@@ -1489,6 +1489,185 @@ def save_space_shooter_result(request):
         return JsonResponse({
             'success': True,
             'result_id': result.id
+        })
+
+    except (ValueError, TypeError, json.JSONDecodeError):
+        return JsonResponse(
+            {'error': 'Invalid result data'},
+            status=400
+        )
+
+
+# =========================================================
+# CAR RACING GAME
+# =========================================================
+
+@ensure_csrf_cookie
+def car_racing(request):
+
+    stats = {
+        'total_games': 0,
+        'best_score': 0,
+        'average_wpm': 0,
+        'average_accuracy': 0,
+    }
+
+    history = []
+    game_chart_data = []
+
+    difficulty_stats = [
+        {
+            'difficulty': level.title(),
+            'total_games': 0,
+            'average_wpm': 0,
+            'average_accuracy': 0,
+        }
+        for level in ['easy', 'normal', 'hard', 'extreme']
+    ]
+
+    if request.user.is_authenticated:
+
+        results = CarRacingResult.objects.filter(
+            user=request.user
+        )
+
+        summary = results.aggregate(
+            total_games=Count('id'),
+            best_score=Max('score'),
+            average_wpm=Avg('wpm'),
+            average_accuracy=Avg('accuracy'),
+        )
+
+        stats = {
+            'total_games': summary['total_games'] or 0,
+            'best_score': summary['best_score'] or 0,
+            'average_wpm': round(summary['average_wpm'] or 0),
+            'average_accuracy': round(
+                summary['average_accuracy'] or 0, 1
+            ),
+        }
+
+        difficulty_data = (
+            results
+            .values('difficulty')
+            .annotate(
+                total_games=Count('id'),
+                average_wpm=Avg('wpm'),
+                average_accuracy=Avg('accuracy'),
+            )
+        )
+
+        for item in difficulty_data:
+            for card in difficulty_stats:
+                if card['difficulty'].lower() == item['difficulty']:
+                    card['total_games'] = item['total_games']
+                    card['average_wpm'] = round(
+                        item['average_wpm'] or 0
+                    )
+                    card['average_accuracy'] = round(
+                        item['average_accuracy'] or 0, 1
+                    )
+                    break
+
+        history = list(results.order_by('-created_at')[:10])
+
+        chart_results = list(
+            results.order_by('-created_at')[:10]
+        )
+        chart_results.reverse()
+
+        game_chart_data = [
+            {
+                'date': result.created_at.strftime('%d %b'),
+                'wpm': result.wpm,
+                'accuracy': float(result.accuracy),
+            }
+            for result in chart_results
+        ]
+
+    return render(
+        request,
+        'games/car_game/home.html',
+        {
+            'stats': stats,
+            'history': history,
+            'game_chart_data': game_chart_data,
+            'difficulty_stats': difficulty_stats,
+        }
+    )
+
+
+@login_required
+@ensure_csrf_cookie
+def car_racing_game(request):
+
+    difficulty = request.GET.get('difficulty', 'normal')
+
+    if difficulty not in ['easy', 'normal', 'hard', 'extreme']:
+        difficulty = 'normal'
+
+    return render(
+        request,
+        'games/car_game/game.html',
+        {'difficulty': difficulty}
+    )
+
+
+@login_required
+def car_racing_result(request, result_id):
+
+    result = CarRacingResult.objects.get(
+        id=result_id,
+        user=request.user
+    )
+
+    return render(
+        request,
+        'games/car_game/result.html',
+        {'result': result}
+    )
+
+
+@require_POST
+@csrf_protect
+def save_car_racing_result(request):
+
+    if not request.user.is_authenticated:
+        return JsonResponse(
+            {'error': 'Login required'},
+            status=401
+        )
+
+    try:
+        data = json.loads(request.body)
+
+        difficulty = data.get('difficulty', 'normal')
+
+        if difficulty not in ['easy', 'normal', 'hard', 'extreme']:
+            return JsonResponse(
+                {'error': 'Invalid difficulty'},
+                status=400
+            )
+
+        result = CarRacingResult.objects.create(
+            user=request.user,
+            difficulty=difficulty,
+            score=max(0, int(data.get('score', 0))),
+            wpm=max(0, int(data.get('wpm', 0))),
+            accuracy=max(
+                0,
+                min(100, float(data.get('accuracy', 0)))
+            ),
+            words_typed=max(0, int(data.get('words_typed', 0))),
+            distance=max(0, int(data.get('distance', 0))),
+            collisions=max(0, int(data.get('collisions', 0))),
+            mistakes=max(0, int(data.get('mistakes', 0))),
+            duration=max(0, int(data.get('duration', 0))),
+        )
+
+        return JsonResponse({
+            'success': True,
+            'result_id': result.id,
         })
 
     except (ValueError, TypeError, json.JSONDecodeError):

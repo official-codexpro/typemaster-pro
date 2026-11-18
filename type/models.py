@@ -162,3 +162,51 @@ class SpaceShooterResult(models.Model):
             f'{self.user.username} - '
             f'{self.difficulty} - {self.score}'
         )
+
+
+class CarRacingResult(models.Model):
+
+    DIFFICULTY_CHOICES = [
+        ('easy', 'Easy'),
+        ('normal', 'Normal'),
+        ('hard', 'Hard'),
+        ('extreme', 'Extreme'),
+    ]
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='car_racing_results'
+    )
+
+    difficulty = models.CharField(
+        max_length=10,
+        choices=DIFFICULTY_CHOICES
+    )
+
+    score = models.PositiveIntegerField(default=0)
+    wpm = models.PositiveIntegerField(default=0)
+    accuracy = models.FloatField(default=0)
+
+    words_typed = models.PositiveIntegerField(default=0)
+    distance = models.PositiveIntegerField(default=0)
+    collisions = models.PositiveIntegerField(default=0)
+    mistakes = models.PositiveIntegerField(default=0)
+
+    duration = models.PositiveIntegerField(default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', '-created_at']),
+            models.Index(fields=['user', 'difficulty']),
+        ]
+
+    def __str__(self):
+        return (
+            f'{self.user.username} - '
+            f'{self.difficulty} - {self.score}'
+        )
+

@@ -1,0 +1,130 @@
+
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}Retro Racing | TypeMaster Pro{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'games/car_game/css/game.css' %}">
+{% endblock %}
+
+{% block content %}
+<div
+    id="carRacingGame"
+    class="car-game"
+    data-difficulty="{{ difficulty }}"
+    data-save-url="{% url 'save_car_racing_result' %}"
+    data-home-url="{% url 'car_racing' %}"
+>
+    <!-- Game Header -->
+    <header class="game-header">
+        <a href="{% url 'car_racing' %}" class="exit-button">
+            <span>←</span> EXIT
+        </a>
+
+        <div class="game-brand">
+            <span class="brand-icon">🏎️</span>
+            <div>
+                <h1>RETRO RACING</h1>
+                <p>TYPE YOUR WAY TO VICTORY</p>
+            </div>
+        </div>
+
+        <div class="difficulty-badge" id="difficultyBadge">
+            {{ difficulty|upper }}
+        </div>
+    </header>
+
+    <!-- Game Stats -->
+    <section class="game-stats">
+        <div class="stat-card">
+            <span>SCORE</span>
+            <strong id="scoreValue">0</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>WPM</span>
+            <strong id="wpmValue">0</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>ACCURACY</span>
+            <strong id="accuracyValue">100%</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>DISTANCE</span>
+            <strong><span id="distanceValue">0</span> KM</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>COLLISIONS</span>
+            <strong id="collisionValue">0</strong>
+        </div>
+    </section>
+
+    <!-- Game Stage -->
+    <main class="game-stage">
+        <canvas id="racingCanvas"></canvas>
+
+        <div class="stage-overlay" id="startOverlay">
+            <div class="overlay-content">
+                <span class="overlay-icon">🏁</span>
+                <h2>READY TO RACE?</h2>
+                <p>Type the displayed words to accelerate and overtake traffic.</p>
+                <button id="startButton" type="button">
+                    START RACE
+                </button>
+            </div>
+        </div>
+
+        <div class="pause-overlay hidden" id="pauseOverlay">
+            <div class="overlay-content">
+                <h2>GAME PAUSED</h2>
+                <button id="resumeButton" type="button">RESUME</button>
+            </div>
+        </div>
+
+        <div class="countdown-overlay hidden" id="countdownOverlay">
+            <strong id="countdownValue">3</strong>
+        </div>
+
+        <div class="race-message" id="raceMessage"></div>
+    </main>
+
+    <!-- Typing Controls -->
+    <section class="typing-panel">
+        <div class="target-word-area">
+            <span>NEXT WORD</span>
+            <strong id="targetWord">READY</strong>
+        </div>
+
+        <div class="typing-input-area">
+            <input
+                type="text"
+                id="typingInput"
+                placeholder="Type the word and press space..."
+                autocomplete="off"
+                autocapitalize="off"
+                spellcheck="false"
+                disabled
+            >
+
+            <p id="typingFeedback">Start the race to begin typing.</p>
+        </div>
+    </section>
+
+    <!-- Game Controls -->
+    <footer class="game-controls">
+        <p>⌨️ Type correctly to accelerate · Wrong words increase collision risk</p>
+
+        <button id="pauseButton" type="button" disabled>
+            PAUSE
+        </button>
+    </footer>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'games/car_game/js/game.js' %}" defer></script>
+{% endblock %}

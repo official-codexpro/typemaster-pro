@@ -1,0 +1,147 @@
+
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}Race Results | TypeMaster Pro{% endblock %}
+
+{% block content %}
+
+<div class="min-h-screen bg-neutral-50 dark:bg-[#0f1117] px-4 py-12">
+
+    <div class="max-w-4xl mx-auto">
+
+        <!-- HEADER -->
+        <div class="text-center mb-10">
+
+            <div class="text-6xl mb-5">🏁</div>
+
+            <p class="text-xs font-black tracking-[4px] text-violet-600 uppercase">
+                Race Completed
+            </p>
+
+            <h1 class="text-4xl md:text-5xl font-black text-neutral-900 dark:text-white mt-3">
+                Your Race Results
+            </h1>
+
+            <p class="text-sm text-neutral-500 dark:text-white/50 mt-3">
+                Here's how you performed on the track.
+            </p>
+
+        </div>
+
+        <!-- FINAL SCORE -->
+        <div class="rounded-3xl p-8 md:p-12 text-center bg-gradient-to-br from-violet-600 to-indigo-700 text-white shadow-xl">
+
+            <p class="text-xs font-bold tracking-[3px] text-white/70">
+                FINAL SCORE
+            </p>
+
+            <h2 class="text-6xl md:text-7xl font-black mt-4 tabular-nums">
+                {{ result.score }}
+            </h2>
+
+            <div class="mt-5 inline-flex px-5 py-2 rounded-full bg-white/15 text-sm font-bold">
+                {{ result.get_difficulty_display }} Difficulty
+            </div>
+
+        </div>
+
+        <!-- RESULT STATS -->
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-7">
+
+            <div class="rounded-2xl p-6 bg-white dark:bg-[#191c26] border border-neutral-200 dark:border-white/10">
+                <p class="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                    WPM
+                </p>
+                <h3 class="text-3xl font-black text-neutral-900 dark:text-white mt-3">
+                    {{ result.wpm }}
+                </h3>
+            </div>
+
+            <div class="rounded-2xl p-6 bg-white dark:bg-[#191c26] border border-neutral-200 dark:border-white/10">
+                <p class="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                    Accuracy
+                </p>
+                <h3 class="text-3xl font-black text-green-500 mt-3">
+                    {{ result.accuracy }}%
+                </h3>
+            </div>
+
+            <div class="rounded-2xl p-6 bg-white dark:bg-[#191c26] border border-neutral-200 dark:border-white/10">
+                <p class="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                    Words Typed
+                </p>
+                <h3 class="text-3xl font-black text-neutral-900 dark:text-white mt-3">
+                    {{ result.words_typed }}
+                </h3>
+            </div>
+
+            <div class="rounded-2xl p-6 bg-white dark:bg-[#191c26] border border-neutral-200 dark:border-white/10">
+                <p class="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                    Distance
+                </p>
+                <h3 class="text-3xl font-black text-neutral-900 dark:text-white mt-3">
+                    {{ result.distance }} <span class="text-sm">KM</span>
+                </h3>
+            </div>
+
+            <div class="rounded-2xl p-6 bg-white dark:bg-[#191c26] border border-neutral-200 dark:border-white/10">
+                <p class="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                    Collisions
+                </p>
+                <h3 class="text-3xl font-black text-red-500 mt-3">
+                    {{ result.collisions }}
+                </h3>
+            </div>
+
+            <div class="rounded-2xl p-6 bg-white dark:bg-[#191c26] border border-neutral-200 dark:border-white/10">
+                <p class="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                    Mistakes
+                </p>
+                <h3 class="text-3xl font-black text-neutral-900 dark:text-white mt-3">
+                    {{ result.mistakes }}
+                </h3>
+            </div>
+
+        </div>
+
+        <!-- DURATION -->
+        <div class="mt-5 rounded-2xl p-6 bg-white dark:bg-[#191c26] border border-neutral-200 dark:border-white/10 flex items-center justify-between">
+
+            <div>
+                <p class="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                    Race Duration
+                </p>
+                <p class="text-xl font-black text-neutral-900 dark:text-white mt-2">
+                    {{ result.duration }} Seconds
+                </p>
+            </div>
+
+            <span class="text-3xl">⏱️</span>
+
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="flex flex-col sm:flex-row gap-4 mt-9">
+
+            <a
+                href="{% url 'car_racing' %}"
+                class="flex-1 text-center py-4 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-black text-sm transition"
+            >
+                BACK TO GARAGE
+            </a>
+
+            <a
+                href="{% url 'car_racing_game' %}?difficulty={{ result.difficulty }}"
+                class="flex-1 text-center py-4 rounded-xl border border-neutral-300 dark:border-white/15 text-neutral-800 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 font-black text-sm transition"
+            >
+                RACE AGAIN
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

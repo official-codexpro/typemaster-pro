@@ -1,0 +1,446 @@
+
+/* =========================================
+   RETRO RACING - GAME UI
+========================================= */
+
+.car-game {
+    --race-bg: #090b12;
+    --race-panel: #111522;
+    --race-border: rgba(255, 255, 255, 0.09);
+    --race-text: #ffffff;
+    --race-muted: #9299aa;
+    --race-accent: #a78bfa;
+    --race-green: #4ade80;
+
+    width: 100%;
+    min-height: 100vh;
+    padding: 24px;
+    color: var(--race-text);
+    background: var(--race-bg);
+    font-family: Inter, sans-serif;
+}
+
+.car-game * {
+    box-sizing: border-box;
+}
+
+.car-game button,
+.car-game input {
+    font: inherit;
+}
+
+/* Header */
+
+.game-header {
+    max-width: 1400px;
+    margin: 0 auto 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.exit-button {
+    color: var(--race-muted);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    transition: color 0.2s ease;
+}
+
+.exit-button:hover {
+    color: var(--race-text);
+}
+
+.exit-button span {
+    margin-right: 6px;
+    font-size: 20px;
+}
+
+.game-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.brand-icon {
+    font-size: 34px;
+}
+
+.game-brand h1 {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 900;
+    letter-spacing: 2px;
+}
+
+.game-brand p {
+    margin: 4px 0 0;
+    color: var(--race-muted);
+    font-size: 9px;
+    letter-spacing: 2px;
+}
+
+.difficulty-badge {
+    padding: 9px 15px;
+    border: 1px solid rgba(167, 139, 250, 0.35);
+    border-radius: 8px;
+    color: #c4b5fd;
+    background: rgba(167, 139, 250, 0.1);
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+/* Stats */
+
+.game-stats {
+    max-width: 1400px;
+    margin: 0 auto 18px;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.stat-card {
+    padding: 15px 18px;
+    border: 1px solid var(--race-border);
+    border-radius: 12px;
+    background: var(--race-panel);
+}
+
+.stat-card span {
+    display: block;
+    color: var(--race-muted);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+}
+
+.stat-card strong {
+    display: block;
+    margin-top: 7px;
+    font-size: 23px;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Game Stage */
+
+.game-stage {
+    position: relative;
+    width: 100%;
+    max-width: 1400px;
+    height: clamp(340px, 55vw, 590px);
+    margin: 0 auto;
+    overflow: hidden;
+    border: 1px solid var(--race-border);
+    border-radius: 16px;
+    background: #101827;
+    isolation: isolate;
+}
+
+#racingCanvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* Overlays */
+
+.stage-overlay,
+.pause-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(5, 8, 16, 0.78);
+    backdrop-filter: blur(7px);
+}
+
+.overlay-content {
+    width: min(100%, 390px);
+    padding: 35px 25px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 18px;
+    background: rgba(17, 21, 34, 0.95);
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.35);
+}
+
+.overlay-icon {
+    display: block;
+    margin-bottom: 15px;
+    font-size: 52px;
+}
+
+.overlay-content h2 {
+    margin: 0 0 12px;
+    font-size: 24px;
+    font-weight: 950;
+    letter-spacing: 1px;
+}
+
+.overlay-content p {
+    margin: 0 0 24px;
+    color: var(--race-muted);
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.overlay-content button {
+    width: 100%;
+    padding: 14px 20px;
+    border: 0;
+    border-radius: 9px;
+    color: #100d1b;
+    background: var(--race-accent);
+    font-size: 12px;
+    font-weight: 950;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.overlay-content button:hover {
+    filter: brightness(1.12);
+    transform: translateY(-2px);
+}
+
+.hidden {
+    display: none !important;
+}
+
+.countdown-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.2);
+    pointer-events: none;
+}
+
+.countdown-overlay strong {
+    color: white;
+    font-size: clamp(65px, 12vw, 120px);
+    font-weight: 1000;
+    text-shadow: 0 5px 35px rgba(0, 0, 0, 0.5);
+}
+
+.race-message {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    z-index: 4;
+    color: white;
+    font-size: 18px;
+    font-weight: 900;
+    text-align: center;
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
+/* Typing Panel */
+
+.typing-panel {
+    max-width: 1400px;
+    margin: 18px auto 0;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 180px minmax(0, 1fr);
+    gap: 20px;
+    align-items: center;
+    border: 1px solid var(--race-border);
+    border-radius: 14px;
+    background: var(--race-panel);
+}
+
+.target-word-area {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.target-word-area span {
+    color: var(--race-muted);
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+}
+
+.target-word-area strong {
+    color: var(--race-accent);
+    font-size: 25px;
+    font-weight: 950;
+    overflow-wrap: anywhere;
+}
+
+.typing-input-area input {
+    width: 100%;
+    min-height: 54px;
+    padding: 0 17px;
+    outline: none;
+    border: 1px solid rgba(167, 139, 250, 0.3);
+    border-radius: 9px;
+    color: white;
+    background: rgba(0, 0, 0, 0.2);
+    font-size: 15px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.typing-input-area input:focus {
+    border-color: var(--race-accent);
+    box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1);
+}
+
+.typing-input-area input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.typing-input-area p {
+    margin: 8px 0 0;
+    color: var(--race-muted);
+    font-size: 11px;
+}
+
+/* Footer Controls */
+
+.game-controls {
+    max-width: 1400px;
+    margin: 16px auto 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.game-controls p {
+    margin: 0;
+    color: var(--race-muted);
+    font-size: 11px;
+}
+
+.game-controls button {
+    padding: 10px 20px;
+    border: 1px solid var(--race-border);
+    border-radius: 8px;
+    color: white;
+    background: var(--race-panel);
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.game-controls button:hover:not(:disabled) {
+    border-color: var(--race-accent);
+    background: rgba(167, 139, 250, 0.12);
+}
+
+.game-controls button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Responsive */
+
+@media (max-width: 768px) {
+    .car-game {
+        padding: 15px;
+    }
+
+    .game-header {
+        flex-wrap: wrap;
+    }
+
+    .game-brand {
+        order: -1;
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 8px;
+    }
+
+    .game-stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .stat-card {
+        padding: 12px;
+    }
+
+    .stat-card strong {
+        font-size: 19px;
+    }
+
+    .game-stage {
+        height: 430px;
+    }
+
+    .typing-panel {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .target-word-area {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+@media (max-width: 480px) {
+    .car-game {
+        padding: 10px;
+    }
+
+    .game-brand h1 {
+        font-size: 16px;
+    }
+
+    .game-brand p {
+        font-size: 8px;
+    }
+
+    .brand-icon {
+        font-size: 28px;
+    }
+
+    .game-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .stat-card:last-child {
+        grid-column: span 2;
+    }
+
+    .game-stage {
+        height: 380px;
+        border-radius: 10px;
+    }
+
+    .overlay-content {
+        padding: 25px 18px;
+    }
+
+    .overlay-content h2 {
+        font-size: 20px;
+    }
+
+    .game-controls {
+        align-items: flex-start;
+    }
+
+    .game-controls p {
+        max-width: 70%;
+        line-height: 1.6;
+    }
+}
