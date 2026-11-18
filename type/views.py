@@ -1319,6 +1319,7 @@ def space_shooter(request):
     }
 
     history = []
+    game_chart_data = []
 
     if request.user.is_authenticated:
         results = SpaceShooterResult.objects.filter(
@@ -1341,11 +1342,29 @@ def space_shooter(request):
             ),
         }
 
-        history = results.order_by('-created_at')[:10]
+        history = list(
+            results.order_by('-created_at')[:10]
+        )
+
+        chart_results = list(
+            results.order_by('-created_at')[:10]
+        )
+
+        chart_results.reverse()
+
+        game_chart_data = [
+            {
+                'date': result.created_at.strftime('%d %b'),
+                'wpm': result.wpm,
+                'accuracy': float(result.accuracy),
+            }
+            for result in chart_results
+        ]
 
     return render(request, 'games/space_shooter/home.html', {
         'stats': stats,
         'history': history,
+        'game_chart_data': game_chart_data,
     })
 
 
