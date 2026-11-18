@@ -30,6 +30,12 @@ urlpatterns = [
     path('car-racing/result/<int:result_id>/', views.car_racing_result, name='car_racing_result'),
     path('car-racing/save/', views.save_car_racing_result, name='save_car_racing_result'),
 
+    # Type Fighter
+    path('type-fighter/', views.type_fighter, name='type_fighter'),
+    path('type-fighter/play/', views.type_fighter_game, name='type_fighter_game'),
+    path('type-fighter/result/<int:result_id>/', views.type_fighter_result, name='type_fighter_result'),
+    path('type-fighter/save/', views.save_type_fighter_result, name='save_type_fighter_result'),
+
 
     # Password Reset
     path(

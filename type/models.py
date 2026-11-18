@@ -210,3 +210,63 @@ class CarRacingResult(models.Model):
             f'{self.difficulty} - {self.score}'
         )
 
+
+class TypeFighterResult(models.Model):
+
+    DIFFICULTY_CHOICES = [
+        ('easy', 'Easy'),
+        ('normal', 'Normal'),
+        ('hard', 'Hard'),
+        ('extreme', 'Extreme'),
+    ]
+
+    RESULT_CHOICES = [
+        ('win', 'Win'),
+        ('loss', 'Loss'),
+        ('draw', 'Draw'),
+    ]
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='type_fighter_results'
+    )
+
+    difficulty = models.CharField(
+        max_length=10,
+        choices=DIFFICULTY_CHOICES
+    )
+
+    result = models.CharField(
+        max_length=10,
+        choices=RESULT_CHOICES,
+        default='draw'
+    )
+
+    score = models.PositiveIntegerField(default=0)
+    wpm = models.PositiveIntegerField(default=0)
+    accuracy = models.FloatField(default=0)
+
+    words_typed = models.PositiveIntegerField(default=0)
+    mistakes = models.PositiveIntegerField(default=0)
+
+    wins = models.PositiveIntegerField(default=0)
+    losses = models.PositiveIntegerField(default=0)
+    knockouts = models.PositiveIntegerField(default=0)
+
+    duration = models.PositiveIntegerField(default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', '-created_at']),
+            models.Index(fields=['user', 'difficulty']),
+        ]
+
+    def __str__(self):
+        return (
+            f'{self.user.username} - '
+            f'{self.difficulty} - {self.result}'
+        )
