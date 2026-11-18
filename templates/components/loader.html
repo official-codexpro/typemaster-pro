@@ -145,6 +145,27 @@
     color: #171717;
 }
 
+
+/* Dark theme logo visibility */
+
+html.dark .loader-logo,
+body.dark .loader-logo,
+.dark .loader-logo,
+[data-theme="dark"] .loader-logo,
+html[data-theme="dark"] .loader-logo {
+    color: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+    html.dark .loader-logo,
+    body.dark .loader-logo,
+    .dark .loader-logo,
+    [data-theme="dark"] .loader-logo,
+    html[data-theme="dark"] .loader-logo {
+        color: #ffffff;
+    }
+}
+
 .logo-icon {
     font-size: 25px;
 }
@@ -375,11 +396,34 @@
 
 
 <script>
-(function () {
 
+(function () {
     const loader = document.getElementById("typing-loader");
 
     if (!loader) return;
+
+    const SESSION_KEY = "typemaster_visited";
+    const navigation = performance.getEntriesByType("navigation")[0];
+
+    let shouldShow = false;
+
+    try {
+        const isRefresh = navigation?.type === "reload";
+        const isFirstVisit = !sessionStorage.getItem(SESSION_KEY);
+
+        shouldShow = isRefresh || isFirstVisit;
+
+        sessionStorage.setItem(SESSION_KEY, "true");
+    } catch (error) {
+        // Fallback if sessionStorage is unavailable.
+        shouldShow = navigation?.type !== "back_forward";
+    }
+
+    // Internal page navigation: skip loader.
+    if (!shouldShow) {
+        loader.remove();
+        return;
+    }
 
     const progress = document.getElementById("loader-progress");
     const percent = document.getElementById("loader-percent");
@@ -399,11 +443,30 @@
         "Almost ready..."
     ];
 
-    function updateProgress() {
+    function hideLoader() {
+        if (finished) return;
 
+        finished = true;
+
+        progress.style.width = "100%";
+        percent.textContent = "100%";
+        message.textContent = "Ready!";
+
+        setTimeout(function () {
+            loader.classList.add("loader-hidden");
+
+            setTimeout(function () {
+                loader.remove();
+            }, 600);
+
+        }, 200);
+    }
+
+    function updateProgress() {
         if (finished) return;
 
         const elapsed = Date.now() - startTime;
+
         const percentage = Math.min(
             Math.floor((elapsed / MINIMUM_TIME) * 100),
             95
@@ -424,26 +487,6 @@
         }
     }
 
-    function hideLoader() {
-
-        if (finished) return;
-
-        finished = true;
-
-        progress.style.width = "100%";
-        percent.textContent = "100%";
-        message.textContent = "Ready!";
-
-        setTimeout(function () {
-            loader.classList.add("loader-hidden");
-
-            setTimeout(function () {
-                loader.remove();
-            }, 600);
-
-        }, 200);
-    }
-
     const progressInterval = setInterval(function () {
         updateProgress();
 
@@ -458,6 +501,6 @@
             updateProgress();
         }, { once: true });
     }
-
 })();
+
 </script>
