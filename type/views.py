@@ -1309,6 +1309,7 @@ def generate_passage(request):
 # =========================================================
 
 # SPACE SHOOTER
+
 @ensure_csrf_cookie
 def space_shooter(request):
     stats = {
@@ -1320,6 +1321,33 @@ def space_shooter(request):
 
     history = []
     game_chart_data = []
+
+    difficulty_stats = [
+        {
+            'difficulty': 'Easy',
+            'total_games': 0,
+            'average_wpm': 0,
+            'average_accuracy': 0,
+        },
+        {
+            'difficulty': 'Normal',
+            'total_games': 0,
+            'average_wpm': 0,
+            'average_accuracy': 0,
+        },
+        {
+            'difficulty': 'Hard',
+            'total_games': 0,
+            'average_wpm': 0,
+            'average_accuracy': 0,
+        },
+        {
+            'difficulty': 'Extreme',
+            'total_games': 0,
+            'average_wpm': 0,
+            'average_accuracy': 0,
+        },
+    ]
 
     if request.user.is_authenticated:
         results = SpaceShooterResult.objects.filter(
@@ -1341,6 +1369,29 @@ def space_shooter(request):
                 summary['average_accuracy'] or 0, 1
             ),
         }
+
+        # DIFFICULTY-WISE ANALYTICS
+        difficulty_data = (
+            results
+            .values('difficulty')
+            .annotate(
+                total_games=Count('id'),
+                average_wpm=Avg('wpm'),
+                average_accuracy=Avg('accuracy'),
+            )
+        )
+
+        for item in difficulty_data:
+            for card in difficulty_stats:
+                if card['difficulty'].lower() == item['difficulty']:
+                    card['total_games'] = item['total_games']
+                    card['average_wpm'] = round(
+                        item['average_wpm'] or 0
+                    )
+                    card['average_accuracy'] = round(
+                        item['average_accuracy'] or 0, 1
+                    )
+                    break
 
         history = list(
             results.order_by('-created_at')[:10]
@@ -1365,6 +1416,7 @@ def space_shooter(request):
         'stats': stats,
         'history': history,
         'game_chart_data': game_chart_data,
+        'difficulty_stats': difficulty_stats,
     })
 
 
