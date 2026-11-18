@@ -1318,7 +1318,7 @@ def space_shooter(request):
         'average_accuracy': 0,
     }
 
-    chart_data = []
+    history = []
 
     if request.user.is_authenticated:
         results = SpaceShooterResult.objects.filter(
@@ -1341,21 +1341,40 @@ def space_shooter(request):
             ),
         }
 
-        recent = list(results.order_by('-created_at')[:10])
-        recent.reverse()
+        history = results.order_by('-created_at')[:10]
 
-        chart_data = [
-            {
-                'date': result.created_at.strftime('%d %b'),
-                'score': result.score,
-                'wpm': result.wpm,
-            }
-            for result in recent
-        ]
+    return render(request, 'games/space_shooter/home.html', {
+        'stats': stats,
+        'history': history,
+    })
+
+
+# SPACE SHOOTER - GAME PAGE
+
+@login_required
+@ensure_csrf_cookie
+def space_shooter_game(request):
+    difficulty = request.GET.get('difficulty', 'normal')
+
+    if difficulty not in ['easy', 'normal', 'hard', 'extreme']:
+        difficulty = 'normal'
 
     return render(request, 'games/space_shooter/game.html', {
-        'stats': stats,
-        'chart_data': chart_data,
+        'difficulty': difficulty,
+    })
+
+
+# SPACE SHOOTER - RESULT PAGE
+
+@login_required
+def space_shooter_result(request, result_id):
+    result = SpaceShooterResult.objects.get(
+        id=result_id,
+        user=request.user
+    )
+
+    return render(request, 'games/space_shooter/result.html', {
+        'result': result,
     })
 
 

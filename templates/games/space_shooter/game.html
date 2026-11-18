@@ -9,111 +9,44 @@
 
 {% block content %}
 
-<div id="spaceShooterPage">
+<div id="spaceShooterGame" data-difficulty="{{ difficulty }}">
 
-    <section id="game">
-        <canvas id="cv"></canvas>
+    <header class="game-header">
+        <a href="{% url 'space_shooter' %}">← Back to Home</a>
+        <span>SPACE SHOOTER</span>
+        <span id="difficultyLabel">{{ difficulty|title }}</span>
+    </header>
 
-        <div class="top">
-            <div class="brand">✦ TYPEMASTER // SPACE DEFENSE</div>
+    <main class="game-area">
 
-            <div class="hud">
-                <div class="stat">
-                    <small>SCORE</small>
-                    <strong class="score" id="score">00000</strong>
-                </div>
-
-                <div class="stat">
-                    <small>WAVE</small>
-                    <strong class="wave" id="wave">01</strong>
-                </div>
-
-                <div class="stat">
-                    <small>COMBO</small>
-                    <strong class="combo" id="combo">×0</strong>
-                </div>
-            </div>
+        <div class="game-hud">
+            <div>Score: <strong id="score">0</strong></div>
+            <div>Wave: <strong id="wave">1</strong></div>
+            <div>WPM: <strong id="wpm">0</strong></div>
+            <div>Accuracy: <strong id="accuracy">100%</strong></div>
         </div>
 
-        <div class="actions">
-            <button id="pause">Ⅱ PAUSE</button>
-            <button id="sound">♫ SOUND ON</button>
+        <canvas id="gameCanvas"></canvas>
+
+        <div class="typing-area">
+            <p id="targetWord">Waiting for target...</p>
+            <input
+                type="text"
+                id="typingInput"
+                placeholder="Type the target word..."
+                autocomplete="off"
+                autofocus
+            >
         </div>
 
-        <div class="bottom">
-            <div class="label">TARGET LOCKED // TYPE TO FIRE</div>
-            <div class="target" id="target">
-                <span class="rest">WAITING FOR TARGET</span>
-            </div>
-            <div class="hint">Type each character to fire · ESC pause</div>
-            <div class="bar"><span id="progress"></span></div>
+        <div class="game-actions">
+            <button id="pauseGame">Pause</button>
+            <button id="quitGame">Quit Game</button>
         </div>
 
-        <div class="overlay" id="start">
-            <div class="modal">
-                <div class="eyebrow">✦ DEEP SPACE TRAINING ✦</div>
-                <h1>SPACE<br> TYPING SHOOTER</h1>
-                <p>Type incoming words to fire lasers and defend your ship.</p>
-                <div class="difficulty-selector">
-    <label for="difficulty">SELECT DIFFICULTY</label>
-    <select id="difficulty">
-        <option value="easy">Easy</option>
-        <option value="normal" selected>Normal</option>
-        <option value="hard">Hard</option>
-        <option value="extreme">Extreme</option>
-    </select>
-</div>
-                <button class="primary" id="launch">LAUNCH MISSION</button>
-            </div>
-        </div>
-
-        <div class="overlay hide" id="paused">
-            <div class="modal">
-                <h1>PAUSED.</h1>
-                <button class="primary" id="resume">RESUME MISSION</button>
-            </div>
-        </div>
-
-        <div class="overlay hide" id="over">
-            <div class="modal">
-                <h1>GAME OVER</h1>
-                <div class="result" id="final">0</div>
-                <div class="eyebrow">FINAL SCORE</div>
-                <p id="stats">Mission complete.</p>
-                <button class="primary" id="retry">RETRY MISSION</button>
-            </div>
-        </div>
-    </section>
-
-    <section class="space-performance">
-        <h2>Your Space Shooter Performance</h2>
-
-        <div class="performance-stats">
-            <div class="dashboard-card">
-                <small>Total Games</small>
-                <h3>{{ stats.total_games }}</h3>
-            </div>
-
-            <div class="dashboard-card">
-                <small>Best Score</small>
-                <h3>{{ stats.best_score }}</h3>
-            </div>
-
-            <div class="dashboard-card">
-                <small>Average WPM</small>
-                <h3>{{ stats.average_wpm }}</h3>
-            </div>
-
-            <div class="dashboard-card">
-                <small>Average Accuracy</small>
-                <h3>{{ stats.average_accuracy }}%</h3>
-            </div>
-        </div>
-    </section>
+    </main>
 
 </div>
-
-{{ chart_data|json_script:"space-chart-data" }}
 
 {% endblock %}
 

@@ -1,0 +1,84 @@
+#spaceShooterResult {
+    max-width: 900px;
+    margin: 50px auto;
+    padding: 24px;
+    color: var(--text-primary);
+    text-align: center;
+}
+
+#spaceShooterResult header {
+    margin-bottom: 30px;
+}
+
+#spaceShooterResult header span,
+#spaceShooterResult .result-score span {
+    color: var(--accent-text);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+}
+
+#spaceShooterResult h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin: 10px 0;
+}
+
+#spaceShooterResult p {
+    color: var(--text-secondary);
+}
+
+#spaceShooterResult .result-score {
+    padding: 30px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    margin-bottom: 20px;
+}
+
+#spaceShooterResult .result-score h2 {
+    font-size: 52px;
+    font-weight: 800;
+    margin: 10px 0;
+}
+
+#spaceShooterResult .result-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+#spaceShooterResult .result-card {
+    padding: 22px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+}
+
+#spaceShooterResult .result-card span {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+#spaceShooterResult .result-card h3 {
+    font-size: 26px;
+    font-weight: 700;
+    margin-top: 10px;
+}
+
+#spaceShooterResult .back-home {
+    display: inline-block;
+    padding: 13px 25px;
+    background: var(--accent);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+@media (max-width: 600px) {
+    #spaceShooterResult .result-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

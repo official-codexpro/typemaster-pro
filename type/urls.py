@@ -18,8 +18,12 @@ urlpatterns = [
     # User Profile
     path('profile/', views.user_profile, name='profile'),
     path('profile/edit/', views.edit_profile, name='edit_profile'),
+    # Space Shooter
     path('space-shooter/',views.space_shooter,name='space_shooter'),
+    path('space-shooter/play/',views.space_shooter_game,name='space_shooter_game'),
+    path('space-shooter/result/<int:result_id>/',views.space_shooter_result,name='space_shooter_result'),
     path('space-shooter/save/',views.save_space_shooter_result,name='save_space_shooter_result'),
+
 
     # Password Reset
     path(

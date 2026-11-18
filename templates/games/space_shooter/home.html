@@ -1,0 +1,89 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}Space Shooter | TypeMaster Pro{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'games/space_shooter/css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div id="spaceShooterHome">
+
+    <section class="game-hero">
+        <span class="eyebrow">TYPEMASTER PRO / GAMES</span>
+        <h1>Space Shooter</h1>
+        <p>Test your typing speed. Destroy incoming targets. Beat your high score.</p>
+
+        <div class="game-controls">
+            <select id="difficulty">
+                <option value="easy">Easy</option>
+                <option value="normal" selected>Normal</option>
+                <option value="hard">Hard</option>
+                <option value="extreme">Extreme</option>
+            </select>
+
+            <button id="startGame">Start Game</button>
+        </div>
+    </section>
+
+    <section class="game-performance">
+        <h2>Game Performance</h2>
+
+        <div class="performance-grid">
+            <div class="performance-card">
+                <span>Total Games</span>
+                <h3>{{ stats.total_games }}</h3>
+            </div>
+
+            <div class="performance-card">
+                <span>Best Score</span>
+                <h3>{{ stats.best_score }}</h3>
+            </div>
+
+            <div class="performance-card">
+                <span>Average WPM</span>
+                <h3>{{ stats.average_wpm }}</h3>
+            </div>
+
+            <div class="performance-card">
+                <span>Average Accuracy</span>
+                <h3>{{ stats.average_accuracy }}%</h3>
+            </div>
+        </div>
+    </section>
+
+    <section class="game-history">
+        <h2>Previous Games</h2>
+
+        <div class="history-table">
+            <div class="history-header">
+                <span>Date</span>
+                <span>Difficulty</span>
+                <span>Score</span>
+                <span>WPM</span>
+                <span>Accuracy</span>
+            </div>
+
+            {% for result in history %}
+            <div class="history-row">
+                <span>{{ result.created_at|date:"d M Y" }}</span>
+                <span>{{ result.get_difficulty_display }}</span>
+                <span>{{ result.score }}</span>
+                <span>{{ result.wpm }}</span>
+                <span>{{ result.accuracy }}%</span>
+            </div>
+            {% empty %}
+            <p class="empty-history">No games played yet.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'games/space_shooter/js/home.js' %}"></script>
+{% endblock %}
