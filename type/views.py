@@ -984,7 +984,22 @@ def results(request):
         'date_to': request.GET.get('date_to', ''),
     })
 
+# =========================================================
+# CERTIFICATIONS
+# =========================================================
 
+@login_required
+def certifications(request):
+
+    certificates = TestResult.objects.filter(
+        user=request.user,
+        certificate__in=['bronze', 'silver', 'gold'],
+        difficulty__in=['easy', 'normal', 'hard']
+    ).order_by('-created_at')
+
+    return render(request, 'certifications/certifications.html', {
+        'certificates': certificates,
+    })
 # =========================================================
 # AUTHENTICATION
 # =========================================================
@@ -1196,6 +1211,17 @@ def save_test_result(request):
         else:
             language = ''
 
+        # CERTIFICATE SYSTEM
+        certificate = 'none'
+
+        if difficulty != 'code':
+            if wpm >= 70 and accuracy >= 98:
+                certificate = 'gold'
+            elif wpm >= 50 and accuracy >= 95:
+                certificate = 'silver'
+            elif wpm >= 35 and accuracy >= 90:
+                certificate = 'bronze'
+
         result = TestResult.objects.create(
             user=request.user,
             wpm=wpm,
@@ -1205,6 +1231,7 @@ def save_test_result(request):
             duration=duration,
             difficulty=difficulty,
             language=language,
+            certificate=certificate,
         )
 
         return JsonResponse({

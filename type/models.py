@@ -101,6 +101,19 @@ class TestResult(models.Model):
         default=''
     )
 
+    CERTIFICATE_CHOICES = [
+        ('none', 'None'),
+        ('bronze', 'Bronze'),
+        ('silver', 'Silver'),
+        ('gold', 'Gold'),
+    ]
+
+    certificate = models.CharField(
+        max_length=10,
+        choices=CERTIFICATE_CHOICES,
+        default='none'
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

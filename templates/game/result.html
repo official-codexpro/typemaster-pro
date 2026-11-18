@@ -17,7 +17,7 @@
 
     </div>
 
-    <div class="grid grid-cols-2 gap-4">
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
 
         <div class="bg-neutral-50 border border-neutral-100 rounded-2xl p-6">
             <p class="text-xs text-neutral-400 uppercase tracking-widest">
@@ -32,6 +32,44 @@
             </p>
             <h2 id="resultAccuracy" class="text-4xl md:text-5xl font-bold mt-4 text-neutral-900">100%</h2>
         </div>
+
+
+<!-- CERTIFICATE -->
+<div class="bg-neutral-50 border border-neutral-100 rounded-2xl p-6">
+
+    <p class="text-xs text-neutral-400 uppercase tracking-widest">
+        Certificate
+    </p>
+
+    <div class="flex items-center gap-3 mt-4">
+
+        <div id="certificateIcon"
+            class="w-12 h-12 rounded-xl bg-neutral-200 flex items-center justify-center text-2xl">
+            —
+        </div>
+
+        <div>
+            <h2 id="certificateRank"
+                class="text-xl font-bold text-neutral-900">
+                None
+            </h2>
+
+            <p id="certificateMessage"
+                class="text-xs text-neutral-400 mt-1">
+                Keep practising!
+            </p>
+        </div>
+
+    </div>
+
+    <a id="viewCertificatesBtn"
+        href="{% url 'certifications' %}"
+        class="hidden inline-block mt-5 px-5 py-2.5 rounded-xl bg-neutral-900 text-white text-sm font-semibold hover:bg-neutral-700 transition">
+        View My Certificates →
+    </a>
+
+</div>
+
 
         <div class="bg-neutral-50 border border-neutral-100 rounded-2xl p-6">
             <p class="text-xs text-neutral-400 uppercase tracking-widest">

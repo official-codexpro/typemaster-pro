@@ -13,15 +13,15 @@
         <!-- Main Navigation -->
         <nav class="hidden lg:flex items-center gap-1">
 
-            <a href="{% url 'results' %}#typing-test" class="theme-nav-link px-4 py-2.5 rounded-lg text-sm font-semibold text-neutral-600 hover:text-indigo-600 hover:bg-indigo-50 transition">
+            <a href="{% url 'results' %}" class="theme-nav-link px-4 py-2.5 rounded-lg text-sm font-semibold text-neutral-600 hover:text-indigo-600 hover:bg-indigo-50 transition">
                 Typing Test
             </a>
 
-            <a href="{% url 'home' %}#code-mode" class="theme-nav-link px-4 py-2.5 rounded-lg text-sm font-semibold text-neutral-600 hover:text-indigo-600 hover:bg-indigo-50 transition">
-                Code Practice
+            <a href="{% url 'certifications' %}" class="theme-nav-link px-4 py-2.5 rounded-lg text-sm font-semibold text-neutral-600 hover:text-indigo-600 hover:bg-indigo-50 transition">
+                Certificate
             </a>
 
-            <a href="{% url 'home' %}#courses" class="theme-nav-link px-4 py-2.5 rounded-lg text-sm font-semibold text-neutral-600 hover:text-indigo-600 hover:bg-indigo-50 transition">
+            <a href="{% url 'home' %}" class="theme-nav-link px-4 py-2.5 rounded-lg text-sm font-semibold text-neutral-600 hover:text-indigo-600 hover:bg-indigo-50 transition">
                 Courses
             </a>
 
@@ -69,7 +69,7 @@
             </svg>
         </a>
 
-        <!-- CAR RACING -->
+        {% comment %} <!-- CAR RACING -->
         <a href="{% url 'car_racing' %}" class="games-dropdown-link">
 
             <span class="games-dropdown-icon racing-icon">🏎️</span>
@@ -97,7 +97,7 @@
     </span>
 
     <span class="games-coming-soon">SOON</span>
-</a>
+</a> {% endcomment %}
 
     </div>
 </div>

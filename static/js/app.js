@@ -48,6 +48,9 @@ const resultWpm = document.getElementById("resultWpm");
 const resultAccuracy = document.getElementById("resultAccuracy");
 const resultCorrect = document.getElementById("resultCorrect");
 const resultMistakes = document.getElementById("resultMistakes");
+const certificateIcon = document.getElementById("certificateIcon");
+const certificateRank = document.getElementById("certificateRank");
+const certificateMessage = document.getElementById("certificateMessage");
 
 const retestDuration = document.getElementById("retestDuration");
 const retestButton = document.getElementById("retestButton");
@@ -90,12 +93,16 @@ const requiredElements = [
     codeEditor,
     codeDisplay,
     codeLineNumbers,
+    certificateIcon,
+    certificateRank,
+    certificateMessage,
     codeLanguageLabel,
     codeProgress,
     targetCodeScroll,
     typedCodeScroll,
     typedCodeDisplay,
     typedCodeLineNumbers
+    
 ];
 
 if (requiredElements.some(element => !element)) {
@@ -1189,6 +1196,51 @@ async function endGame() {
     resultAccuracy.textContent = finalAccuracy + "%";
     resultCorrect.textContent = correctTyped;
     resultMistakes.textContent = mistakes;
+
+    // CERTIFICATION SYSTEM
+let certificate = {
+    rank: "None",
+    icon: "—",
+    message: "Keep practising to earn your first certificate!"
+};
+
+if (finalWpm >= 70 && finalAccuracy >= 98) {
+
+    certificate = {
+        rank: "Gold",
+        icon: "🥇",
+        message: "Outstanding! Elite typing performance."
+    };
+
+} else if (finalWpm >= 50 && finalAccuracy >= 95) {
+
+    certificate = {
+        rank: "Silver",
+        icon: "🥈",
+        message: "Excellent! Silver achievement unlocked."
+    };
+
+} else if (finalWpm >= 35 && finalAccuracy >= 90) {
+
+    certificate = {
+        rank: "Bronze",
+        icon: "🥉",
+        message: "Great start! Bronze achievement unlocked."
+    };
+}
+
+// CERTIFICATE BUTTON
+const viewCertificatesBtn = document.getElementById("viewCertificatesBtn");
+
+if (viewCertificatesBtn) {
+    const hasCertificate = ["Bronze", "Silver", "Gold"].includes(certificate.rank);
+
+    viewCertificatesBtn.classList.toggle("hidden", !hasCertificate);
+}
+
+certificateIcon.textContent = certificate.icon;
+certificateRank.textContent = certificate.rank;
+certificateMessage.textContent = certificate.message;
 
     retestDuration.value = String(totalTime);
 

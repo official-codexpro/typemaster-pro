@@ -36,6 +36,8 @@ urlpatterns = [
     path('type-fighter/result/<int:result_id>/', views.type_fighter_result, name='type_fighter_result'),
     path('type-fighter/save/', views.save_type_fighter_result, name='save_type_fighter_result'),
 
+    path('certifications/',views.certifications,name='certifications'),
+
 
     # Password Reset
     path(

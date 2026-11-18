@@ -1,0 +1,163 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}My Certifications | TypeMaster Pro{% endblock %}
+
+{% block extra_css %}
+<style>
+    .certifications-page {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 60px 24px;
+    }
+
+    .certifications-header {
+        text-align: center;
+        margin-bottom: 45px;
+    }
+
+    .certifications-header h1 {
+        font-size: clamp(2rem, 5vw, 3rem);
+        font-weight: 800;
+        margin-bottom: 12px;
+    }
+
+    .certifications-header p {
+        opacity: 0.7;
+    }
+
+    .certificate-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 24px;
+    }
+
+    .certificate-card {
+        position: relative;
+        padding: 30px 24px;
+        border: 1px solid var(--border-color, rgba(128,128,128,.25));
+        border-radius: 18px;
+        text-align: center;
+        background: var(--card-bg, rgba(128,128,128,.06));
+        transition: transform .25s ease, box-shadow .25s ease;
+    }
+
+    .certificate-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 30px rgba(0,0,0,.10);
+    }
+
+    .certificate-icon {
+        font-size: 52px;
+        margin-bottom: 15px;
+    }
+
+    .certificate-rank {
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin-bottom: 10px;
+        text-transform: capitalize;
+    }
+
+    .certificate-details {
+        opacity: .75;
+        font-size: .9rem;
+        line-height: 1.8;
+    }
+
+    .bronze { color: #cd7f32; }
+    .silver { color: #a7a9ac; }
+    .gold { color: #d6a526; }
+
+    .empty-certificates {
+        text-align: center;
+        padding: 55px 20px;
+        border: 1px dashed var(--border-color, rgba(128,128,128,.35));
+        border-radius: 18px;
+    }
+
+    .empty-certificates .empty-icon {
+        font-size: 55px;
+        margin-bottom: 15px;
+    }
+
+    .empty-certificates h2 {
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .empty-certificates p {
+        opacity: .7;
+        margin-bottom: 22px;
+    }
+
+    .practice-link {
+        display: inline-block;
+        padding: 11px 24px;
+        border-radius: 9px;
+        background: var(--accent-color, #d6a526);
+        color: #111;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    @media (max-width: 600px) {
+        .certifications-page {
+            padding: 40px 16px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="certifications-page">
+
+    <header class="certifications-header">
+        <h1>My Certifications</h1>
+        <p>Your typing achievements, earned through practice.</p>
+    </header>
+
+    {% if certificates %}
+        <section class="certificate-grid">
+
+            {% for certificate in certificates %}
+                <article class="certificate-card">
+
+                    <div class="certificate-icon">
+                        {% if certificate.certificate == 'gold' %}
+                            🏆
+                        {% elif certificate.certificate == 'silver' %}
+                            🥈
+                        {% elif certificate.certificate == 'bronze' %}
+                            🥉
+                        {% endif %}
+                    </div>
+
+                    <h2 class="certificate-rank {{ certificate.certificate }}">
+                        {{ certificate.get_certificate_display }}
+                    </h2>
+
+                    <div class="certificate-details">
+                        <p>Typing Speed: <strong>{{ certificate.wpm }} WPM</strong></p>
+                        <p>Accuracy: <strong>{{ certificate.accuracy }}%</strong></p>
+                        <p>Difficulty: <strong>{{ certificate.get_difficulty_display }}</strong></p>
+                        <p>Earned: <strong>{{ certificate.created_at|date:"d M Y" }}</strong></p>
+                    </div>
+
+                </article>
+            {% endfor %}
+
+        </section>
+
+    {% else %}
+        <section class="empty-certificates">
+            <div class="empty-icon">🏅</div>
+            <h2>No Certificates Yet</h2>
+            <p>Keep practicing and achieve the required WPM and accuracy to earn your first certificate.</p>
+            <a href="{% url 'results' %}" class="practice-link bg-purple-600 text-white">Start Practicing</a>
+        </section>
+    {% endif %}
+
+</main>
+{% endblock %}
