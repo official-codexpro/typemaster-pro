@@ -6,13 +6,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('type', '0006_typefighterresult'),
+        ("type", "0006_typefighterresult"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='testresult',
-            name='certificate',
-            field=models.CharField(choices=[('none', 'None'), ('bronze', 'Bronze'), ('silver', 'Silver'), ('gold', 'Gold')], default='none', max_length=10),
+            model_name="testresult",
+            name="certificate",
+            field=models.CharField(
+                choices=[
+                    ("none", "None"),
+                    ("bronze", "Bronze"),
+                    ("silver", "Silver"),
+                    ("gold", "Gold"),
+                ],
+                default="none",
+                max_length=10,
+            ),
         ),
     ]

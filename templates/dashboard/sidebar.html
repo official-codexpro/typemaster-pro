@@ -1,46 +1,32 @@
-
 <aside class="sticky top-20 z-10 self-start">
-
     <div class="dashboard-card p-2">
-
         <!-- Home -->
         <a href="{% url 'home' %}"
-           class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-lg text-sm font-semibold text-left hover:bg-neutral-100
-           {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+           class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-lg text-sm font-semibold text-left hover:bg-neutral-100 {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
             <span class="text-lg">⌂</span>
             Home
         </a>
-
         <!-- Results -->
         <a href="{% url 'results' %}"
-           class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-lg text-sm font-semibold text-left hover:bg-neutral-100
-           {% if request.resolver_match.url_name == 'results' %}active{% endif %}">
+           class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-lg text-sm font-semibold text-left hover:bg-neutral-100 {% if request.resolver_match.url_name == 'results' %}active{% endif %}">
             <span class="text-lg">☷</span>
             Results
         </a>
-
         <!-- Certificate -->
         <button class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-lg text-sm font-semibold text-left hover:bg-neutral-100">
             <span class="text-lg">✿</span>
             Certificate
         </button>
-
         <!-- Coding -->
         <button id="codePracticeButton"
-            class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-lg text-sm font-semibold text-left hover:bg-neutral-100">
+                class="nav-item w-full flex items-center gap-4 px-4 py-3 rounded-lg text-sm font-semibold text-left hover:bg-neutral-100">
             <span class="text-lg">&lt;/&gt;</span>
             Coding
         </button>
-
     </div>
-
     <button id="startTestButton"
-        class="w-full mt-6 bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm rounded-xl py-4 shadow-[0_4px_0_#6d28d9] transition active:translate-y-1 active:shadow-none">
+            class="w-full mt-6 bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm rounded-xl py-4 shadow-[0_4px_0_#6d28d9] transition active:translate-y-1 active:shadow-none">
         START TEST &nbsp; ↵
     </button>
-
-    <p class="text-center text-xs text-neutral-400 mt-4">
-        Ready to improve your speed?
-    </p>
-
+    <p class="text-center text-xs text-neutral-400 mt-4">Ready to improve your speed?</p>
 </aside>

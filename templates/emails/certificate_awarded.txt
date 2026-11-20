@@ -1,0 +1,17 @@
+TYPEMASTER PRO · CERTIFICATE AWARDED
+
+Congratulations, {{ recipient_name }}!
+
+You earned a {{ certificate.get_certificate_display }} typing certificate.
+
+Certificate ID: TM-{{ certificate.pk|stringformat:"05d" }}
+Typing speed: {{ certificate.wpm }} WPM
+Accuracy: {{ certificate.accuracy|floatformat:1 }}%
+Test: {{ certificate.get_difficulty_display }} · {{ certificate.duration }} seconds
+Awarded: {{ certificate.created_at|date:"F j, Y" }}
+
+Your certificate is saved in your TypeMaster Pro account. Sign in to view or print it:
+{{ certificate_url }}
+
+Keep practising,
+TypeMaster Pro

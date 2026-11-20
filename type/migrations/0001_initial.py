@@ -15,31 +15,80 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='TestResult',
+            name="TestResult",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('wpm', models.PositiveIntegerField(default=0)),
-                ('accuracy', models.FloatField(default=0)),
-                ('correct_characters', models.PositiveIntegerField(default=0)),
-                ('mistakes', models.PositiveIntegerField(default=0)),
-                ('duration', models.PositiveIntegerField(help_text='Test duration in seconds')),
-                ('difficulty', models.CharField(choices=[('easy', 'Easy'), ('normal', 'Normal'), ('hard', 'Hard')], default='normal', max_length=10)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='test_results', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("wpm", models.PositiveIntegerField(default=0)),
+                ("accuracy", models.FloatField(default=0)),
+                ("correct_characters", models.PositiveIntegerField(default=0)),
+                ("mistakes", models.PositiveIntegerField(default=0)),
+                (
+                    "duration",
+                    models.PositiveIntegerField(help_text="Test duration in seconds"),
+                ),
+                (
+                    "difficulty",
+                    models.CharField(
+                        choices=[
+                            ("easy", "Easy"),
+                            ("normal", "Normal"),
+                            ("hard", "Hard"),
+                        ],
+                        default="normal",
+                        max_length=10,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="test_results",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='UserProfile',
+            name="UserProfile",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('bio', models.TextField(blank=True)),
-                ('profile_picture', models.ImageField(blank=True, null=True, upload_to='profile_pictures/')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='profile', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("bio", models.TextField(blank=True)),
+                (
+                    "profile_picture",
+                    models.ImageField(
+                        blank=True, null=True, upload_to="profile_pictures/"
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="profile",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

@@ -1,0 +1,48 @@
+{
+  "ANIMATION_CLIPS": {
+    "heroDropKick": "heroaction/attack/heroDropKick.fbx",
+    "heroFlipKick": "heroaction/attack/heroFlipKick.fbx",
+    "heroKneeCombo": "heroaction/attack/heroFlyingKneePunchCombo.fbx",
+    "heroDropKickReaction": "heroaction/reaction/dropkickreaction.fbx",
+    "heroFlipKickReaction": "heroaction/reaction/flipkickreaction.fbx",
+    "heroKneeReaction": "heroaction/reaction/kneepunchcomboreaction.fbx",
+    "heroDefeat": "heroaction/reaction/herodeadlose.fbx",
+    "enemyDropKick": "enemyaction/attack/enemyDropKick.fbx",
+    "enemyFlipKick": "enemyaction/attack/enemyFlipKick.fbx",
+    "enemyMutantPunch": "enemyaction/attack/enemyMutantPunch.fbx",
+    "enemyKneeCombo": "enemyaction/attack/enemyflyingknneepucnchcombo.fbx",
+    "enemyPunch": "enemyaction/attack/enemypunching.fbx",
+    "enemyDropKickReaction": "enemyaction/reaction/dropkickreaction.fbx",
+    "enemyFlipKickReaction": "enemyaction/reaction/flipkickreaction.fbx",
+    "enemyKneeReaction": "enemyaction/reaction/kneepunchcomboreaction.fbx",
+    "enemyDefeat": "enemyaction/reaction/enemydeadlose.fbx"
+  },
+  "FIGHT_ANIMATIONS": {
+    "player": {
+      "jab": { "attack": "heroDropKick", "reaction": "enemyDropKickReaction", "impact": 0.52 },
+      "kick": { "attack": "heroDropKick", "reaction": "enemyDropKickReaction", "impact": 0.56 },
+      "launcher": { "attack": "heroFlipKick", "reaction": "enemyFlipKickReaction", "impact": 0.54 },
+      "heavy": { "attack": "heroKneeCombo", "reaction": "enemyKneeReaction", "impact": 0.48 },
+      "special": { "attack": "heroKneeCombo", "reaction": "enemyKneeReaction", "impact": 0.48 }
+    },
+    "enemy": {
+      "jab": { "attack": "enemyPunch", "reaction": "heroKneeReaction", "impact": 0.44 },
+      "kick": { "attack": "enemyDropKick", "reaction": "heroDropKickReaction", "impact": 0.53 },
+      "launcher": { "attack": "enemyFlipKick", "reaction": "heroFlipKickReaction", "impact": 0.52 },
+      "heavy": { "attack": "enemyMutantPunch", "reaction": "heroKneeReaction", "impact": 0.46 },
+      "special": { "attack": "enemyKneeCombo", "reaction": "heroKneeReaction", "impact": 0.48 }
+    }
+  },
+  "DEFEAT_ANIMATIONS": {
+    "player": "heroDefeat",
+    "enemy": "enemyDefeat"
+  },
+  "REACTION_ANIMATIONS": {
+    "heroDropKickReaction": "dropkick",
+    "heroFlipKickReaction": "flipkick",
+    "heroKneeReaction": "kneepunch",
+    "enemyDropKickReaction": "dropkick",
+    "enemyFlipKickReaction": "flipkick",
+    "enemyKneeReaction": "kneepunch"
+  }
+}

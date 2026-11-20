@@ -1,66 +1,99 @@
-{% extends "base/base.html" %}
-{% load static %}
-
-{% block title %}Game Result | TypeMaster Pro{% endblock %}
-
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'games/space_shooter/css/result.css' %}">
-{% endblock %}
-
-{% block content %}
-
-<div id="spaceShooterResult">
-
-    <header>
-        <span>MISSION COMPLETED</span>
-        <h1>Game Result</h1>
-        <p>Here is your performance summary.</p>
-    </header>
-
-    <section class="result-score">
-        <span>FINAL SCORE</span>
-        <h2>{{ result.score }}</h2>
-        <p>{{ result.get_difficulty_display }} Difficulty</p>
-    </section>
-
-    <section class="result-grid">
-
-        <div class="result-card">
-            <span>WPM</span>
-            <h3>{{ result.wpm }}</h3>
-        </div>
-
-        <div class="result-card">
-            <span>Accuracy</span>
-            <h3>{{ result.accuracy }}%</h3>
-        </div>
-
-        <div class="result-card">
-            <span>Words Destroyed</span>
-            <h3>{{ result.words_destroyed }}</h3>
-        </div>
-
-        <div class="result-card">
-            <span>Mistakes</span>
-            <h3>{{ result.mistakes }}</h3>
-        </div>
-
-        <div class="result-card">
-            <span>Highest Wave</span>
-            <h3>{{ result.highest_wave }}</h3>
-        </div>
-
-        <div class="result-card">
-            <span>Duration</span>
-            <h3>{{ result.duration }} sec</h3>
-        </div>
-
-    </section>
-
-    <a href="{% url 'type_fighter' %}" class="back-home">
-        Back to Home
-    </a>
-
-</div>
-
+{% extends "base/base.html" %} {% load static %} {% block title %}Fight Result | TypeMaster Pro{% endblock %} {% block extra_css %}
+<link rel="stylesheet" href="{% static 'games/type_fighter/css/result.css' %}" />
+{% endblock %} {% block content %}
+<main id="typeFighterResult" class="result-page">
+  <header class="result-header">
+    <span class="result-kicker">TYPE FIGHTER · MATCH COMPLETE</span>
+    <h1>{% if result.mode == "training" %}Practice Complete{% else %}{{ result.get_result_display }}{% endif %}</h1>
+    <p>{{ result.get_mode_display }} · {{ result.get_difficulty_display }} · {{ result.created_at|date:"F j, Y · H:i" }}</p>
+  </header>
+  <section class="result-score" aria-label="Final score">
+    <span>FINAL SCORE</span>
+    <strong>{{ result.score }}</strong>
+    <p>{{ result.knockouts }} round wins · best of 3</p>
+  </section>
+  <section class="result-grid" aria-label="Match statistics">
+    <article class="result-card">
+      <span>Selected difficulty</span>
+      <strong>{{ result.get_difficulty_display }}</strong>
+    </article>
+    <article class="result-card">
+      <span>Typing speed</span>
+      <strong>{{ result.wpm }} <small>WPM</small></strong>
+    </article>
+    <article class="result-card">
+      <span>Peak speed</span>
+      <strong>{{ result.highest_wpm }} <small>WPM</small></strong>
+    </article>
+    <article class="result-card">
+      <span>Accuracy</span>
+      <strong>{{ result.accuracy|floatformat:1 }}%</strong>
+    </article>
+    <article class="result-card">
+      <span>Round wins</span>
+      <strong>{{ result.knockouts }}</strong>
+    </article>
+    <article class="result-card">
+      <span>Words completed</span>
+      <strong>{{ result.words_typed }}</strong>
+    </article>
+    <article class="result-card">
+      <span>Mistakes</span>
+      <strong>{{ result.mistakes }}</strong>
+    </article>
+    <article class="result-card">
+      <span>Damage dealt</span>
+      <strong>{{ result.damage_dealt }}</strong>
+    </article>
+    <article class="result-card">
+      <span>Damage received</span>
+      <strong>{{ result.damage_received }}</strong>
+    </article>
+    <article class="result-card">
+      <span>Successful attacks</span>
+      <strong>{{ result.attacks_successful }}</strong>
+    </article>
+    <article class="result-card">
+      <span>Failed attacks</span>
+      <strong>{{ result.attacks_failed }}</strong>
+    </article>
+    <article class="result-card">
+      <span>Best combo</span>
+      <strong>{{ result.best_combo }} <small>hits</small></strong>
+    </article>
+    <article class="result-card">
+      <span>Perfect inputs</span>
+      <strong>{{ result.perfect_inputs }}</strong>
+    </article>
+    <article class="result-card">
+      <span>Match time</span>
+      <strong>{{ result.duration }} <small>sec</small></strong>
+    </article>
+  </section>
+  <aside class="result-feedback" aria-label="Practice feedback">
+    {% if result.accuracy < 90 %}
+      <p>Focus on accuracy before increasing speed. Clean inputs build stronger attacks.</p>
+    {% elif result.wpm >= 40 and result.accuracy >= 95 %}
+      <p>Your reaction speed is improving. Try the next difficulty when this feels consistent.</p>
+    {% else %}
+      <p>Good work. Keep practicing clean combinations to build speed and consistency.</p>
+    {% endif %}
+  </aside>
+  {% if result.mistake_words %}
+  <section class="mistake-review" aria-label="Words to review">
+    <h2>Words to review</h2>
+    <p>Repeat these calls in the Training Room to make them feel automatic.</p>
+    <ul>{% for word in result.mistake_words %}<li>{{ word }}</li>{% endfor %}</ul>
+  </section>
+  {% endif %}
+  <nav class="result-actions" aria-label="Match actions">
+    <a
+      class="result-primary"
+      href="{% url 'type_fighter_game' %}?difficulty={{ result.difficulty|urlencode }}"
+      >Fight again</a
+    >
+    <a href="{% url 'type_fighter' %}">Type Fighter dashboard</a>
+    <a href="{% url 'results' %}">Typing progress</a>
+  </nav>
+</main>
 {% endblock %}

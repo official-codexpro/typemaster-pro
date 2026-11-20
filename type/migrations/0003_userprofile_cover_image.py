@@ -6,13 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('type', '0002_testresult_language_alter_testresult_difficulty'),
+        ("type", "0002_testresult_language_alter_testresult_difficulty"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='userprofile',
-            name='cover_image',
-            field=models.ImageField(blank=True, help_text='Optional profile banner image.', null=True, upload_to='profile_covers/'),
+            model_name="userprofile",
+            name="cover_image",
+            field=models.ImageField(
+                blank=True,
+                help_text="Optional profile banner image.",
+                null=True,
+                upload_to="profile_covers/",
+            ),
         ),
     ]

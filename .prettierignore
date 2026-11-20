@@ -1,0 +1,7 @@
+node_modules/
+static/css/tailwind.css
+static/games/car_game/js/race-world.bundle.js
+static/games/type_fighter/dist/game.js
+static/vendor/
+package-lock.json
+staticfiles/

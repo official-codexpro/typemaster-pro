@@ -1,4 +1,3 @@
-
 <style>
     /* =========================
        BASE
@@ -247,43 +246,28 @@
         }
     }
 </style>
-
-
-<div id="gameScreen" class="hidden min-h-screen bg-[#f7f8fa] text-neutral-800 font-mono">
-
+<div id="gameScreen"
+     class="hidden min-h-screen bg-[#f7f8fa] text-neutral-800 font-mono">
     <main class="max-w-[88rem] mx-auto px-4 md:px-8 xl:px-12 pt-8 md:pt-10 pb-12">
-
         <!-- FILTER BAR -->
         <section class="mb-8">
-
             <div class="flex flex-wrap items-center justify-between gap-4">
-
                 <div class="flex items-center gap-3 shrink-0">
-
                     <div class="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center text-lg">
                         ☷
                     </div>
-
                     <div>
-                        <h1 class="text-lg font-bold tracking-tight text-neutral-900">
-                            Filter
-                        </h1>
-                        <p class="text-[11px] text-neutral-400">
-                            Customize your test
-                        </p>
+                        <h1 class="text-lg font-bold tracking-tight text-neutral-900">Filter</h1>
+                        <p class="text-[11px] text-neutral-400">Customize your test</p>
                     </div>
-
                 </div>
-
                 <div class="flex items-center justify-end gap-2 flex-wrap">
-
                     <select id="difficulty" class="filter-control w-[115px] sm:w-36">
                         <option value="easy">Easy</option>
                         <option value="normal" selected>Normal</option>
                         <option value="hard">Hard</option>
                         <option value="code">Code Mode</option>
                     </select>
-
                     <select id="languageSelect" class="hidden filter-control w-[125px] sm:w-40">
                         <option value="python">Python</option>
                         <option value="javascript">JavaScript</option>
@@ -313,200 +297,145 @@
                         <option value="scala">Scala</option>
                         <option value="powershell">PowerShell</option>
                     </select>
-
                     <select id="duration" class="filter-control w-[125px] sm:w-36">
                         <option value="15">15 Seconds</option>
                         <option value="30" selected>30 Seconds</option>
                         <option value="60">60 Seconds</option>
                         <option value="120">120 Seconds</option>
                     </select>
-
-                    <button id="restart" type="button" title="Restart Test" aria-label="Restart Test">
-                        ↻
-                    </button>
-
+                    <button id="restart"
+                            type="button"
+                            title="Restart Test"
+                            aria-label="Restart Test">↻</button>
                 </div>
-
             </div>
-
         </section>
-
-
         <!-- STATS -->
         <section class="mb-7">
-
             <div class="flex items-stretch bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
-
                 <div class="filter-stat">
                     <p class="text-[10px] md:text-xs text-neutral-400 uppercase tracking-wider font-bold">Time</p>
                     <div class="mt-2 flex items-baseline justify-center gap-1">
-                        <span id="timer" class="text-3xl md:text-5xl font-bold tracking-tight text-neutral-900">30</span>
+                        <span id="timer"
+                              class="text-3xl md:text-5xl font-bold tracking-tight text-neutral-900">30</span>
                         <span class="hidden sm:inline text-xs text-neutral-400">sec</span>
                     </div>
                 </div>
-
                 <div class="filter-stat">
                     <p class="text-[10px] md:text-xs text-neutral-400 uppercase tracking-wider font-bold">WPM</p>
                     <div class="mt-2">
-                        <strong id="wpm" class="text-3xl md:text-5xl font-bold tracking-tight text-violet-600">0</strong>
+                        <strong id="wpm"
+                                class="text-3xl md:text-5xl font-bold tracking-tight text-violet-600">0</strong>
                     </div>
                 </div>
-
                 <div class="filter-stat">
                     <p class="text-[10px] md:text-xs text-neutral-400 uppercase tracking-wider font-bold">Accuracy</p>
                     <div class="mt-2">
-                        <strong id="accuracy" class="text-3xl md:text-5xl font-bold tracking-tight text-emerald-600">100%</strong>
+                        <strong id="accuracy"
+                                class="text-3xl md:text-5xl font-bold tracking-tight text-emerald-600">100%</strong>
                     </div>
                 </div>
-
                 <div class="filter-stat">
                     <p class="text-[10px] md:text-xs text-neutral-400 uppercase tracking-wider font-bold">Mistakes</p>
                     <div class="mt-2">
-                        <strong id="mistakes" class="text-3xl md:text-5xl font-bold tracking-tight text-red-500">0</strong>
+                        <strong id="mistakes"
+                                class="text-3xl md:text-5xl font-bold tracking-tight text-red-500">0</strong>
                     </div>
                 </div>
-
             </div>
-
         </section>
-
-
         <!-- TIMELINE -->
         <section class="mb-6">
-
             <div class="flex justify-between items-center text-[10px] text-neutral-400 uppercase tracking-wider font-bold mb-2">
                 <span>Time Progress</span>
                 <span id="timeProgressLabel">100% remaining</span>
             </div>
-
             <div id="timeProgressBar">
                 <div id="timeProgress" style="width:100%"></div>
             </div>
-
         </section>
-
-
         <!-- TYPING AREA -->
         <section id="typingArea" class="relative">
-
             <!-- NORMAL TYPING -->
             <div class="typing-paper">
                 <div id="textDisplay" class="text-neutral-400"></div>
             </div>
-
-
             <!-- PACMAN -->
             <div id="pacman" class="pointer-events-none">
                 <svg viewBox="0 0 100 100">
-                    <circle id="pacmanFace" cx="50" cy="50" r="45" fill="#FACC15"/>
-                    <polygon id="pacmanMouth" points="50,50 100,25 100,75" fill="white"/>
-                    <circle cx="57" cy="24" r="5" fill="#222"/>
+                    <circle id="pacmanFace" cx="50" cy="50" r="45" fill="#FACC15" />
+                    <polygon id="pacmanMouth" points="50,50 100,25 100,75" fill="white" />
+                    <circle cx="57" cy="24" r="5" fill="#222" />
                 </svg>
             </div>
-
-
             <!-- CODE MODE -->
             <div id="codeEditor" class="hidden w-full">
-
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-
                     <!-- TARGET CODE -->
                     <div class="filter-editor">
-
                         <div class="filter-editor-header flex items-center justify-between px-4">
-
                             <div class="flex items-center gap-1.5">
                                 <span class="w-2.5 h-2.5 rounded-full bg-red-400"></span>
                                 <span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span>
                                 <span class="w-2.5 h-2.5 rounded-full bg-green-400"></span>
                             </div>
-
-                            <span class="text-xs text-neutral-300 font-bold tracking-wider">
-                                TARGET CODE
-                            </span>
-
-                            <span id="codeLanguageLabel" class="text-xs text-neutral-400 uppercase">
-                                Python
-                            </span>
-
+                            <span class="text-xs text-neutral-300 font-bold tracking-wider">TARGET CODE</span>
+                            <span id="codeLanguageLabel" class="text-xs text-neutral-400 uppercase">Python</span>
                         </div>
-
                         <div id="targetCodeScroll" class="filter-editor-scroll flex">
-
-                            <div id="codeLineNumbers" class="shrink-0 min-w-12 px-3 py-5 text-right text-sm leading-7 text-neutral-600 bg-[#1e1e1e] select-none"></div>
-
-                            <pre id="codeDisplay" class="flex-1 min-w-0 m-0 px-4 py-5 text-sm md:text-base leading-7 text-neutral-300 whitespace-pre font-mono select-none"></pre>
-
+                            <div id="codeLineNumbers"
+                                 class="shrink-0 min-w-12 px-3 py-5 text-right text-sm leading-7 text-neutral-600 bg-[#1e1e1e] select-none">
+                            </div>
+                            <pre id="codeDisplay"
+                                 class="flex-1 min-w-0 m-0 px-4 py-5 text-sm md:text-base leading-7 text-neutral-300 whitespace-pre font-mono select-none"></pre>
                         </div>
-
                         <div class="filter-editor-footer flex items-center justify-between px-4">
                             <span class="text-xs text-neutral-500">Reference Code</span>
                             <span id="codeProgress" class="text-xs text-neutral-400">0 characters</span>
                         </div>
-
                     </div>
-
-
                     <!-- YOUR CODE -->
                     <div class="filter-editor">
-
                         <div class="filter-editor-header flex items-center justify-between px-4">
-
                             <div class="flex items-center gap-1.5">
                                 <span class="w-2.5 h-2.5 rounded-full bg-neutral-600"></span>
                                 <span class="text-xs text-neutral-300 font-bold tracking-wider">YOUR CODE</span>
                             </div>
-
                             <span class="text-xs text-neutral-500">Live Editor</span>
-
                         </div>
-
                         <div id="typedCodeScroll" class="filter-editor-scroll flex">
-
-                            <div id="typedCodeLineNumbers" class="shrink-0 min-w-12 px-3 py-5 text-right text-sm leading-7 text-neutral-600 bg-[#1e1e1e] select-none">
+                            <div id="typedCodeLineNumbers"
+                                 class="shrink-0 min-w-12 px-3 py-5 text-right text-sm leading-7 text-neutral-600 bg-[#1e1e1e] select-none">
                                 <div>1</div>
                             </div>
-
-                            <pre id="typedCodeDisplay" class="flex-1 min-w-0 m-0 px-4 py-5 text-sm md:text-base leading-7 text-neutral-300 whitespace-pre font-mono"><span class="text-neutral-600">Start typing your code here...</span></pre>
-
+                            <pre id="typedCodeDisplay"
+                                 class="flex-1 min-w-0 m-0 px-4 py-5 text-sm md:text-base leading-7 text-neutral-300 whitespace-pre font-mono"><span class="text-neutral-600">Start typing your code here...</span></pre>
                         </div>
-
                         <div class="filter-editor-footer flex flex-wrap items-center justify-between gap-2 px-4">
-
                             <div class="flex items-center gap-3 text-xs text-neutral-500">
                                 <span><span class="text-emerald-400">●</span> Correct</span>
                                 <span><span class="text-red-400">●</span> Incorrect</span>
                                 <span><span class="text-neutral-500">●</span> Pending</span>
                             </div>
-
                             <span class="text-xs text-neutral-500">Code Practice</span>
-
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
-
         </section>
-
-
         <!-- HIDDEN INPUT -->
-        <input type="text" id="typingInput" autocomplete="off" autocapitalize="off" spellcheck="false">
-
-
+        <input type="text"
+               id="typingInput"
+               autocomplete="off"
+               autocapitalize="off"
+               spellcheck="false">
         <!-- FOOTER -->
         <div class="mt-7 text-center">
             <p class="text-sm text-neutral-400">Start typing to begin your test</p>
             <p class="text-xs text-neutral-300 mt-2">Choose your difficulty · Improve your speed · Beat your record</p>
         </div>
-
     </main>
-
 </div>
-
-
 <!-- TIMELINE COLOR CONTROLLER -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {

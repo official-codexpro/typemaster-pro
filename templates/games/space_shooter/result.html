@@ -1,66 +1,48 @@
 {% extends "base/base.html" %}
 {% load static %}
-
 {% block title %}Game Result | TypeMaster Pro{% endblock %}
-
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'games/space_shooter/css/result.css' %}">
+    <link rel="stylesheet"
+          href="{% static 'games/space_shooter/css/result.css' %}">
 {% endblock %}
-
 {% block content %}
-
-<div id="spaceShooterResult">
-
-    <header>
-        <span>MISSION COMPLETED</span>
-        <h1>Game Result</h1>
-        <p>Here is your performance summary.</p>
-    </header>
-
-    <section class="result-score">
-        <span>FINAL SCORE</span>
-        <h2>{{ result.score }}</h2>
-        <p>{{ result.get_difficulty_display }} Difficulty</p>
-    </section>
-
-    <section class="result-grid">
-
-        <div class="result-card">
-            <span>WPM</span>
-            <h3>{{ result.wpm }}</h3>
-        </div>
-
-        <div class="result-card">
-            <span>Accuracy</span>
-            <h3>{{ result.accuracy }}%</h3>
-        </div>
-
-        <div class="result-card">
-            <span>Words Destroyed</span>
-            <h3>{{ result.words_destroyed }}</h3>
-        </div>
-
-        <div class="result-card">
-            <span>Mistakes</span>
-            <h3>{{ result.mistakes }}</h3>
-        </div>
-
-        <div class="result-card">
-            <span>Highest Wave</span>
-            <h3>{{ result.highest_wave }}</h3>
-        </div>
-
-        <div class="result-card">
-            <span>Duration</span>
-            <h3>{{ result.duration }} sec</h3>
-        </div>
-
-    </section>
-
-    <a href="{% url 'space_shooter' %}" class="back-home">
-        Back to Home
-    </a>
-
-</div>
-
+    <div id="spaceShooterResult">
+        <header>
+            <span>MISSION COMPLETED</span>
+            <h1>Game Result</h1>
+            <p>Here is your performance summary.</p>
+        </header>
+        <section class="result-score">
+            <span>FINAL SCORE</span>
+            <h2>{{ result.score }}</h2>
+            <p>{{ result.get_difficulty_display }} Difficulty</p>
+        </section>
+        <section class="result-grid">
+            <div class="result-card">
+                <span>WPM</span>
+                <h3>{{ result.wpm }}</h3>
+            </div>
+            <div class="result-card">
+                <span>Accuracy</span>
+                <h3>{{ result.accuracy }}%</h3>
+            </div>
+            <div class="result-card">
+                <span>Words Destroyed</span>
+                <h3>{{ result.words_destroyed }}</h3>
+            </div>
+            <div class="result-card">
+                <span>Mistakes</span>
+                <h3>{{ result.mistakes }}</h3>
+            </div>
+            <div class="result-card">
+                <span>Highest Wave</span>
+                <h3>{{ result.highest_wave }}</h3>
+            </div>
+            <div class="result-card">
+                <span>Duration</span>
+                <h3>{{ result.duration }} sec</h3>
+            </div>
+        </section>
+        <a href="{% url 'space_shooter' %}" class="back-home">Back to Home</a>
+    </div>
 {% endblock %}

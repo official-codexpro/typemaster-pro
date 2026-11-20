@@ -1,845 +1,658 @@
-
 document.addEventListener('DOMContentLoaded', () => {
-    const root = document.getElementById('carRacingGame');
-    if (!root) return;
+  const root = document.getElementById('carRacingGame');
+  if (!root) return;
 
-    // ELEMENTS
-    const canvas = document.getElementById('racingCanvas');
-    const ctx = canvas.getContext('2d');
+  const canvas = document.getElementById('racingCanvas');
+  const $ = (id) => document.getElementById(id);
+  const input = $('typingInput');
+  const sentenceDisplay = $('sentenceDisplay');
+  const feedback = $('typingFeedback');
+  const difficulty = root.dataset.difficulty || 'normal';
+  const mode = root.dataset.mode || 'paragraph';
+  const language = root.dataset.language || 'python';
+  const passageDifficulty = difficulty === 'extreme' ? 'hard' : difficulty;
+  const raceSeconds = 60;
+  const referenceWpm = 55;
+  const maxProgressSpeed = 1.82;
+  const aiSpeeds = {
+    easy: [22, 26, 29, 33],
+    normal: [33, 38, 43, 48],
+    hard: [42, 47, 52, 57],
+    extreme: [50, 55, 60, 68],
+  }[difficulty] || [33, 38, 43, 48];
+  const racers = [
+    {
+      name: 'YOU',
+      color: '#20b95e',
+      progress: 0,
+      velocity: 0,
+      throttle: 0,
+      drivePulse: 0,
+      player: true,
+    },
+    {
+      name: 'NOVA RUSH',
+      shortName: 'NOVA',
+      color: '#bd71cb',
+      progress: 0,
+      wpm: aiSpeeds[0],
+    },
+    {
+      name: 'NEON APEX',
+      shortName: 'NEON',
+      color: '#28bc70',
+      progress: 0,
+      wpm: aiSpeeds[1],
+    },
+    {
+      name: 'MIDNIGHT GT',
+      shortName: 'MIDNIGHT',
+      color: '#171a1c',
+      progress: 0,
+      wpm: aiSpeeds[2],
+    },
+    {
+      name: 'RAZORBACK CHARGER',
+      shortName: 'RAZOR',
+      color: '#32bd50',
+      progress: 0,
+      wpm: aiSpeeds[3],
+    },
+  ];
+  let raf = 0,
+    previous = 0,
+    elapsed = 0,
+    remaining = raceSeconds,
+    raceEndTime = 0,
+    pausedAt = 0;
+  let running = false,
+    paused = false,
+    ended = false,
+    saving = false,
+    countdownTimer = null;
+  let charIndex = 0,
+    correctChars = 0,
+    typedCharacters = 0,
+    mistakes = 0,
+    score = 0,
+    wordsTyped = 0;
+  let currentPassage = '',
+    passageQueue = [],
+    generatorPromise = null,
+    wrongCurrent = false,
+    codeErrorLocked = false,
+    paragraphsCompleted = 0;
+  let currentWpm = 0,
+    recentCorrectKeys = [];
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let standingsSignature = '';
+  let lastStandingsUpdate = 0;
+  const standingsRows = new Map();
+  const standingsList = $('raceStandingsList');
 
-    const scoreEl = document.getElementById('scoreValue');
-    const wpmEl = document.getElementById('wpmValue');
-    const accuracyEl = document.getElementById('accuracyValue');
-    const distanceEl = document.getElementById('distanceValue');
-    const collisionEl = document.getElementById('collisionValue');
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+  let world;
+  try {
+    if (!window.RaceWorld3D) throw new Error('3D race engine bundle did not load');
+    world = new window.RaceWorld3D(canvas, racers, {
+      reducedMotion,
+      modelUrl: root.dataset.carModel,
+    });
+  } catch (error) {
+    console.error('Unable to initialize the 3D race scene:', error);
+    $('startButton').disabled = true;
+    $('startOverlay').querySelector('h2').textContent = '3D GRAPHICS UNAVAILABLE';
+    $('startOverlay').querySelector('p:last-of-type').textContent =
+      'This race needs a browser with WebGL enabled. Try an updated browser or enable graphics acceleration.';
+    feedback.textContent = 'Could not initialize the 3D racing scene.';
+    return;
+  }
+  window.addEventListener('resize', () => world.resize());
 
-    const targetEl = document.getElementById('targetWord');
-    const input = document.getElementById('typingInput');
-    const feedback = document.getElementById('typingFeedback');
-
-    const startOverlay = document.getElementById('startOverlay');
-    const pauseOverlay = document.getElementById('pauseOverlay');
-    const countdownOverlay = document.getElementById('countdownOverlay');
-    const countdownValue = document.getElementById('countdownValue');
-
-    const startButton = document.getElementById('startButton');
-    const pauseButton = document.getElementById('pauseButton');
-    const resumeButton = document.getElementById('resumeButton');
-    const raceMessage = document.getElementById('raceMessage');
-
-    // CONFIGURATION
-    const difficulty = root.dataset.difficulty || 'normal';
-
-    const CONFIG = {
-        easy: {
-            speed: 0.24,
-            spawnRate: 2.5,
-            words: ['road', 'drive', 'speed', 'green', 'light', 'car', 'race']
-        },
-        normal: {
-            speed: 0.34,
-            spawnRate: 2,
-            words: ['engine', 'racing', 'driver', 'street', 'corner', 'traffic']
-        },
-        hard: {
-            speed: 0.44,
-            spawnRate: 1.55,
-            words: ['velocity', 'highway', 'overtake', 'traction', 'racer', 'distance']
-        },
-        extreme: {
-            speed: 0.56,
-            spawnRate: 1.2,
-            words: ['acceleration', 'transmission', 'competition', 'performance', 'navigation']
+  function splitIntoParagraphs(text) {
+    const clean = (text || '').replace(/\r/g, '').trim();
+    if (!clean) return [];
+    if (mode === 'code') {
+      const lines = clean.split('\n');
+      const blocks = [];
+      let block = [];
+      lines.forEach((line) => {
+        block.push(line);
+        if (block.length >= 3) {
+          blocks.push(block.join('\n'));
+          block = [];
         }
+      });
+      if (block.length) blocks.push(block.join('\n'));
+      return blocks.filter(Boolean);
+    }
+    const sentences = clean.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [clean];
+    const blocks = [];
+    let paragraph = '';
+    let wordCount = 0;
+    sentences.forEach((sentence) => {
+      const parts = sentence.trim().split(/\s+/);
+      let offset = 0;
+      while (offset < parts.length) {
+        const room = Math.max(1, 24 - wordCount),
+          take = parts.slice(offset, offset + room);
+        paragraph += (paragraph ? ' ' : '') + take.join(' ');
+        wordCount += take.length;
+        offset += take.length;
+        if (wordCount >= 24) {
+          blocks.push(paragraph);
+          paragraph = '';
+          wordCount = 0;
+        }
+      }
+    });
+    if (paragraph) blocks.push(paragraph);
+    return blocks;
+  }
+
+  function fallbackPassage() {
+    if (mode === 'code') {
+      return (
+        {
+          django:
+            '{% extends "base.html" %}\n{% load static %}\n{% block content %}\n<main class="race-card">\n  <h1>{{ title|default:"Race day" }}</h1>\n</main>\n{% endblock %}',
+          python:
+            'def race_step(speed, throttle):\n    acceleration = throttle * 0.8\n    return min(speed + acceleration, 240)\n\nfor lap in range(3):\n    print("Ready to race", lap)',
+          javascript:
+            'function raceStep(speed, throttle) {\n  const acceleration = throttle * 0.8;\n  return Math.min(speed + acceleration, 240);\n}\n\nfor (let lap = 0; lap < 3; lap++) {\n  console.log("Ready to race", lap);\n}',
+          sql: 'SELECT driver_name, average_wpm\nFROM race_results\nWHERE accuracy >= 95\nORDER BY average_wpm DESC\nLIMIT 5;',
+        }[language] || 'function raceStep(speed) {\n  return speed + 1;\n}'
+      );
+    }
+    const easy =
+      'a fast driver follows the road and keeps a steady pace as the bright green car moves through the open city circuit';
+    const normal =
+      'A focused driver watches the road, holds a steady pace, and accelerates smoothly through every turn.';
+    const hard =
+      'Precise acceleration, consistent rhythm, and deliberate focus help experienced racers maintain control through demanding corners.';
+    return difficulty === 'easy'
+      ? easy
+      : difficulty === 'hard' || difficulty === 'extreme'
+        ? hard
+        : normal;
+  }
+
+  async function generatePassage() {
+    if (mode === 'code' && language === 'django') return generateDjangoTemplate();
+    const params = new URLSearchParams({
+      difficulty: mode === 'code' ? 'code' : passageDifficulty,
+    });
+    if (mode === 'code') params.set('language', language);
+    const response = await fetch(`/api/generate/?${params.toString()}`, {
+      credentials: 'same-origin',
+    });
+    if (!response.ok) throw new Error(`Passage API returned ${response.status}`);
+    const data = await response.json();
+    if (!data.success || typeof data.text !== 'string' || !data.text.trim())
+      throw new Error(data.message || 'No passage returned');
+    return data.text;
+  }
+
+  function generateDjangoTemplate() {
+    const templates = [
+      '{% extends "base.html" %}\n{% load static %}\n{% block content %}\n<main class="race-card">\n  <h1>{{ title|default:"Night run" }}</h1>\n  <img src="{% static \'images/turn-marker.svg\' %}" alt="Circuit marker">\n</main>\n{% endblock %}',
+      '{% for driver in drivers %}\n<article class="driver-card">\n  <h2>{{ driver.name }}</h2>\n  <span>{{ driver.wpm }} WPM</span>\n</article>\n{% empty %}\n<p>No drivers yet.</p>\n{% endfor %}',
+      '{% if race.is_open %}\n<form method="post" action="{% url \'join_race\' race.id %}">\n  {% csrf_token %}\n  <button type="submit">Join race</button>\n</form>\n{% else %}\n<p>{{ race.status|title }}</p>\n{% endif %}',
+      '{% with best=results|dictsortreversed:"wpm"|first %}\n<section class="best-result">\n  <h2>{{ best.driver|default:"Your best run" }}</h2>\n  <strong>{{ best.wpm|default:0 }} WPM</strong>\n</section>\n{% endwith %}',
+      '{% include "games/partials/race_badge.html" with place=position %}\n{% if result.accuracy >= 95 %}\n<p class="clean-run">Excellent accuracy</p>\n{% else %}\n<p>{{ result.mistakes }} errors to improve</p>\n{% endif %}',
+    ];
+    return templates[Math.floor(Math.random() * templates.length)];
+  }
+
+  async function fillPassageQueue(minimum = 3) {
+    while (passageQueue.length < minimum) {
+      if (!generatorPromise) {
+        generatorPromise = (async () => {
+          let text;
+          try {
+            text = await generatePassage();
+          } catch (error) {
+            console.warn('Using local race passage fallback:', error);
+            text = fallbackPassage();
+          }
+          const chunks = splitIntoParagraphs(text);
+          passageQueue.push(...(chunks.length ? chunks : splitIntoParagraphs(fallbackPassage())));
+        })();
+      }
+      await generatorPromise;
+      generatorPromise = null;
+    }
+  }
+
+  function syntaxClasses(text) {
+    const classes = Array(text.length).fill('');
+    if (mode !== 'code') return classes;
+    const patterns = [
+      ['syntax-django-tag', /{%[\s\S]*?%}|{#[\s\S]*?#}/g],
+      ['syntax-django-variable', /{{[\s\S]*?}}/g],
+      ['syntax-html-tag', /<\/?[a-z][^>\n]*>/gi],
+      ['syntax-comment', /\/\/[^\n]*|#[^\n]*|--[^\n]*/g],
+      ['syntax-string', /"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`/g],
+      ['syntax-number', /\b\d+(?:\.\d+)?\b/g],
+      [
+        'syntax-keyword',
+        /\b(?:abstract|async|await|break|case|catch|class|const|continue|def|else|enum|export|extends|false|finally|for|from|function|if|import|in|interface|let|new|null|private|public|return|self|static|true|try|var|while|yield|SELECT|FROM|WHERE|ORDER|BY|LIMIT|INSERT|INTO|VALUES|UPDATE|SET|DELETE)\b/g,
+      ],
+    ];
+    patterns.forEach(([className, regex]) => {
+      let match;
+      while ((match = regex.exec(text))) {
+        for (let i = match.index; i < match.index + match[0].length; i++)
+          if (!classes[i]) classes[i] = className;
+      }
+    });
+    return classes;
+  }
+
+  function renderSentence() {
+    const frag = document.createDocumentFragment();
+    const syntax = syntaxClasses(currentPassage);
+    [...currentPassage].forEach((char, i) => {
+      const span = document.createElement('span');
+      span.textContent = char;
+      const classes = [syntax[i]];
+      if (i < charIndex) classes.push('typed-correct');
+      else if (i === charIndex) {
+        classes.push('current-char');
+        if (wrongCurrent) classes.push('typing-wrong');
+      } else classes.push('future-text');
+      span.className = classes.filter(Boolean).join(' ');
+      frag.appendChild(span);
+    });
+    sentenceDisplay.replaceChildren(frag);
+    const current = sentenceDisplay.querySelector('.current-char');
+    if (current) {
+      const currentRect = current.getBoundingClientRect(),
+        displayRect = sentenceDisplay.getBoundingClientRect();
+      const currentLeft = currentRect.left - displayRect.left + sentenceDisplay.scrollLeft;
+      sentenceDisplay.scrollLeft = Math.max(0, currentLeft - sentenceDisplay.clientWidth * 0.72);
+      const currentTop = currentRect.top - displayRect.top + sentenceDisplay.scrollTop;
+      if (currentTop > sentenceDisplay.scrollTop + sentenceDisplay.clientHeight - 28)
+        sentenceDisplay.scrollTop = currentTop - sentenceDisplay.clientHeight + 34;
+      else if (currentTop < sentenceDisplay.scrollTop) sentenceDisplay.scrollTop = currentTop;
+    } else sentenceDisplay.scrollLeft = sentenceDisplay.scrollWidth;
+    $('typingProgress').style.width =
+      `${currentPassage.length ? (charIndex / currentPassage.length) * 100 : 0}%`;
+    sentenceDisplay.classList.toggle('code-mode', mode === 'code');
+  }
+
+  async function loadNextParagraph() {
+    if (!passageQueue.length) {
+      if (running) input.disabled = true;
+      feedback.textContent = 'Generating the next paragraph…';
+      await fillPassageQueue(1);
+      if (ended) return;
+      input.disabled = !running || paused;
+    }
+    currentPassage = passageQueue.shift() || fallbackPassage();
+    charIndex = 0;
+    wrongCurrent = false;
+    codeErrorLocked = false;
+    $('passageLabel').textContent =
+      mode === 'code'
+        ? `${language.toUpperCase()} SYNTAX · PARAGRAPH ${paragraphsCompleted + 1}`
+        : `${difficulty.toUpperCase()} PARAGRAPH ${paragraphsCompleted + 1}`;
+    renderSentence();
+    fillPassageQueue(3).catch((error) => console.error('Passage prefetch error:', error));
+  }
+
+  function formatTime(seconds) {
+    const s = Math.max(0, Math.ceil(seconds));
+    return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+  }
+  function updateHud() {
+    const accuracy = typedCharacters ? Math.round((correctChars / typedCharacters) * 100) : 100;
+    const minutes = elapsed > 0 ? elapsed / 60 : 0;
+    currentWpm = minutes ? Math.round(correctChars / 5 / minutes) : 0;
+    $('wpmValue').textContent = currentWpm;
+    $('speedValue').textContent = currentWpm;
+    $('timerValue').textContent = formatTime(remaining);
+    $('accuracyValue').textContent = `${accuracy}%`;
+    $('distanceValue').textContent = Math.floor(racers[0].progress);
+    $('collisionValue').textContent = mistakes;
+    $('scoreValue').textContent = score;
+    $('lapValue').textContent = world.lapLabel(racers[0].progress);
+    const place = [...racers].sort((a, b) => b.progress - a.progress).indexOf(racers[0]) + 1;
+    $('positionValue').textContent = `P${place}/5`;
+    $('dialNeedle').style.transform = `rotate(${-48 + clamp(currentWpm, 0, 100) * 1.28}deg)`;
+    updateStandings();
+  }
+
+  function updateStandings() {
+    const now = performance.now();
+    if (now - lastStandingsUpdate < 140) return;
+    lastStandingsUpdate = now;
+    const ordered = [...racers].sort((a, b) => b.progress - a.progress);
+    const signature = ordered.map((racer) => racer.name).join('|');
+    if (signature !== standingsSignature) {
+      standingsSignature = signature;
+      ordered.forEach((racer) => {
+        if (!standingsRows.has(racer.name)) {
+          const row = document.createElement('li');
+          row.className = 'standing-row';
+          row.style.setProperty('--driver-color', racer.color);
+          const place = document.createElement('span');
+          place.className = 'standing-place';
+          const car = document.createElement('span');
+          car.className = 'standing-car';
+          car.setAttribute('aria-hidden', 'true');
+          car.textContent = '▰';
+          const info = document.createElement('span');
+          info.className = 'standing-info';
+          const name = document.createElement('span');
+          name.className = 'standing-name';
+          name.textContent = racer.player ? 'YOU' : racer.shortName;
+          const bar = document.createElement('span');
+          bar.className = 'standing-bar';
+          const barFill = document.createElement('i');
+          bar.appendChild(barFill);
+          info.append(name, bar);
+          row.append(place, car, info);
+          standingsRows.set(racer.name, { row, place, barFill });
+        }
+        standingsList.appendChild(standingsRows.get(racer.name).row);
+      });
+    }
+    const leaderProgress = ordered[0].progress;
+    ordered.forEach((racer, index) => {
+      const entry = standingsRows.get(racer.name);
+      entry.place.textContent = `P${index + 1}`;
+      const gap = Math.max(0, leaderProgress - racer.progress);
+      entry.barFill.style.width = `${clamp(100 - gap * 1.1, 12, 100)}%`;
+      entry.row.classList.toggle('standing-player', racer.player);
+    });
+  }
+  function message(text, color = '#fff') {
+    $('raceMessage').textContent = text;
+    $('raceMessage').style.color = color;
+    clearTimeout(message.timer);
+    message.timer = setTimeout(() => ($('raceMessage').textContent = ''), 1500);
+  }
+
+  function processCharacter(char) {
+    if (
+      !running ||
+      paused ||
+      ended ||
+      !currentPassage ||
+      performance.now() >= raceEndTime ||
+      (mode === 'code' && codeErrorLocked)
+    )
+      return;
+    typedCharacters++;
+    if (char !== currentPassage[charIndex]) {
+      const expected = currentPassage[charIndex];
+      mistakes++;
+      input.classList.add('typing-error');
+      feedback.textContent = `Missed key · expected “${expected === ' ' ? 'space' : expected}”`;
+      wrongCurrent = true;
+      if (mode === 'code') codeErrorLocked = true;
+      renderSentence();
+      feedback.style.color = '#ff8a81';
+      updateHud();
+      return;
+    }
+    charIndex++;
+    correctChars++;
+    recentCorrectKeys.push(performance.now());
+    racers[0].drivePulse = clamp(racers[0].drivePulse + 0.24, 0, 1);
+    score += char === ' ' ? 2 : 5;
+    wrongCurrent = false;
+    input.classList.remove('typing-error');
+    feedback.textContent = 'Clean typing · keep the momentum';
+    feedback.style.color = '#7de6cf';
+    renderSentence();
+    updateHud();
+    if (charIndex >= currentPassage.length) {
+      wordsTyped += (currentPassage.match(/[A-Za-z0-9_$]+/g) || []).length;
+      paragraphsCompleted++;
+      feedback.textContent = 'Paragraph complete · next passage loading…';
+      loadNextParagraph().catch((error) => {
+        console.error('Next passage failed:', error);
+      });
+    }
+  }
+  input.addEventListener('keydown', (event) => {
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
+    if (mode === 'code' && codeErrorLocked) {
+      event.preventDefault();
+      if (event.key === 'Backspace') {
+        codeErrorLocked = false;
+        wrongCurrent = false;
+        input.classList.remove('typing-error');
+        feedback.textContent = 'Error cleared · type the highlighted character';
+        feedback.style.color = '#7de6cf';
+        renderSentence();
+      }
+      return;
+    }
+    if (mode === 'code' && event.key === 'Enter') {
+      event.preventDefault();
+      processCharacter('\n');
+      return;
+    }
+    if (mode === 'code' && event.key === 'Tab') {
+      event.preventDefault();
+      for (let i = 0; i < 4; i++) processCharacter(' ');
+      return;
+    }
+    if (event.key.length !== 1) return;
+    event.preventDefault();
+    processCharacter(event.key);
+  });
+  input.addEventListener('input', () => {
+    const chars = [...input.value];
+    input.value = '';
+    chars.forEach(processCharacter);
+  });
+  input.addEventListener('paste', (event) => event.preventDefault());
+  sentenceDisplay.addEventListener('click', () => {
+    if (running && !paused) input.focus();
+  });
+  canvas.addEventListener('click', () => {
+    if (running && !paused) input.focus();
+  });
+
+  function tick(timestamp) {
+    if (!running || paused || ended) return;
+    const dt = previous ? Math.min((timestamp - previous) / 1000, 0.1) : 0;
+    previous = timestamp;
+    remaining = Math.max(0, (raceEndTime - performance.now()) / 1000);
+    elapsed = raceSeconds - remaining;
+    racers.slice(1).forEach((car, i) => {
+      car.progress =
+        car.baseProgress +
+        (car.wpm / referenceWpm) * maxProgressSpeed * elapsed +
+        0.3 * Math.sin(elapsed * 0.25 + i * 1.4);
+    });
+    const player = racers[0];
+    const now = performance.now();
+    while (recentCorrectKeys.length && recentCorrectKeys[0] < now - 3000) recentCorrectKeys.shift();
+    let cadenceWpm = 0;
+    if (recentCorrectKeys.length > 1) {
+      const span = Math.max(0.75, (recentCorrectKeys.at(-1) - recentCorrectKeys[0]) / 1000);
+      const idle = Math.max(0, (now - recentCorrectKeys.at(-1)) / 1000);
+      cadenceWpm = clamp(
+        ((recentCorrectKeys.length - 1) / span) * 12 * Math.exp(-idle / 1.1),
+        0,
+        72,
+      );
+    }
+    const targetThrottle = clamp(cadenceWpm / referenceWpm, 0, 1.3);
+    player.throttle += (targetThrottle - player.throttle) * Math.min(1, dt * 4.2);
+    const targetSpeed = player.throttle * maxProgressSpeed;
+    const response = targetSpeed > player.velocity ? 3.1 : 1.35;
+    player.velocity += (targetSpeed - player.velocity) * Math.min(1, dt * response);
+    player.progress += player.velocity * dt;
+    player.drivePulse = Math.max(0, player.drivePulse - dt * 1.65);
+    updateHud();
+    world.render(racers, dt);
+    if (remaining <= 0) {
+      updateHud();
+      world.render(racers, 0);
+      const ranking = [...racers].sort((a, b) => b.progress - a.progress);
+      const place = ranking.indexOf(racers[0]) + 1;
+      endGame(place === 1 ? 'YOU WIN THE RACE!' : `RACE COMPLETE · PLACE ${place}`, place);
+    } else raf = requestAnimationFrame(tick);
+  }
+  function startLoop() {
+    cancelAnimationFrame(raf);
+    previous = 0;
+    raf = requestAnimationFrame(tick);
+  }
+  function countdown() {
+    if (countdownTimer) return;
+    let count = 3;
+    $('startButton').disabled = true;
+    $('countdownOverlay').classList.remove('hidden');
+    $('countdownValue').textContent = count;
+    countdownTimer = setInterval(() => {
+      count--;
+      if (count <= 0) {
+        clearInterval(countdownTimer);
+        countdownTimer = null;
+        $('countdownOverlay').classList.add('hidden');
+        beginRace();
+      } else $('countdownValue').textContent = count;
+    }, 750);
+  }
+  function beginRace() {
+    running = true;
+    paused = false;
+    elapsed = 0;
+    remaining = raceSeconds;
+    recentCorrectKeys = [];
+    raceEndTime = performance.now() + raceSeconds * 1000;
+    racers.slice(1).forEach((car) => (car.baseProgress = car.progress));
+    $('startOverlay').classList.add('hidden');
+    $('pauseOverlay').classList.add('hidden');
+    input.disabled = false;
+    input.focus();
+    $('pauseButton').disabled = false;
+    feedback.textContent = 'Type smoothly to build speed · release to coast';
+    feedback.style.color = '';
+    startLoop();
+  }
+  $('startButton').addEventListener('click', () => {
+    if (!running && !ended && currentPassage) countdown();
+  });
+  function togglePause() {
+    if (!running || ended) return;
+    paused = !paused;
+    if (paused) {
+      pausedAt = performance.now();
+      cancelAnimationFrame(raf);
+      $('pauseOverlay').classList.remove('hidden');
+      input.disabled = true;
+      $('pauseButton').textContent = '▶';
+    } else {
+      $('pauseOverlay').classList.add('hidden');
+      raceEndTime += performance.now() - pausedAt;
+      input.disabled = false;
+      input.focus();
+      $('pauseButton').textContent = 'Ⅱ';
+      startLoop();
+    }
+  }
+  $('pauseButton').addEventListener('click', togglePause);
+  $('resumeButton').addEventListener('click', togglePause);
+  const fullscreenButton = $('fullscreenButton');
+  fullscreenButton.addEventListener('click', async () => {
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else await root.requestFullscreen();
+    } catch (error) {
+      console.warn('Fullscreen is unavailable:', error);
+    }
+  });
+  document.addEventListener('fullscreenchange', () => {
+    const active = document.fullscreenElement === root;
+    fullscreenButton.textContent = active ? '⤢' : '⛶';
+    fullscreenButton.title = active ? 'Exit fullscreen' : 'Enter fullscreen';
+    fullscreenButton.setAttribute('aria-label', active ? 'Exit fullscreen' : 'Enter fullscreen');
+    world.resize();
+  });
+  function cookie(name) {
+    const item = document.cookie
+      .split(';')
+      .map((x) => x.trim())
+      .find((x) => x.startsWith(name + '='));
+    return item ? decodeURIComponent(item.slice(name.length + 1)) : '';
+  }
+  async function endGame(reason, finishPosition = 5) {
+    if (ended || saving) return;
+    ended = true;
+    running = false;
+    saving = true;
+    cancelAnimationFrame(raf);
+    input.disabled = true;
+    $('pauseButton').disabled = true;
+    message(reason, '#fff5c2');
+    feedback.textContent = 'Saving race results…';
+    const accuracy = typedCharacters ? (correctChars / typedCharacters) * 100 : 100;
+    const result = {
+      difficulty,
+      mode,
+      language: mode === 'code' ? language : '',
+      finish_position: finishPosition,
+      score,
+      wpm: Math.round(correctChars / 5 / Math.max(elapsed / 60, 1 / 60)),
+      accuracy,
+      words_typed: wordsTyped,
+      distance: Math.floor(racers[0].progress * 10),
+      collisions: 0,
+      mistakes,
+      duration: raceSeconds,
     };
-
-    const settings = CONFIG[difficulty] || CONFIG.normal;
-
-    // GAME STATE
-    let width = 0;
-    let height = 0;
-    let animationId = null;
-    let previousTime = 0;
-
-    let running = false;
-    let paused = false;
-    let ended = false;
-    let saving = false;
-
-    let elapsed = 0;
-    let remainingTime = 90;
-    let spawnTimer = 0;
-
-    let score = 0;
-    let wordsTyped = 0;
-    let correctCharacters = 0;
-    let totalCharacters = 0;
-    let mistakes = 0;
-    let collisions = 0;
-    let distance = 0;
-
-    let typedWord = '';
-    let traffic = [];
-    let particles = [];
-    let roadOffset = 0;
-    let shake = 0;
-
-    const MAX_COLLISIONS = 10;
-    const RACE_DURATION = 90;
-    const WORD_TARGET = 30;
-
-    // CANVAS SIZE
-    function resizeCanvas() {
-        const rect = canvas.getBoundingClientRect();
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
-
-        width = rect.width;
-        height = rect.height;
-
-        canvas.width = Math.round(width * dpr);
-        canvas.height = Math.round(height * dpr);
-
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-        if (!running) drawScene();
+    try {
+      const response = await fetch(root.dataset.saveUrl, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': cookie('csrftoken'),
+        },
+        body: JSON.stringify(result),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Unable to save race result.');
+      window.location.href = `/car-racing/result/${data.result_id}/`;
+    } catch (error) {
+      saving = false;
+      feedback.textContent = 'Result could not be saved. Refresh to retry.';
+      feedback.style.color = '#ff8a81';
+      console.error('Car Racing save error:', error);
     }
-
-    window.addEventListener('resize', resizeCanvas);
-
-    // ROAD GEOMETRY
-    function roadPosition(progress) {
-        const horizon = height * 0.36;
-        const bottom = height;
-        const y = horizon + progress * (bottom - horizon);
-
-        const roadTop = width * 0.12;
-        const roadBottom = width * 0.91;
-
-        const roadWidth = roadTop + (roadBottom - roadTop) * progress;
-
-        const center = width / 2;
-
-        return {
-            y,
-            left: center - roadWidth / 2,
-            right: center + roadWidth / 2,
-            width: roadWidth,
-            center
-        };
-    }
-
-    // DRAW BACKGROUND
-    function drawBackground() {
-        const sky = ctx.createLinearGradient(0, 0, 0, height * 0.5);
-        sky.addColorStop(0, '#182a48');
-        sky.addColorStop(1, '#e58b70');
-
-        ctx.fillStyle = sky;
-        ctx.fillRect(0, 0, width, height * 0.5);
-
-        // Sun
-        ctx.beginPath();
-        ctx.arc(width * 0.75, height * 0.19, Math.min(width, height) * 0.065, 0, Math.PI * 2);
-        ctx.fillStyle = '#ffd78b';
-        ctx.fill();
-
-        // Mountains
-        ctx.fillStyle = '#34445a';
-        ctx.beginPath();
-        ctx.moveTo(0, height * 0.38);
-        ctx.lineTo(width * 0.13, height * 0.18);
-        ctx.lineTo(width * 0.26, height * 0.38);
-        ctx.lineTo(width * 0.42, height * 0.22);
-        ctx.lineTo(width * 0.62, height * 0.39);
-        ctx.lineTo(width * 0.8, height * 0.2);
-        ctx.lineTo(width, height * 0.38);
-        ctx.closePath();
-        ctx.fill();
-
-        // Ground
-        ctx.fillStyle = '#416b43';
-        ctx.fillRect(0, height * 0.36, width, height * 0.64);
-    }
-
-    // ROAD
-    function drawRoad() {
-        const horizon = height * 0.36;
-        const top = roadPosition(0);
-        const bottom = roadPosition(1);
-
-        // Road surface
-        ctx.fillStyle = '#333b48';
-        ctx.beginPath();
-        ctx.moveTo(top.left, horizon);
-        ctx.lineTo(top.right, horizon);
-        ctx.lineTo(bottom.right, height);
-        ctx.lineTo(bottom.left, height);
-        ctx.closePath();
-        ctx.fill();
-
-        // Road edges
-        ctx.strokeStyle = '#f5f0d9';
-        ctx.lineWidth = 3;
-
-        ctx.beginPath();
-        ctx.moveTo(top.left, horizon);
-        ctx.lineTo(bottom.left, height);
-        ctx.moveTo(top.right, horizon);
-        ctx.lineTo(bottom.right, height);
-        ctx.stroke();
-
-        // Roadside stripes
-        for (let i = 0; i < 18; i++) {
-            const p = ((i / 18) + roadOffset) % 1;
-            const pos = roadPosition(p);
-            const stripeWidth = 3 + p * 9;
-
-            ctx.fillStyle = i % 2 ? '#f8f1d7' : '#d94b4b';
-
-            ctx.fillRect(
-                pos.left - stripeWidth,
-                pos.y,
-                stripeWidth,
-                8 + p * 18
-            );
-
-            ctx.fillRect(
-                pos.right,
-                pos.y,
-                stripeWidth,
-                8 + p * 18
-            );
-        }
-
-        // Lane dividers
-        for (let lane = 1; lane <= 2; lane++) {
-            for (let i = 0; i < 15; i++) {
-                const p = ((i / 15) + roadOffset) % 1;
-                const pos = roadPosition(p);
-
-                const x = pos.left + pos.width * (lane / 3);
-                const dashHeight = 3 + p * 18;
-                const dashWidth = 1 + p * 3;
-
-                ctx.fillStyle = '#fff5cc';
-                ctx.fillRect(
-                    x - dashWidth / 2,
-                    pos.y,
-                    dashWidth,
-                    dashHeight
-                );
-            }
-        }
-    }
-
-    // TREES
-    function drawTrees() {
-        for (let i = 0; i < 13; i++) {
-            const p = ((i / 13) + roadOffset * 0.8) % 1;
-            const pos = roadPosition(p);
-
-            const size = 8 + p * 35;
-            const sides = [
-                pos.left - size * 2.2,
-                pos.right + size * 2.2
-            ];
-
-            sides.forEach((x, side) => {
-                const treeX = x + (side === 0 ? -1 : 1) * p * 10;
-
-                ctx.fillStyle = '#59402e';
-                ctx.fillRect(
-                    treeX - size * 0.09,
-                    pos.y - size * 0.25,
-                    size * 0.18,
-                    size * 0.7
-                );
-
-                ctx.fillStyle = i % 2 ? '#174b35' : '#22623c';
-
-                ctx.beginPath();
-                ctx.arc(
-                    treeX,
-                    pos.y - size * 0.5,
-                    size * 0.5,
-                    0,
-                    Math.PI * 2
-                );
-                ctx.fill();
-            });
-        }
-    }
-
-    // DRAW PLAYER CAR
-    function drawPlayerCar() {
-        const carWidth = Math.min(width * 0.13, 100);
-        const carHeight = carWidth * 1.55;
-
-        const x = width / 2;
-        const y = height - carHeight * 0.78;
-
-        ctx.save();
-        ctx.translate(x, y);
-
-        // Shadow
-        ctx.fillStyle = 'rgba(0,0,0,0.35)';
-        ctx.beginPath();
-        ctx.ellipse(0, carHeight * 0.45, carWidth * 0.62, carHeight * 0.18, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Wheels
-        ctx.fillStyle = '#111';
-        ctx.fillRect(-carWidth * 0.55, -carHeight * 0.05, carWidth * 0.2, carHeight * 0.48);
-        ctx.fillRect(carWidth * 0.35, -carHeight * 0.05, carWidth * 0.2, carHeight * 0.48);
-
-        // Body
-        ctx.fillStyle = '#e84545';
-        ctx.beginPath();
-        ctx.moveTo(-carWidth * 0.43, carHeight * 0.48);
-        ctx.lineTo(-carWidth * 0.35, -carHeight * 0.3);
-        ctx.lineTo(-carWidth * 0.2, -carHeight * 0.48);
-        ctx.lineTo(carWidth * 0.2, -carHeight * 0.48);
-        ctx.lineTo(carWidth * 0.35, -carHeight * 0.3);
-        ctx.lineTo(carWidth * 0.43, carHeight * 0.48);
-        ctx.closePath();
-        ctx.fill();
-
-        // Windshield
-        ctx.fillStyle = '#a8d9ec';
-        ctx.beginPath();
-        ctx.moveTo(-carWidth * 0.27, -carHeight * 0.18);
-        ctx.lineTo(-carWidth * 0.16, -carHeight * 0.38);
-        ctx.lineTo(carWidth * 0.16, -carHeight * 0.38);
-        ctx.lineTo(carWidth * 0.27, -carHeight * 0.18);
-        ctx.closePath();
-        ctx.fill();
-
-        // Front lights
-        ctx.fillStyle = '#fff1a8';
-        ctx.fillRect(-carWidth * 0.34, carHeight * 0.31, carWidth * 0.16, carHeight * 0.07);
-        ctx.fillRect(carWidth * 0.18, carHeight * 0.31, carWidth * 0.16, carHeight * 0.07);
-
-        // Center stripe
-        ctx.fillStyle = '#ffd166';
-        ctx.fillRect(-carWidth * 0.035, -carHeight * 0.43, carWidth * 0.07, carHeight * 0.82);
-
-        ctx.restore();
-    }
-
-    // TRAFFIC CARS
-    function drawTrafficCar(car) {
-        const pos = roadPosition(car.progress);
-        const laneX = pos.left + pos.width * ((car.lane + 0.5) / 3);
-
-        const carWidth = 15 + car.progress * 48;
-        const carHeight = carWidth * 1.45;
-
-        ctx.save();
-        ctx.translate(laneX, pos.y);
-
-        ctx.fillStyle = 'rgba(0,0,0,0.3)';
-        ctx.fillRect(-carWidth * 0.55, carHeight * 0.25, carWidth * 1.1, carHeight * 0.15);
-
-        ctx.fillStyle = '#151515';
-        ctx.fillRect(-carWidth * 0.55, -carHeight * 0.1, carWidth * 0.16, carHeight * 0.5);
-        ctx.fillRect(carWidth * 0.39, -carHeight * 0.1, carWidth * 0.16, carHeight * 0.5);
-
-        ctx.fillStyle = car.color;
-        ctx.beginPath();
-        ctx.roundRect(
-            -carWidth * 0.45,
-            -carHeight * 0.35,
-            carWidth * 0.9,
-            carHeight * 0.85,
-            carWidth * 0.12
-        );
-        ctx.fill();
-
-        ctx.fillStyle = '#b9dce8';
-        ctx.fillRect(-carWidth * 0.3, -carHeight * 0.27, carWidth * 0.6, carHeight * 0.25);
-
-        ctx.fillStyle = '#fff0a0';
-        ctx.fillRect(-carWidth * 0.35, carHeight * 0.3, carWidth * 0.17, carHeight * 0.08);
-        ctx.fillRect(carWidth * 0.18, carHeight * 0.3, carWidth * 0.17, carHeight * 0.08);
-
-        // Word label
-        if (car.progress > 0.18) {
-            const labelWidth = Math.max(65, car.word.length * 9 + 22);
-            const labelY = -carHeight * 0.9;
-
-            ctx.fillStyle = 'rgba(10,13,22,0.92)';
-            ctx.beginPath();
-            ctx.roundRect(-labelWidth / 2, labelY - 15, labelWidth, 25, 6);
-            ctx.fill();
-
-            ctx.strokeStyle = '#a78bfa';
-            ctx.lineWidth = 1;
-            ctx.stroke();
-
-            ctx.fillStyle = '#ffffff';
-            ctx.font = `bold ${Math.max(10, 9 + car.progress * 4)}px monospace`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(car.word, 0, labelY - 2);
-        }
-
-        ctx.restore();
-    }
-
-    // PARTICLES
-    function drawParticles() {
-        particles.forEach(p => {
-            ctx.globalAlpha = Math.max(0, p.life);
-            ctx.fillStyle = p.color;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-            ctx.fill();
-        });
-
-        ctx.globalAlpha = 1;
-    }
-
-    function createParticles(x, y, color) {
-        for (let i = 0; i < 15; i++) {
-            particles.push({
-                x,
-                y,
-                vx: (Math.random() - 0.5) * 160,
-                vy: (Math.random() - 0.5) * 160,
-                life: 1,
-                size: Math.random() * 4 + 2,
-                color
-            });
-        }
-    }
-
-    // COMPLETE SCENE
-    function drawScene() {
-        if (!width || !height) return;
-
-        ctx.clearRect(0, 0, width, height);
-
-        ctx.save();
-
-        if (shake > 0) {
-            ctx.translate(
-                (Math.random() - 0.5) * shake,
-                (Math.random() - 0.5) * shake
-            );
-        }
-
-        drawBackground();
-        drawRoad();
-        drawTrees();
-
-        traffic
-            .slice()
-            .sort((a, b) => a.progress - b.progress)
-            .forEach(drawTrafficCar);
-
-        drawParticles();
-        drawPlayerCar();
-
-        ctx.restore();
-    }
-
-    // TRAFFIC SPAWNING
-    function spawnTraffic() {
-        const availableLanes = [0, 1, 2];
-
-        const occupied = traffic
-            .filter(car => car.progress < 0.3)
-            .map(car => car.lane);
-
-        const lanes = availableLanes.filter(lane => !occupied.includes(lane));
-
-        if (!lanes.length) return;
-
-        const lane = lanes[Math.floor(Math.random() * lanes.length)];
-        const words = settings.words;
-
-        const word = words[Math.floor(Math.random() * words.length)];
-
-        const colors = ['#2878b9', '#e0a12d', '#3d9a72', '#9a69c8', '#d85b45'];
-
-        traffic.push({
-            lane,
-            word,
-            progress: 0.02,
-            color: colors[Math.floor(Math.random() * colors.length)],
-            speed: settings.speed
-        });
-
-        updateTarget();
-    }
-
-    // CURRENT TARGET
-    function getTargetCar() {
-        return traffic
-            .filter(car => car.progress < 0.95)
-            .sort((a, b) => b.progress - a.progress)[0] || null;
-    }
-
-    function updateTarget() {
-        const target = getTargetCar();
-
-        targetEl.textContent = target ? target.word : 'WAIT...';
-    }
-
-    // LIVE STATS
-    function updateStats() {
-        const minutes = Math.max(elapsed / 60, 1 / 60);
-
-        const wpm = Math.round((correctCharacters / 5) / minutes);
-
-        const accuracy = totalCharacters > 0
-            ? Math.round((correctCharacters / totalCharacters) * 100)
-            : 100;
-
-        scoreEl.textContent = score;
-        wpmEl.textContent = wpm;
-        accuracyEl.textContent = accuracy + '%';
-        distanceEl.textContent = Math.floor(distance);
-        collisionEl.textContent = collisions;
-    }
-
-    // MESSAGE
-    function showMessage(message, color = '#ffffff') {
-        raceMessage.textContent = message;
-        raceMessage.style.color = color;
-
-        clearTimeout(showMessage.timeout);
-
-        showMessage.timeout = setTimeout(() => {
-            raceMessage.textContent = '';
-        }, 900);
-    }
-
-    // WORD TYPING
-    input.addEventListener('input', () => {
-        if (!running || paused || ended) return;
-
-        const value = input.value.toLowerCase();
-
-        // Only accept letters
-        if (/[^a-z]/.test(value)) {
-            input.value = value.replace(/[^a-z]/g, '');
-            return;
-        }
-
-        const target = getTargetCar();
-
-        if (!target) {
-            typedWord = value;
-            return;
-        }
-
-        typedWord = value;
-
-        if (!target.word.startsWith(typedWord)) {
-            input.classList.add('typing-error');
-            feedback.textContent = 'Wrong letters! Try again.';
-            feedback.style.color = '#f87171';
-        } else {
-            input.classList.remove('typing-error');
-            feedback.textContent = 'Keep going...';
-            feedback.style.color = '#4ade80';
-        }
+  }
+
+  $('modeBadge').textContent = mode === 'code' ? 'CODE SYNTAX' : 'PARAGRAPH';
+  $('timerValue').textContent = '01:00';
+  if (mode === 'code') {
+    document.querySelector('.typing-console').classList.add('code-mode');
+    $('typingHint').innerHTML =
+      '<span class="keycap">TAB</span> INDENTS · <span class="keycap">ENTER</span> NEW LINE';
+  }
+  renderSentence();
+  world.resize();
+  world.render(racers, 0);
+  updateHud();
+  $('startButton').disabled = true;
+  feedback.textContent = 'Loading race passages and performance cars…';
+  Promise.all([fillPassageQueue(3), world.ready])
+    .then(() => loadNextParagraph())
+    .then(() => {
+      $('startButton').disabled = false;
+      feedback.textContent = 'Generated passage ready · click start to race';
+    })
+    .catch((error) => {
+      console.error('Could not prepare race passage:', error);
+      feedback.textContent = 'Could not load a passage. Refresh to try again.';
     });
-
-    input.addEventListener('keydown', event => {
-        if (event.key !== ' ' && event.key !== 'Enter') return;
-
-        event.preventDefault();
-
-        if (!running || paused || ended) return;
-
-        const typed = input.value.trim().toLowerCase();
-        const target = getTargetCar();
-
-        if (!typed) return;
-
-        totalCharacters += typed.length;
-
-        if (target && typed === target.word) {
-            correctCharacters += typed.length;
-            wordsTyped++;
-
-            score += 100 + Math.round(target.progress * 100);
-            distance += 1;
-
-            const pos = roadPosition(target.progress);
-            const x = pos.left + pos.width * ((target.lane + 0.5) / 3);
-
-            createParticles(x, pos.y, '#4ade80');
-
-            traffic = traffic.filter(car => car !== target);
-
-            showMessage('OVERTAKE! +100', '#4ade80');
-            feedback.textContent = 'Perfect! Next target incoming.';
-            feedback.style.color = '#4ade80';
-
-        } else {
-            mistakes++;
-            score = Math.max(0, score - 20);
-
-            showMessage('WRONG WORD!', '#f87171');
-            feedback.textContent = 'Incorrect word. Try the next target.';
-            feedback.style.color = '#f87171';
-        }
-
-        input.value = '';
-        typedWord = '';
-
-        updateTarget();
-        updateStats();
-
-        if (wordsTyped >= WORD_TARGET) {
-            endGame('FINISH LINE!');
-        }
-    });
-
-    // GAME UPDATE
-    function updateGame(dt) {
-        elapsed += dt;
-        remainingTime = Math.max(0, RACE_DURATION - elapsed);
-
-        roadOffset = (roadOffset + dt * settings.speed * 0.8) % 1;
-        shake = Math.max(0, shake - dt * 30);
-
-        spawnTimer += dt;
-
-        if (spawnTimer >= settings.spawnRate) {
-            spawnTimer = 0;
-            spawnTraffic();
-        }
-
-        traffic.forEach(car => {
-            car.progress += dt * car.speed;
-        });
-
-        // Collision when traffic reaches the player
-        const missed = traffic.filter(car => car.progress >= 0.96);
-
-        missed.forEach(car => {
-            collisions++;
-            mistakes++;
-            shake = 12;
-
-            showMessage('CRASH! -1 LIFE', '#f87171');
-
-            createParticles(width / 2, height * 0.82, '#f87171');
-
-            traffic = traffic.filter(item => item !== car);
-        });
-
-        particles.forEach(p => {
-            p.x += p.vx * dt;
-            p.y += p.vy * dt;
-            p.life -= dt * 1.8;
-        });
-
-        particles = particles.filter(p => p.life > 0);
-
-        updateTarget();
-        updateStats();
-
-        if (collisions >= MAX_COLLISIONS) {
-            endGame('RACE OVER!');
-        } else if (remainingTime <= 0) {
-            endGame('TIME UP!');
-        }
-    }
-
-    // GAME LOOP
-    function gameLoop(timestamp) {
-        if (!running || paused || ended) return;
-
-        const dt = previousTime
-            ? Math.min((timestamp - previousTime) / 1000, 0.05)
-            : 0;
-
-        previousTime = timestamp;
-
-        updateGame(dt);
-        drawScene();
-
-        if (running && !paused && !ended) {
-            animationId = requestAnimationFrame(gameLoop);
-        }
-    }
-
-    function startLoop() {
-        cancelAnimationFrame(animationId);
-        previousTime = 0;
-        animationId = requestAnimationFrame(gameLoop);
-    }
-
-    // COUNTDOWN
-    function countdown() {
-        let count = 3;
-
-        countdownOverlay.classList.remove('hidden');
-        countdownValue.textContent = count;
-
-        const timer = setInterval(() => {
-            count--;
-
-            if (count <= 0) {
-                clearInterval(timer);
-                countdownOverlay.classList.add('hidden');
-                beginRace();
-                return;
-            }
-
-            countdownValue.textContent = count;
-        }, 800);
-    }
-
-    // START
-    function beginRace() {
-        running = true;
-        paused = false;
-
-        startOverlay.classList.add('hidden');
-        pauseOverlay.classList.add('hidden');
-
-        input.disabled = false;
-        input.value = '';
-        input.focus();
-
-        pauseButton.disabled = false;
-        pauseButton.textContent = 'PAUSE';
-
-        feedback.textContent = 'Type the target word and press space.';
-        feedback.style.color = '';
-
-        spawnTraffic();
-        startLoop();
-    }
-
-    startButton.addEventListener('click', () => {
-        if (running || ended) return;
-        countdown();
-    });
-
-    // PAUSE / RESUME
-    function pauseRace() {
-        if (!running || ended) return;
-
-        paused = !paused;
-
-        if (paused) {
-            cancelAnimationFrame(animationId);
-            pauseOverlay.classList.remove('hidden');
-            input.disabled = true;
-            pauseButton.textContent = 'RESUME';
-        } else {
-            pauseOverlay.classList.add('hidden');
-            input.disabled = false;
-            input.focus();
-            pauseButton.textContent = 'PAUSE';
-            startLoop();
-        }
-    }
-
-    pauseButton.addEventListener('click', () => {
-        if (paused) {
-            pauseRace();
-        } else if (running) {
-            pauseRace();
-        }
-    });
-
-    resumeButton.addEventListener('click', () => {
-        if (paused) pauseRace();
-    });
-
-    // CSRF
-    function getCookie(name) {
-        const cookies = document.cookie.split(';');
-
-        for (const cookie of cookies) {
-            const item = cookie.trim();
-
-            if (item.startsWith(name + '=')) {
-                return decodeURIComponent(item.slice(name.length + 1));
-            }
-        }
-
-        return '';
-    }
-
-    // END GAME + SAVE RESULT
-    async function endGame(reason) {
-        if (ended || saving) return;
-
-        ended = true;
-        running = false;
-        saving = true;
-
-        cancelAnimationFrame(animationId);
-
-        input.disabled = true;
-        pauseButton.disabled = true;
-
-        showMessage(reason, '#ffd166');
-        feedback.textContent = 'Saving your race result...';
-
-        const duration = Math.max(1, Math.round(elapsed));
-
-        const accuracy = totalCharacters > 0
-            ? (correctCharacters / totalCharacters) * 100
-            : 100;
-
-        const wpm = Math.round(
-            (correctCharacters / 5) / Math.max(elapsed / 60, 1 / 60)
-        );
-
-        const result = {
-            difficulty,
-            score,
-            wpm,
-            accuracy,
-            words_typed: wordsTyped,
-            distance: Math.floor(distance),
-            collisions,
-            mistakes,
-            duration
-        };
-
-        try {
-            const response = await fetch(root.dataset.saveUrl, {
-                method: 'POST',
-                credentials: 'same-origin',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                body: JSON.stringify(result)
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || 'Unable to save race result.');
-            }
-
-            window.location.href =
-                `/car-racing/result/${data.result_id}/`;
-
-        } catch (error) {
-            saving = false;
-            feedback.textContent = 'Could not save result. Please try again.';
-            feedback.style.color = '#f87171';
-
-            console.error('Car Racing save error:', error);
-        }
-    }
-
-    // INITIALIZE
-    resizeCanvas();
-    updateStats();
-    updateTarget();
-    drawScene();
 });

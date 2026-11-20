@@ -1,56 +1,29 @@
 {% extends "base/base.html" %}
 {% load static %}
-
 {% block title %}TypeMaster Pro | Typing Dashboard{% endblock %}
-
 {% block content %}
-
-<div id="dashboardScreen" class="min-h-screen">
-
-   
-
-    <main class="max-w-9xl mx-auto px-6 py-10">
-
-        <div class="text-center mb-11">
-            <h1 class="text-3xl md:text-4xl font-extrabold">
-                Typing Test
-            </h1>
-
-            <p class="text-neutral-500 mt-4">
-                Take a free typing test, check your speed, and improve your skills.
-            </p>
-        </div>
-
-        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-[225px_1fr] gap-6 md:gap-7">
-
-            {% include "dashboard/sidebar.html" %}
-
-            <section class="min-w-0">
-
-                {% include "dashboard/stats.html" %}
-
-                {% include "dashboard/performance.html" %}
-
-                {% include "dashboard/difficulty.html" %}
-
-                {% include "dashboard/results.html" %}
-
-            </section>
-
-        </div>
-
-    </main>
-
-</div>
-
-{% include "game/game.html" %}
-
-{% include "game/result.html" %}
-
+    <div id="dashboardScreen" class="min-h-screen">
+        <main class="max-w-9xl mx-auto px-6 py-10">
+            <div class="text-center mb-11">
+                <h1 class="text-3xl md:text-4xl font-extrabold">Typing Test</h1>
+                <p class="text-neutral-500 mt-4">
+                    Take a free typing test, check your speed, and improve your skills.
+                </p>
+            </div>
+            <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-[225px_1fr] gap-6 md:gap-7">
+                {% include "dashboard/sidebar.html" %}
+                <section class="min-w-0">
+                    {% include "dashboard/stats.html" %}
+                    {% include "dashboard/performance.html" %}
+                    {% include "dashboard/difficulty.html" %}
+                    {% include "dashboard/results.html" %}
+                </section>
+            </div>
+        </main>
+    </div>
+    {% include "game/game.html" %}
+    {% include "game/result.html" %}
 {% endblock %}
-
 {% block extra_js %}
-
-<script src="{% static 'js/dashboard.js' %}"></script>
-
+    <script src="{% static 'js/dashboard.js' %}"></script>
 {% endblock %}

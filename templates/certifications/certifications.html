@@ -1,264 +1,983 @@
-
 {% extends "base/base.html" %}
 {% load static %}
-
 {% block title %}My Certifications | TypeMaster Pro{% endblock %}
-
 {% block content %}
+    <style>
+    /* =====================================================
+       CERTIFICATIONS PAGE
+       The certificate is a "paper" document: it always stays
+       light (also in dark theme and in print), so it uses its
+       own scoped classes instead of the global theme utilities.
+    ===================================================== */
 
-<main class="mx-auto w-full max-w-5xl px-4 py-7 sm:px-6 lg:py-9">
+    .cert-page {
+        width: 100%;
+        max-width: 64rem;
+        margin: 0 auto;
+        padding: 1.75rem 1rem 2.5rem;
+    }
 
-    <!-- PAGE HEADER -->
-    <header class="mb-5 flex flex-wrap items-center justify-between gap-4 print:hidden">
-        <div>
-            <h1 class="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">
-                My Certifications
-            </h1>
-            <p class="mt-1 text-sm text-gray-500">
-                Your achievements, recognized by TypeMaster Pro.
+    @media (min-width: 640px) {
+        .cert-page {
+            padding: 2.25rem 1.5rem 3rem;
+        }
+    }
+
+    /* ---------- tier colours ---------- */
+
+    .cert-gold   { --tier: #b45309; }
+    .cert-silver { --tier: #475569; }
+    .cert-bronze { --tier: #92400e; }
+    .cert-none   { --tier: #6b7280; }
+
+    /* ---------- one certificate block ---------- */
+
+    .cert-wrap {
+        width: 100%;
+        max-width: 56rem;
+        margin: 0 auto 2rem;
+    }
+
+    .cert-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+    }
+
+    .cert-toolbar-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+        flex-wrap: wrap;
+    }
+
+    .cert-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 999px;
+        background: #ffffff;
+        color: var(--tier);
+        font-size: 10px;
+        font-weight: 900;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+    }
+
+    .cert-pill::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--tier);
+    }
+
+    .cert-print-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: 38px;
+        padding: 0 16px;
+        border: 0;
+        border-radius: 10px;
+        background: #dc2626;
+        color: #ffffff;
+        font-size: 13px;
+        font-weight: 800;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: background-color .2s ease, transform .15s ease;
+    }
+
+    .cert-print-btn:hover {
+        background: #b91c1c;
+    }
+
+    .cert-print-btn:active {
+        transform: scale(.97);
+    }
+
+    /* ---------- paper ---------- */
+
+    .cert-paper {
+        position: relative;
+        display: flex;
+        padding: 8px;
+        border: 7px solid #f3e8ff;
+        border-radius: 12px;
+        background: #ffffff;
+        color: #1f2937;
+        box-shadow: 0 22px 44px -14px rgba(59, 7, 100, .22);
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    @media (min-width: 700px) {
+        .cert-paper {
+            aspect-ratio: 297 / 210;
+        }
+    }
+
+    .cert-inner {
+        position: relative;
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        padding: 1.25rem 1rem;
+        border: 1px solid #e9d5ff;
+        border-radius: 8px;
+        background: #ffffff;
+    }
+
+    @media (min-width: 700px) {
+        .cert-inner {
+            padding: 1.4rem 2.4rem 1.2rem;
+        }
+    }
+
+    /* decoration */
+
+    .cert-deco {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        border-radius: inherit;
+        pointer-events: none;
+    }
+
+    .cert-deco::after {
+        content: "";
+        position: absolute;
+        inset: 10px;
+        border: 1px solid #f3e8ff;
+        border-radius: 4px;
+    }
+
+    .cert-deco i {
+        position: absolute;
+        border-radius: 50%;
+        border-style: solid;
+        border-color: #faf5ff;
+    }
+
+    .cert-deco i:nth-child(1) {
+        left: -64px;
+        top: -64px;
+        width: 192px;
+        height: 192px;
+        border-width: 20px;
+    }
+
+    .cert-deco i:nth-child(2) {
+        right: -64px;
+        bottom: -80px;
+        width: 224px;
+        height: 224px;
+        border-width: 24px;
+    }
+
+    /* corner ribbon */
+
+    .cert-ribbon {
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 20;
+        width: 112px;
+        height: 112px;
+        overflow: hidden;
+        border-top-right-radius: 5px;
+        pointer-events: none;
+    }
+
+    .cert-ribbon span {
+        position: absolute;
+        display: block;
+        top: 25px;
+        right: -43px;
+        width: 160px;
+        padding: 7px 0;
+        transform: rotate(45deg);
+        text-align: center;
+        font-size: 9px;
+        line-height: 1;
+        font-weight: 900;
+        letter-spacing: 1.5px;
+        color: #ffffff;
+        background: linear-gradient(135deg, #7e22ce, #a855f7, #6b21a8);
+        box-shadow: 0 3px 8px rgba(88, 28, 135, .25);
+        border-top: 1px solid rgba(255, 255, 255, .5);
+        border-bottom: 1px solid rgba(255, 255, 255, .3);
+    }
+
+    /* top block */
+
+    .cert-top {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+    }
+
+    .cert-brand {
+        margin: 0;
+        color: #6d28d9;
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: .35em;
+    }
+
+    .cert-medal {
+        width: 84px;
+        height: 66px;
+        margin: 6px auto;
+    }
+
+    @media (min-width: 700px) {
+        .cert-medal {
+            width: 96px;
+            height: 76px;
+        }
+    }
+
+    .cert-title {
+        display: inline-block;
+        padding: 8px 24px;
+        border-radius: 6px;
+        background: #7c3aed;
+        color: #ffffff;
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: .2em;
+        box-shadow: 0 6px 14px rgba(124, 58, 237, .22);
+    }
+
+    /* middle block */
+
+    .cert-body {
+        position: relative;
+        z-index: 2;
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 0;
+        text-align: center;
+    }
+
+    .cert-awarded {
+        margin: 0 0 8px;
+        color: #6b7280;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: .12em;
+    }
+
+    .cert-name {
+        max-width: 100%;
+        margin: 0;
+        padding: 0 18px 8px;
+        border-bottom: 2px solid #d8b4fe;
+        color: #111827;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(1.6rem, 4.2vw, 2.5rem);
+        font-weight: 700;
+        line-height: 1.15;
+        overflow-wrap: anywhere;
+    }
+
+    html[data-theme="dark"] .cert-name {
+        color: #111827 !important;
+    }
+
+    .cert-text {
+        max-width: 34rem;
+        margin: 14px 0 0;
+        color: #6b7280;
+        font-size: 13px;
+        line-height: 1.65;
+    }
+
+    .cert-text strong {
+        color: #6d28d9;
+    }
+
+    .cert-wpm {
+        margin-top: 14px;
+        padding: 8px 34px;
+        border: 1px solid #e9d5ff;
+        border-radius: 12px;
+        background: #faf5ff;
+        color: #6d28d9;
+        font-size: 30px;
+        font-weight: 900;
+        letter-spacing: -.02em;
+        line-height: 1.2;
+    }
+
+    .cert-wpm small {
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    .cert-tier-label {
+        margin: 8px 0 0;
+        color: var(--tier);
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: .22em;
+    }
+
+    .cert-details {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 6px 26px;
+        margin-top: 14px;
+        color: #6b7280;
+        font-size: 13px;
+    }
+
+    .cert-details strong {
+        color: #1f2937;
+    }
+
+    /* footer block */
+
+    .cert-footer {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        align-items: end;
+        gap: 8px;
+        padding-top: 10px;
+        border-top: 1px solid #f3e8ff;
+    }
+
+    .cert-date {
+        margin: 0;
+        color: #1f2937;
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    .cert-muted {
+        margin: 3px 0 0;
+        color: #9ca3af;
+        font-size: 10px;
+    }
+
+    .cert-footer-center {
+        text-align: center;
+    }
+
+    .cert-footer-brand {
+        margin: 0;
+        color: #9ca3af;
+        font-size: 17px;
+        font-weight: 900;
+        letter-spacing: -.02em;
+    }
+
+    .cert-footer-brand span {
+        color: #7c3aed;
+    }
+
+    .cert-footer-right {
+        text-align: right;
+    }
+
+    .cert-signature {
+        display: block;
+        width: 130px;
+        height: 42px;
+        margin-left: auto;
+    }
+
+    .cert-signer {
+        margin: 0;
+        color: #374151;
+        font-size: 11px;
+        font-weight: 800;
+    }
+
+    @media (max-width: 520px) {
+        .cert-footer {
+            grid-template-columns: 1fr;
+            text-align: center;
+        }
+
+        .cert-footer-right,
+        .cert-footer-left {
+            text-align: center;
+        }
+
+        .cert-signature {
+            margin: 0 auto;
+        }
+
+        .cert-wpm {
+            padding: 8px 24px;
+        }
+    }
+
+    /* empty state call to action */
+
+    .cert-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 22px;
+        padding: 12px 24px;
+        border-radius: 12px;
+        background: #7c3aed;
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: 800;
+        text-decoration: none;
+        transition: background-color .2s ease;
+    }
+
+    .cert-cta:hover {
+        background: #6d28d9;
+    }
+
+    /* medal shine */
+
+    .medal-shine {
+        filter: drop-shadow(0 3px 5px rgba(88, 28, 135, .22));
+    }
+
+    .medal-shine .shine-sweep {
+        animation: medalShine 3.5s ease-in-out infinite;
+        transform-origin: center;
+    }
+
+    @keyframes medalShine {
+        0%, 35% {
+            transform: translateX(-35px);
+            opacity: 0;
+        }
+        50% {
+            opacity: .8;
+        }
+        70%, 100% {
+            transform: translateX(35px);
+            opacity: 0;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .medal-shine .shine-sweep {
+            animation: none;
+            opacity: .3;
+        }
+    }
+
+    /* =====================================================
+       PRINT / SAVE AS PDF
+       Only the certificate is printed: navbar, footer and
+       page controls are hidden. "Download PDF" on a card
+       prints only that certificate.
+    ===================================================== */
+
+    @media print {
+        @page {
+            size: A4 landscape;
+            margin: 0;
+        }
+
+        html,
+        body {
+            background: #ffffff !important;
+        }
+
+        header.theme-header,
+        footer,
+        .no-print {
+            display: none !important;
+        }
+
+        .cert-page {
+            max-width: none;
+            padding: 0;
+        }
+
+        .cert-wrap {
+            max-width: none;
+            margin: 0;
+            break-after: page;
+            page-break-after: always;
+        }
+
+        .cert-wrap:last-of-type {
+            break-after: auto;
+            page-break-after: auto;
+        }
+
+        body.printing-one .cert-wrap:not(.is-printing) {
+            display: none !important;
+        }
+
+        .cert-paper {
+            width: 297mm;
+            height: 209mm;
+            aspect-ratio: auto;
+            border-width: 5px;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        .cert-paper,
+        .cert-paper * {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .medal-shine .shine-sweep {
+            animation: none;
+            opacity: .3;
+        }
+    }
+    </style>
+    <main class="cert-page">
+        <!-- PAGE HEADER -->
+        <header class="no-print mx-auto mb-6 flex w-full max-w-4xl flex-wrap items-end justify-between gap-3">
+            <div>
+                <h1 class="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">My Certifications</h1>
+                <p class="mt-1 text-sm text-gray-500">Your achievements, recognized by TypeMaster Pro.</p>
+            </div>
+            {% if certificates %}
+                <span class="rounded-xl bg-purple-50 px-4 py-2 text-xs font-extrabold tracking-wider text-purple-700">
+                    {{ certificates|length }} EARNED
+                </span>
+            {% endif %}
+        </header>
+        {% if certificates %}
+            {% for certificate in certificates %}
+                <!-- CERTIFICATE -->
+                <article class="cert-wrap cert-{{ certificate.certificate }}" data-cert>
+                    <!-- CARD TOOLBAR -->
+                    <div class="cert-toolbar no-print">
+                        <div class="cert-toolbar-left">
+                            <span class="cert-pill">{{ certificate.get_certificate_display }}</span>
+                            <span class="text-xs font-semibold text-gray-500">
+                                {{ certificate.created_at|date:"d M Y" }} · ID TM-{{ certificate.pk|stringformat:"05d" }}
+                            </span>
+                        </div>
+                        <button type="button" class="cert-print-btn" data-print-cert>
+                            <svg width="16"
+                                 height="16"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 viewBox="0 0 24 24"
+                                 aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0 0l-4-4m4 4l4-4M5 17v3h14v-3" />
+                            </svg>
+                            Download PDF
+                        </button>
+                    </div>
+                    <section class="cert-paper"
+                             aria-label="{{ certificate.get_certificate_display }} typing certificate">
+                        <!-- CORNER RIBBON -->
+                        <div class="cert-ribbon" aria-hidden="true">
+                            <span>ACHIEVED</span>
+                        </div>
+                        <div class="cert-inner">
+                            <div class="cert-deco" aria-hidden="true">
+                                <i></i><i></i>
+                            </div>
+                            <!-- TOP -->
+                            <div class="cert-top">
+                                <p class="cert-brand">TYPEMASTER PRO</p>
+                                <!-- METALLIC MEDAL -->
+                                <div class="cert-medal">
+                                    <svg viewBox="0 0 180 130"
+                                         class="medal-shine"
+                                         style="width:100%;
+                                                height:100%"
+                                         xmlns="http://www.w3.org/2000/svg"
+                                         aria-hidden="true">
+                                        <defs>
+                                        {% if certificate.certificate == "gold" %}
+                                            <linearGradient id="medalMetal{{ forloop.counter }}" x1="0" y1="0" x2="1" y2="1">
+                                            <stop offset="0%" stop-color="#fff4b0" />
+                                            <stop offset="25%" stop-color="#facc15" />
+                                            <stop offset="50%" stop-color="#d97706" />
+                                            <stop offset="75%" stop-color="#fef08a" />
+                                            <stop offset="100%" stop-color="#b45309" />
+                                            </linearGradient>
+                                            <linearGradient id="medalCenter{{ forloop.counter }}" x1="0" y1="0" x2="0.9" y2="1">
+                                            <stop offset="0%" stop-color="#fef3c7" />
+                                            <stop offset="50%" stop-color="#f59e0b" />
+                                            <stop offset="100%" stop-color="#92400e" />
+                                            </linearGradient>
+                                            <linearGradient id="ribbonMetal{{ forloop.counter }}" x1="0" y1="0" x2="1" y2="1">
+                                            <stop offset="0%" stop-color="#fde68a" />
+                                            <stop offset="100%" stop-color="#b45309" />
+                                            </linearGradient>
+                                        {% elif certificate.certificate == "silver" %}
+                                            <linearGradient id="medalMetal{{ forloop.counter }}" x1="0" y1="0" x2="1" y2="1">
+                                            <stop offset="0%" stop-color="#ffffff" />
+                                            <stop offset="25%" stop-color="#d1d5db" />
+                                            <stop offset="50%" stop-color="#64748b" />
+                                            <stop offset="75%" stop-color="#f8fafc" />
+                                            <stop offset="100%" stop-color="#94a3b8" />
+                                            </linearGradient>
+                                            <linearGradient id="medalCenter{{ forloop.counter }}" x1="0" y1="0" x2="0.9" y2="1">
+                                            <stop offset="0%" stop-color="#f8fafc" />
+                                            <stop offset="50%" stop-color="#94a3b8" />
+                                            <stop offset="100%" stop-color="#475569" />
+                                            </linearGradient>
+                                            <linearGradient id="ribbonMetal{{ forloop.counter }}" x1="0" y1="0" x2="1" y2="1">
+                                            <stop offset="0%" stop-color="#e2e8f0" />
+                                            <stop offset="100%" stop-color="#64748b" />
+                                            </linearGradient>
+                                        {% elif certificate.certificate == "bronze" %}
+                                            <linearGradient id="medalMetal{{ forloop.counter }}" x1="0" y1="0" x2="1" y2="1">
+                                            <stop offset="0%" stop-color="#fed7aa" />
+                                            <stop offset="25%" stop-color="#c08457" />
+                                            <stop offset="50%" stop-color="#78350f" />
+                                            <stop offset="75%" stop-color="#fdba74" />
+                                            <stop offset="100%" stop-color="#92400e" />
+                                            </linearGradient>
+                                            <linearGradient id="medalCenter{{ forloop.counter }}" x1="0" y1="0" x2="0.9" y2="1">
+                                            <stop offset="0%" stop-color="#ffedd5" />
+                                            <stop offset="50%" stop-color="#b45309" />
+                                            <stop offset="100%" stop-color="#78350f" />
+                                            </linearGradient>
+                                            <linearGradient id="ribbonMetal{{ forloop.counter }}" x1="0" y1="0" x2="1" y2="1">
+                                            <stop offset="0%" stop-color="#fdba74" />
+                                            <stop offset="100%" stop-color="#78350f" />
+                                            </linearGradient>
+                                        {% else %}
+                                            <linearGradient id="medalMetal{{ forloop.counter }}" x1="0" y1="0" x2="1" y2="1">
+                                            <stop offset="0%" stop-color="#e5e7eb" />
+                                            <stop offset="50%" stop-color="#6b7280" />
+                                            <stop offset="100%" stop-color="#111827" />
+                                            </linearGradient>
+                                            <linearGradient id="medalCenter{{ forloop.counter }}" x1="0" y1="0" x2="1" y2="1">
+                                            <stop offset="0%" stop-color="#9ca3af" />
+                                            <stop offset="100%" stop-color="#1f2937" />
+                                            </linearGradient>
+                                            <linearGradient id="ribbonMetal{{ forloop.counter }}" x1="0" y1="0" x2="1" y2="1">
+                                            <stop offset="0%" stop-color="#6b7280" />
+                                            <stop offset="100%" stop-color="#111827" />
+                                            </linearGradient>
+                                        {% endif %}
+                                        <linearGradient id="medalHighlight{{ forloop.counter }}" x1="0" y1="0" x2="1" y2="0">
+                                        <stop offset="0%" stop-color="white" stop-opacity="0" />
+                                        <stop offset="45%" stop-color="white" stop-opacity=".85" />
+                                        <stop offset="55%" stop-color="white" stop-opacity=".95" />
+                                        <stop offset="100%" stop-color="white" stop-opacity="0" />
+                                        </linearGradient>
+                                        <clipPath id="medalClip{{ forloop.counter }}">
+                                        <circle cx="90" cy="65" r="42" />
+                                        </clipPath>
+                                        </defs>
+                                        <!-- MEDAL RIBBON -->
+                                        <path d="M68 8 L87 8 L83 42 L66 55 L59 42 Z" fill="url(#ribbonMetal{{ forloop.counter }})" stroke="#ffffff" stroke-opacity=".5" stroke-width="1.5" />
+                                        <path d="M93 8 L112 8 L121 42 L104 55 L97 42 Z" fill="url(#ribbonMetal{{ forloop.counter }})" stroke="#ffffff" stroke-opacity=".5" stroke-width="1.5" />
+                                        <!-- OUTER MEDAL -->
+                                        <circle cx="90" cy="65" r="46" fill="url(#medalMetal{{ forloop.counter }})" stroke="#ffffff" stroke-width="2.5" />
+                                        <circle cx="90" cy="65" r="40" fill="none" stroke="#ffffff" stroke-opacity=".75" stroke-width="1.5" />
+                                        <!-- INNER MEDAL -->
+                                        <circle cx="90" cy="65" r="34" fill="url(#medalCenter{{ forloop.counter }})" stroke="#ffffff" stroke-opacity=".65" stroke-width="2" />
+                                        <!-- STAR -->
+                                        <path d="M90 39 L97 54 L114 56 L102 68 L105 85 L90 77 L75 85 L78 68 L66 56 L83 54 Z" fill="#ffffff" fill-opacity=".95" stroke="#ffffff" stroke-width="1" />
+                                        <path d="M90 46 L95 57 L107 58 L98 67 L100 79 L90 73 L80 79 L82 67 L73 58 L85 57 Z" fill="url(#medalMetal{{ forloop.counter }})" />
+                                        <!-- METALLIC REFLECTION -->
+                                        <g clip-path="url(#medalClip{{ forloop.counter }})">
+                                        <rect class="shine-sweep" x="20" y="10" width="30" height="110" fill="url(#medalHighlight{{ forloop.counter }})" transform="rotate(25 90 65)" />
+                                        </g>
+                                        <!-- SMALL HIGHLIGHT -->
+                                        <path d="M65 42 Q77 27 93 26" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" opacity=".8" />
+                                    </svg>
+                                </div>
+                                <div class="cert-title">TYPING CERTIFICATE</div>
+                            </div>
+                            <!-- RECIPIENT -->
+                            <div class="cert-body">
+                                <p class="cert-awarded">This certificate is proudly awarded to</p>
+                                <h2 class="cert-name">
+                                    {{ request.user.get_full_name|default:request.user.username }}
+                                </h2>
+                                <p class="cert-text">
+                                    For demonstrating exceptional typing performance and achieving
+                                    the <strong>{{ certificate.get_certificate_display }}</strong>
+                                    certification.
+                                </p>
+                                <div class="cert-wpm">
+                                    {{ certificate.wpm }} <small>WPM</small>
+                                </div>
+                                <p class="cert-tier-label">
+                                    {{ certificate.get_certificate_display|upper }} ACHIEVEMENT
+                                </p>
+                                <div class="cert-details">
+                                    <p style="margin:0;">
+                                        Accuracy:
+                                        <strong>{{ certificate.accuracy|floatformat:1 }}%</strong>
+                                    </p>
+                                    <p style="margin:0;">
+                                        Difficulty:
+                                        <strong>{{ certificate.get_difficulty_display }}</strong>
+                                    </p>
+                                    <p style="margin:0;">
+                                        Duration:
+                                        <strong>{{ certificate.duration }}s</strong>
+                                    </p>
+                                </div>
+                            </div>
+                            <!-- FOOTER -->
+                            <div class="cert-footer">
+                                <div class="cert-footer-left">
+                                    <p class="cert-date">{{ certificate.created_at|date:"d M Y" }}</p>
+                                    <p class="cert-muted">Date of Achievement</p>
+                                </div>
+                                <div class="cert-footer-center">
+                                    <p class="cert-footer-brand">⌨ TypeMaster <span>PRO</span></p>
+                                    <p class="cert-muted">Certificate ID: TM-{{ certificate.pk|stringformat:"05d" }}</p>
+                                </div>
+                                <div class="cert-footer-right">
+                                    <svg viewBox="0 0 190 65"
+                                         class="cert-signature"
+                                         fill="none"
+                                         xmlns="http://www.w3.org/2000/svg"
+                                         aria-hidden="true">
+                                        <path d="M8 43 C17 31 22 15 28 17 C34 19 17 48 23 48 C28 48 39 27 43 29 C46 31 34 48 39 48 C44 48 53 31 58 33 C63 35 47 48 55 48 C63 48 71 32 78 34 C84 36 69 49 77 48 C87 47 94 34 101 35 C108 36 94 47 103 47 C115 47 119 26 126 24 C132 22 118 44 125 45 C134 46 140 30 146 31 C152 32 140 45 147 45 C156 45 165 33 173 28" stroke="#7c3aed" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" />
+                                        <path d="M20 56 C60 51 111 56 175 49" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round" />
+                                    </svg>
+                                    <p class="cert-signer">TypeMaster</p>
+                                    <p class="cert-muted">Authorized Signature</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </article>
+            {% endfor %}
+        {% else %}
+            <!-- EMPTY CERTIFICATE PREVIEW -->
+            <article class="cert-wrap cert-none">
+                <section class="cert-paper" aria-label="Certificate preview">
+                    <div class="cert-inner"
+                         style="align-items:center;
+                                justify-content:center;
+                                text-align:center">
+                        <div class="cert-deco" aria-hidden="true">
+                            <i></i><i></i>
+                        </div>
+                        <div style="position:relative;z-index:2;padding:14px 0;">
+                            <p class="cert-brand">TYPEMASTER PRO</p>
+                            <!-- EMPTY STATE MEDAL -->
+                            <div class="cert-medal" style="margin:14px auto;">
+                                <svg viewBox="0 0 180 130"
+                                     class="medal-shine"
+                                     style="width:100%;
+                                            height:100%"
+                                     xmlns="http://www.w3.org/2000/svg"
+                                     aria-hidden="true">
+                                    <defs>
+                                    <linearGradient id="emptyMedal" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#e5e7eb" />
+                                    <stop offset="50%" stop-color="#9ca3af" />
+                                    <stop offset="100%" stop-color="#374151" />
+                                    </linearGradient>
+                                    <linearGradient id="emptyCenter" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#f9fafb" />
+                                    <stop offset="100%" stop-color="#6b7280" />
+                                    </linearGradient>
+                                    <linearGradient id="emptyHighlight" x1="0" y1="0" x2="1" y2="0">
+                                    <stop offset="0%" stop-color="white" stop-opacity="0" />
+                                    <stop offset="50%" stop-color="white" stop-opacity=".9" />
+                                    <stop offset="100%" stop-color="white" stop-opacity="0" />
+                                    </linearGradient>
+                                    <clipPath id="emptyMedalClip">
+                                    <circle cx="90" cy="65" r="42" />
+                                    </clipPath>
+                                    </defs>
+                                    <path d="M68 8 L87 8 L83 42 L66 55 L59 42 Z" fill="#9ca3af" />
+                                    <path d="M93 8 L112 8 L121 42 L104 55 L97 42 Z" fill="#6b7280" />
+                                    <circle cx="90" cy="65" r="46" fill="url(#emptyMedal)" stroke="white" stroke-width="2.5" />
+                                    <circle cx="90" cy="65" r="40" fill="none" stroke="white" stroke-width="1.5" opacity=".8" />
+                                    <circle cx="90" cy="65" r="34" fill="url(#emptyCenter)" stroke="white" stroke-width="2" />
+                                    <path d="M90 39 L97 54 L114 56 L102 68 L105 85 L90 77 L75 85 L78 68 L66 56 L83 54 Z" fill="white" fill-opacity=".95" />
+                                    <g clip-path="url(#emptyMedalClip)">
+                                    <rect class="shine-sweep" x="20" y="10" width="30" height="110" fill="url(#emptyHighlight)" transform="rotate(25 90 65)" />
+                                    </g>
+                                </svg>
+                            </div>
+                            <div class="cert-title">TYPING CERTIFICATE</div>
+                            <p class="cert-awarded" style="margin-top:22px;">This certificate is reserved for</p>
+                            <h2 class="cert-name" style="display:inline-block;">
+                                {{ request.user.get_full_name|default:request.user.username }}
+                            </h2>
+                            <p class="cert-text" style="margin-left:auto;margin-right:auto;">
+                                Your typing achievement will be recognized here once you earn your first certificate.
+                            </p>
+                            <div class="cert-wpm" style="display:inline-block;">— <small>WPM</small></div>
+                            <p class="cert-tier-label">CERTIFICATE AWAITING</p>
+                            <a href="{% url 'results' %}" class="cert-cta no-print">
+                                Start Practicing <span>→</span>
+                            </a>
+                        </div>
+                    </div>
+                </section>
+            </article>
+            <p class="no-print mt-1 text-center text-xs text-gray-400">
+                Complete a typing test and achieve the required WPM and accuracy to earn your certificate.
             </p>
-        </div>
-
-        <button
-            type="button"
-            onclick="window.print()"
-            class="inline-flex items-center gap-2 rounded-xl bg-purple-600 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-purple-600/20 transition hover:-translate-y-0.5 hover:bg-purple-700"
-        >
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M12 3v12m0 0l-4-4m4 4l4-4M5 17v3h14v-3"/>
-            </svg>
-            Save as PDF
-        </button>
-    </header>
-
-
-    {% if certificates %}
-
-        {% for certificate in certificates %}
-
-        <!-- CERTIFICATE -->
-        <section class="relative mx-auto mb-7 h-[min(68vh,620px)] min-h-[440px] w-full max-w-4xl overflow-hidden rounded-xl border-[7px] border-purple-100 bg-white p-2 shadow-xl shadow-purple-950/10 print:mb-0 print:h-[190mm] print:min-h-0 print:max-w-none print:rounded-none print:border-[5px] print:border-purple-200 print:p-2 print:shadow-none">
-
-            <div class="relative flex h-full flex-col overflow-hidden rounded-lg border border-purple-200 bg-white px-4 py-5 sm:px-8 sm:py-6">
-
-                <!-- SUBTLE BACKGROUND DECORATION -->
-                <div class="pointer-events-none absolute inset-0 opacity-40">
-                    <div class="absolute -left-16 -top-16 h-48 w-48 rounded-full border-[20px] border-purple-50"></div>
-                    <div class="absolute -bottom-20 -right-16 h-56 w-56 rounded-full border-[24px] border-purple-50"></div>
-                    <div class="absolute inset-3 border border-purple-100/70"></div>
+        {% endif %}
+        {% if certificates %}
+            <!-- CERTIFICATE ACTIONS -->
+            <div class="no-print mx-auto mt-2 flex w-full max-w-4xl flex-col gap-3">
+                <!-- LINKEDIN -->
+                <div class="flex min-h-[76px] items-center justify-between gap-3 rounded-xl border border-gray-100 bg-white px-4 py-3 shadow-sm">
+                    <div class="flex min-w-0 items-center gap-3">
+                        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[#E8F3FF]">
+                            <svg viewBox="0 0 24 24"
+                                 class="h-8 w-8"
+                                 xmlns="http://www.w3.org/2000/svg"
+                                 aria-hidden="true">
+                                <path fill="#0A66C2" d="M20.45 2H3.55C2.69 2 2 2.69 2 3.55v16.9c0 .86.69 1.55 1.55 1.55h16.9c.86 0 1.55-.69 1.55-1.55V3.55c0-.86-.69-1.55-1.55-1.55ZM8 18H5V9h3v9ZM6.5 7.75a1.75 1.75 0 1 1 0-3.5 1.75 1.75 0 0 1 0 3.5ZM19 18h-3v-4.4c0-1.05-.02-2.4-1.46-2.4-1.46 0-1.68 1.14-1.68 2.32V18h-3V9h2.88v1.23h.04c.4-.75 1.38-1.54 2.84-1.54 3.04 0 3.6 2 3.6 4.6V18Z" />
+                            </svg>
+                        </div>
+                        <div class="min-w-0">
+                            <h3 class="truncate text-sm font-bold text-gray-900">Share on LinkedIn</h3>
+                            <p class="truncate text-xs text-gray-500">Show your achievement</p>
+                        </div>
+                    </div>
+                    <button type="button"
+                            id="linkedinShare"
+                            class="flex h-10 w-32 shrink-0 items-center justify-center gap-1 whitespace-nowrap rounded-lg bg-[#0A66C2] px-3 text-sm font-bold text-white transition hover:bg-[#004182]">
+                        LinkedIn <span>↗</span>
+                    </button>
                 </div>
-
-                <!-- TOP -->
-                <div class="relative z-10 shrink-0 text-center">
-
-                    <p class="text-[10px] font-black tracking-[0.35em] text-purple-700 sm:text-xs">
-                        TYPEMASTER PRO
-                    </p>
-
-                    <!-- MEDAL -->
-                    <div class="mx-auto my-2 flex h-16 w-20 items-center justify-center sm:h-20 sm:w-24">
-
-                        <svg viewBox="0 0 180 130" class="h-full w-full" xmlns="http://www.w3.org/2000/svg">
-
-                            <g fill="none" stroke="#a78bfa" stroke-width="3" stroke-linecap="round">
-                                <path d="M48 105 C15 75 20 35 35 15"/>
-                                <path d="M35 25 Q18 23 17 10"/>
-                                <path d="M30 40 Q10 37 8 25"/>
-                                <path d="M27 57 Q8 55 5 43"/>
-                                <path d="M30 74 Q12 76 8 64"/>
-                                <path d="M38 89 Q23 96 17 84"/>
-
-                                <path d="M132 105 C165 75 160 35 145 15"/>
-                                <path d="M145 25 Q162 23 163 10"/>
-                                <path d="M150 40 Q170 37 172 25"/>
-                                <path d="M153 57 Q172 55 175 43"/>
-                                <path d="M150 74 Q168 76 172 64"/>
-                                <path d="M142 89 Q157 96 163 84"/>
-                            </g>
-
-                            <path d="M90 14 L105 25 L123 24 L129 41 L143 54 L135 72 L138 90 L120 98 L108 112 L90 106 L72 112 L60 98 L42 90 L45 72 L37 54 L51 41 L57 24 L75 25 Z"
-                                  fill="#c4b5fd"/>
-
-                            <path d="M90 29 L101 48 L123 51 L107 67 L111 89 L90 78 L69 89 L73 67 L57 51 L79 48 Z"
-                                  fill="#7c3aed"/>
-
-                        </svg>
+                <!-- SHARE LINK -->
+                <div class="flex min-h-[76px] items-center justify-between gap-3 rounded-xl border border-gray-100 bg-white px-4 py-3 shadow-sm">
+                    <div class="flex min-w-0 items-center gap-3">
+                        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-purple-50">
+                            <svg class="h-7 w-7 text-purple-600"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 viewBox="0 0 24 24"
+                                 aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 13a5 5 0 0 0 7.07 0l3-3A5 5 0 0 0 13 2.93l-1.72 1.71M14 11a5 5 0 0 0-7.07 0l-3 3A5 5 0 0 0 11 21.07l1.71-1.71" />
+                            </svg>
+                        </div>
+                        <div class="min-w-0">
+                            <h3 class="truncate text-sm font-bold text-gray-900">Certificate Link</h3>
+                            <p id="copyHint" class="truncate text-xs text-gray-500">Click link to copy</p>
+                        </div>
                     </div>
-
-                    <div class="inline-block rounded-md bg-purple-600 px-5 py-2 text-[10px] font-black tracking-[0.2em] text-white shadow-md shadow-purple-600/20 sm:px-7 sm:text-xs">
-                        TYPING CERTIFICATE
-                    </div>
-
+                    <input type="text"
+                           id="certLink"
+                           readonly
+                           value="{{ request.build_absolute_uri }}"
+                           title="Click to copy certificate link"
+                           aria-label="Certificate link"
+                           class="h-10 min-w-0 w-32 cursor-pointer rounded-lg border border-purple-200 bg-purple-50 px-2 text-xs font-medium text-purple-700 outline-none transition hover:border-purple-400 sm:w-56">
                 </div>
-
-
-                <!-- RECIPIENT CONTENT -->
-                <div class="relative z-10 flex min-h-0 flex-1 flex-col items-center justify-center text-center">
-
-                    <p class="mb-2 text-xs font-medium capitalize tracking-widest text-gray-500">
-                        This certificate is proudly awarded to
-                    </p>
-
-                    <h2 class="max-w-full break-words border-b-2 border-purple-300 px-4 pb-2 text-2xl font-black tracking-tight text-gray-900 sm:text-3xl md:text-4xl">
-                        {{ request.user.get_full_name|default:request.user.username }}
-                    </h2>
-
-                    <p class="mt-4 max-w-xl text-xs leading-relaxed text-gray-500 sm:text-sm">
-                        For demonstrating exceptional typing performance and achieving
-                        the following
-                        <strong class="text-purple-700">{{ certificate.get_certificate_display }}</strong>
-                        certification.
-                    </p>
-
-                    <!-- WPM -->
-                    <div class="mt-4 rounded-xl border border-purple-200 bg-purple-50 px-7 py-2 sm:px-10 sm:py-3">
-                        <p class="text-2xl font-black tracking-tight text-purple-700 sm:text-3xl">
-                            {{ certificate.wpm }}
-                            <span class="text-sm font-bold">WPM</span>
-                        </p>
-                    </div>
-
-                    <p class="mt-2 text-[10px] font-black tracking-[0.2em] text-purple-600 sm:text-xs">
-                        {{ certificate.get_certificate_display|upper }} ACHIEVEMENT
-                    </p>
-
-                    <!-- PERFORMANCE DETAILS -->
-                    <div class="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-gray-500 sm:gap-x-10 sm:text-sm">
-                        <p>
-                            Accuracy:
-                            <strong class="text-gray-800">{{ certificate.accuracy }}%</strong>
-                        </p>
-
-                        <p>
-                            Difficulty:
-                            <strong class="text-gray-800">{{ certificate.get_difficulty_display }}</strong>
-                        </p>
-                    </div>
-
-                </div>
-
-
-                <!-- FOOTER -->
-                <div class="relative z-10 mt-3 grid shrink-0 grid-cols-3 items-end gap-2 border-t border-purple-100 pt-3">
-
-                    <!-- DATE -->
-                    <div class="text-left">
-                        <p class="text-xs font-bold text-gray-800 sm:text-sm">
-                            {{ certificate.created_at|date:"d M Y" }}
-                        </p>
-                        <p class="mt-1 text-[9px] text-gray-400 sm:text-[10px]">
-                            Date of Achievement
-                        </p>
-                    </div>
-
-                    <!-- BRAND -->
-                    <div class="text-center">
-                        <p class="text-base font-black tracking-tight text-gray-400 sm:text-lg">
-                            ⌨ TypeMaster
-                            <span class="text-purple-600">PRO</span>
-                        </p>
-                    </div>
-
-                    <!-- SIGNATURE -->
-                    <div class="text-right">
-
-                        <svg viewBox="0 0 190 65"
-                             class="ml-auto h-10 w-28 sm:h-12 sm:w-36"
-                             fill="none"
-                             xmlns="http://www.w3.org/2000/svg">
-
-                            <path
-                                d="M8 43 C17 31 22 15 28 17 C34 19 17 48 23 48 C28 48 39 27 43 29 C46 31 34 48 39 48 C44 48 53 31 58 33 C63 35 47 48 55 48 C63 48 71 32 78 34 C84 36 69 49 77 48 C87 47 94 34 101 35 C108 36 94 47 103 47 C115 47 119 26 126 24 C132 22 118 44 125 45 C134 46 140 30 146 31 C152 32 140 45 147 45 C156 45 165 33 173 28"
-                                stroke="#7c3aed"
-                                stroke-width="2.8"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"/>
-
-                            <path
-                                d="M20 56 C60 51 111 56 175 49"
-                                stroke="#a78bfa"
-                                stroke-width="1.5"
-                                stroke-linecap="round"/>
-
-                        </svg>
-
-                        <p class="text-[10px] font-bold text-gray-700 sm:text-xs">
-                            TypeMaster
-                        </p>
-                        <p class="text-[9px] text-gray-400">
-                            Authorized Signature
-                        </p>
-
-                    </div>
-
-                </div>
-
             </div>
-        </section>
+        {% endif %}
+    </main>
+    <script>
+document.addEventListener("DOMContentLoaded", function () {
 
-        {% endfor %}
+    /* ---------- Download PDF: print only the clicked certificate ---------- */
+
+    function cleanupPrint() {
+        document.body.classList.remove("printing-one");
+
+        document.querySelectorAll("[data-cert].is-printing").forEach(function (item) {
+            item.classList.remove("is-printing");
+        });
+    }
+
+    document.addEventListener("click", function (event) {
+        const button = event.target.closest("[data-print-cert]");
+
+        if (!button) return;
+
+        const certificate = button.closest("[data-cert]");
+
+        if (!certificate) return;
+
+        cleanupPrint();
+
+        certificate.classList.add("is-printing");
+        document.body.classList.add("printing-one");
+
+        window.addEventListener("afterprint", cleanupPrint, { once: true });
+
+        window.print();
+    });
 
 
-    {% else %}
+    /* ---------- LinkedIn share ---------- */
 
-        <!-- EMPTY CERTIFICATE PREVIEW -->
-        <section class="relative mx-auto h-[min(68vh,620px)] min-h-[440px] w-full max-w-4xl overflow-hidden rounded-xl border-[7px] border-purple-100 bg-white p-2 shadow-xl shadow-purple-950/10 print:h-[190mm] print:min-h-0 print:max-w-none print:rounded-none print:border-[5px] print:shadow-none">
+    const linkedinButton = document.getElementById("linkedinShare");
 
-            <div class="relative flex h-full flex-col items-center justify-center overflow-hidden rounded-lg border border-purple-200 bg-white px-4 py-6 text-center">
+    if (linkedinButton) {
+        linkedinButton.addEventListener("click", function () {
+            window.open(
+                "https://www.linkedin.com/sharing/share-offsite/?url=" +
+                encodeURIComponent(window.location.href),
+                "_blank",
+                "noopener,noreferrer"
+            );
+        });
+    }
 
-                <div class="absolute -left-16 -top-16 h-48 w-48 rounded-full border-[20px] border-purple-50"></div>
-                <div class="absolute -bottom-16 -right-16 h-48 w-48 rounded-full border-[20px] border-purple-50"></div>
 
-                <div class="relative z-10">
-                    <p class="text-xs font-black tracking-[0.3em] text-purple-700">
-                        TYPEMASTER PRO
-                    </p>
+    /* ---------- Copy certificate link ---------- */
 
-                    <div class="my-5 text-5xl">🏅</div>
+    const linkInput = document.getElementById("certLink");
+    const copyHint = document.getElementById("copyHint");
 
-                    <div class="inline-block rounded-md bg-purple-600 px-6 py-2 text-xs font-black tracking-widest text-white">
-                        TYPING CERTIFICATE
-                    </div>
+    if (linkInput) {
+        linkInput.addEventListener("click", function () {
+            linkInput.select();
 
-                    <p class="mt-7 text-xs text-gray-500">
-                        This certificate is reserved for
-                    </p>
+            function showCopied(message) {
+                if (copyHint) {
+                    copyHint.textContent = message;
 
-                    <h2 class="mt-2 break-words text-2xl font-black text-gray-900 sm:text-3xl">
-                        {{ request.user.get_full_name|default:request.user.username }}
-                    </h2>
+                    setTimeout(function () {
+                        copyHint.textContent = "Click link to copy";
+                    }, 1500);
+                }
 
-                    <p class="mx-auto mt-4 max-w-md text-sm leading-relaxed text-gray-500">
-                        Your typing achievement will be recognized here once you earn your first certificate.
-                    </p>
+                linkInput.classList.add("border-purple-500");
 
-                    <div class="mt-5 inline-block rounded-xl border border-purple-200 bg-purple-50 px-8 py-3">
-                        <p class="text-2xl font-black text-purple-700">— WPM</p>
-                    </div>
+                setTimeout(function () {
+                    linkInput.classList.remove("border-purple-500");
+                }, 1200);
+            }
 
-                    <p class="mt-3 text-[10px] font-black tracking-widest text-purple-600">
-                        CERTIFICATE AWAITING
-                    </p>
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(linkInput.value)
+                    .then(function () {
+                        linkInput.blur();
+                        showCopied("Link copied!");
+                    })
+                    .catch(function () {
+                        showCopied("Press Ctrl+C to copy");
+                    });
+            } else {
+                showCopied("Press Ctrl+C to copy");
+            }
+        });
+    }
 
-                    <div class="mt-7">
-                        <a href="{% url 'results' %}"
-                           class="inline-flex items-center gap-2 rounded-xl bg-purple-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-purple-700 print:hidden">
-                            Start Practicing
-                            <span>→</span>
-                        </a>
-                    </div>
-                </div>
-
-            </div>
-        </section>
-
-        <p class="mt-4 text-center text-xs text-gray-400 print:hidden">
-            Complete a typing test and achieve the required WPM and accuracy to earn your certificate.
-        </p>
-
-    {% endif %}
-
-</main>
-
+});
+    </script>
 {% endblock %}

@@ -1,95 +1,80 @@
+document.addEventListener('DOMContentLoaded', function () {
+  const dashboardScreen = document.getElementById('dashboardScreen');
+  const gameScreen = document.getElementById('gameScreen');
+  const startTestButton = document.getElementById('startTestButton');
+  const codePracticeButton = document.getElementById('codePracticeButton');
+  const difficultySelect = document.getElementById('difficulty');
 
-document.addEventListener("DOMContentLoaded", function () {
+  let gameScriptLoaded = false;
+  let gameScriptLoading = false;
+  let openCodeModeAfterLoad = false;
 
-    const dashboardScreen = document.getElementById("dashboardScreen");
-    const gameScreen = document.getElementById("gameScreen");
-    const startTestButton = document.getElementById("startTestButton");
-    const codePracticeButton = document.getElementById("codePracticeButton");
-    const difficultySelect = document.getElementById("difficulty");
+  if (!dashboardScreen || !gameScreen || !startTestButton) {
+    console.error('Dashboard elements are missing.');
+    return;
+  }
 
-    let gameScriptLoaded = false;
-    let gameScriptLoading = false;
-    let openCodeModeAfterLoad = false;
-
-    if (!dashboardScreen || !gameScreen || !startTestButton) {
-        console.error("Dashboard elements are missing.");
-        return;
+  function activateCodeMode() {
+    if (!difficultySelect) {
+      console.error('Difficulty selector not found.');
+      return;
     }
 
-    function activateCodeMode() {
-        if (!difficultySelect) {
-            console.error("Difficulty selector not found.");
-            return;
-        }
+    difficultySelect.value = 'code';
 
-        difficultySelect.value = "code";
+    difficultySelect.dispatchEvent(new Event('change', { bubbles: true }));
+  }
 
-        difficultySelect.dispatchEvent(
-            new Event("change", { bubbles: true })
-        );
+  startTestButton.addEventListener('click', function () {
+    dashboardScreen.classList.add('hidden');
+    gameScreen.classList.remove('hidden');
+
+    if (gameScriptLoaded) {
+      return;
     }
 
-    startTestButton.addEventListener("click", function () {
+    if (gameScriptLoading) {
+      return;
+    }
 
-        dashboardScreen.classList.add("hidden");
-        gameScreen.classList.remove("hidden");
+    gameScriptLoading = true;
 
-        if (gameScriptLoaded) {
-            return;
-        }
+    const script = document.createElement('script');
+    script.src = '/static/js/app.js?v=3';
 
-        if (gameScriptLoading) {
-            return;
-        }
+    script.onload = function () {
+      gameScriptLoaded = true;
+      gameScriptLoading = false;
 
-        gameScriptLoading = true;
+      if (openCodeModeAfterLoad) {
+        openCodeModeAfterLoad = false;
+        activateCodeMode();
+      }
+    };
 
-        const script = document.createElement("script");
-        script.src = "/static/js/app.js?v=3";
+    script.onerror = function () {
+      console.error('Game script failed to load.');
 
-        script.onload = function () {
+      gameScriptLoading = false;
 
-            gameScriptLoaded = true;
-            gameScriptLoading = false;
+      dashboardScreen.classList.remove('hidden');
+      gameScreen.classList.add('hidden');
+    };
 
-            if (openCodeModeAfterLoad) {
-                openCodeModeAfterLoad = false;
-                activateCodeMode();
-            }
+    document.body.appendChild(script);
+  });
 
-        };
+  if (codePracticeButton) {
+    codePracticeButton.addEventListener('click', function () {
+      openCodeModeAfterLoad = true;
 
-        script.onerror = function () {
-
-            console.error("Game script failed to load.");
-
-            gameScriptLoading = false;
-
-            dashboardScreen.classList.remove("hidden");
-            gameScreen.classList.add("hidden");
-
-        };
-
-        document.body.appendChild(script);
-
+      if (gameScriptLoaded) {
+        activateCodeMode();
+        dashboardScreen.classList.add('hidden');
+        gameScreen.classList.remove('hidden');
+      } else {
+        startTestButton.click();
+      }
     });
-
-    if (codePracticeButton) {
-
-        codePracticeButton.addEventListener("click", function () {
-
-            openCodeModeAfterLoad = true;
-
-            if (gameScriptLoaded) {
-                activateCodeMode();
-                dashboardScreen.classList.add("hidden");
-                gameScreen.classList.remove("hidden");
-            } else {
-                startTestButton.click();
-            }
-
-        });
-
-    }
-
+  }
 });

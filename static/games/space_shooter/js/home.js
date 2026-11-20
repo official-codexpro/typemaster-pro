@@ -1,11 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const startButton = document.getElementById('startGame');
-    const difficulty = document.getElementById('difficulty');
+  const startButton = document.getElementById('startGame');
+  const difficulty = document.getElementById('difficulty');
 
-    startButton.addEventListener('click', () => {
-        const selectedDifficulty = difficulty.value;
+  startButton.addEventListener('click', () => {
+    const selectedDifficulty = difficulty.value;
 
-        window.location.href =
-            `/space-shooter/play/?difficulty=${selectedDifficulty}`;
-    });
+    window.location.href = `/space-shooter/play/?difficulty=${selectedDifficulty}`;
+  });
 });

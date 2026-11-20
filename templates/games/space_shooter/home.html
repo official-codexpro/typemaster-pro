@@ -1,480 +1,295 @@
-
 {% extends "base/base.html" %}
 {% load static %}
-
 {% block title %}Space Shooter | TypeMaster Pro{% endblock %}
-
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'games/space_shooter/css/home.css' %}">
+    <link rel="stylesheet"
+          href="{% static 'games/space_shooter/css/home.css' %}">
 {% endblock %}
-
 {% block content %}
-
-<div id="spaceShooterHome" class="space-y-10">
-
-    <!-- HERO -->
-    <section class="relative overflow-hidden rounded-3xl bg-neutral-950 text-white p-7 md:p-12">
-        <div class="absolute -top-24 -right-16 w-80 h-80 rounded-full bg-violet-600/20 blur-3xl"></div>
-        <div class="absolute -bottom-32 left-1/3 w-80 h-80 rounded-full bg-blue-600/20 blur-3xl"></div>
-
-        <div class="relative z-10 max-w-2xl">
-            <span class="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.2em] text-violet-300">
-                <span class="w-2 h-2 rounded-full bg-green-400"></span>
-                TYPEMASTER PRO / GAMES
-            </span>
-
-            <h1 class="text-4xl md:text-6xl font-black tracking-tight mt-5">
-                Space Shooter
-            </h1>
-
-            <p class="text-sm md:text-base text-white/60 mt-4 max-w-lg leading-relaxed">
-                Test your typing speed. Destroy incoming targets. Improve your accuracy and beat your high score.
-            </p>
-
-            <div class="game-controls flex flex-wrap items-center gap-3 mt-8">
-                <select id="difficulty"
-                    class="px-5 py-3 rounded-xl bg-white/10 border border-white/20 text-white font-bold text-sm outline-none focus:border-violet-400">
-                    <option value="easy" class="text-neutral-900">Easy</option>
-                    <option value="normal" selected class="text-neutral-900">Normal</option>
-                    <option value="hard" class="text-neutral-900">Hard</option>
-                    <option value="extreme" class="text-neutral-900">Extreme</option>
-                </select>
-
-                <button id="startGame"
-                    class="px-7 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-extrabold text-sm transition-all shadow-lg shadow-violet-600/20">
-                    START GAME →
-                </button>
-            </div>
-        </div>
-
-        <div class="hidden lg:flex absolute right-12 top-1/2 -translate-y-1/2 items-center justify-center w-64 h-64">
-            <div class="absolute inset-0 rounded-full border border-white/10"></div>
-            <div class="absolute inset-5 rounded-full border border-dashed border-violet-400/30"></div>
-            <div class="absolute inset-12 rounded-full border border-white/10"></div>
-            <div class="text-8xl drop-shadow-[0_0_30px_rgba(139,92,246,0.6)]">🚀</div>
-            <span class="absolute top-4 right-8 text-2xl">✦</span>
-            <span class="absolute bottom-8 left-5 text-xl">✧</span>
-        </div>
-    </section>
-
-
-    <!-- PERFORMANCE SUMMARY -->
-    <section>
-
-        <div class="mb-6">
-            <p class="text-xs font-extrabold uppercase tracking-[0.2em] text-indigo-600 mb-2">
-                Gaming Statistics
-            </p>
-
-            <h2 class="text-2xl md:text-3xl font-black text-neutral-900">
-                Game Performance
-            </h2>
-
-            <p class="text-sm text-neutral-500 mt-2">
-                Track your Space Shooter gaming progress.
-            </p>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-
-            <!-- Total Games -->
-            <div class="bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <p class="text-xs font-extrabold uppercase tracking-wider text-neutral-400">
-                            Total Games
-                        </p>
-                        <h3 class="text-3xl font-black text-neutral-900 mt-2">
-                            {{ stats.total_games|default:0 }}
-                        </h3>
-                    </div>
-
-                    <div class="w-12 h-12 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center text-2xl">
-                        🎮
-                    </div>
-                </div>
-
-                <p class="text-xs text-neutral-400 border-t border-neutral-100 pt-4">
-                    Total missions completed
-                </p>
-            </div>
-
-            <!-- Best Score -->
-            <div class="bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <p class="text-xs font-extrabold uppercase tracking-wider text-neutral-400">
-                            Best Score
-                        </p>
-                        <h3 class="text-3xl font-black text-neutral-900 mt-2">
-                            {{ stats.best_score|default:0 }}
-                        </h3>
-                    </div>
-
-                    <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl">
-                        🏆
-                    </div>
-                </div>
-
-                <p class="text-xs text-neutral-400 border-t border-neutral-100 pt-4">
-                    Your highest game score
-                </p>
-            </div>
-
-            <!-- Average WPM -->
-            <div class="bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <p class="text-xs font-extrabold uppercase tracking-wider text-neutral-400">
-                            Average Speed
-                        </p>
-                        <h3 class="text-3xl font-black text-violet-600 mt-2">
-                            {{ stats.average_wpm|default:0 }}
-                            <span class="text-xs text-neutral-400">WPM</span>
-                        </h3>
-                    </div>
-
-                    <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl">
-                        ⚡
-                    </div>
-                </div>
-
-                <p class="text-xs text-neutral-400 border-t border-neutral-100 pt-4">
-                    Average typing speed
-                </p>
-            </div>
-
-            <!-- Accuracy -->
-            <div class="bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <p class="text-xs font-extrabold uppercase tracking-wider text-neutral-400">
-                            Average Accuracy
-                        </p>
-                        <h3 class="text-3xl font-black text-green-600 mt-2">
-                            {{ stats.average_accuracy|default:0 }}%
-                        </h3>
-                    </div>
-
-                    <div class="w-12 h-12 rounded-xl bg-green-50 text-green-600 flex items-center justify-center text-2xl">
-                        🎯
-                    </div>
-                </div>
-
-                <p class="text-xs text-neutral-400 border-t border-neutral-100 pt-4">
-                    Overall typing accuracy
-                </p>
-            </div>
-
-        </div>
-    </section>
-
-
-    <!-- PERFORMANCE ANALYTICS -->
-    <section>
-
-        <div class="mb-6">
-            <p class="text-xs font-extrabold uppercase tracking-[0.2em] text-indigo-600 mb-2">
-                Gaming Analytics
-            </p>
-
-            <h2 class="text-2xl md:text-3xl font-black text-neutral-900">
-                Performance Analytics
-            </h2>
-
-            <p class="text-sm text-neutral-500 mt-2">
-                Analyze your Space Shooter speed and accuracy over time.
-            </p>
-        </div>
-
-        <div class="bg-white border border-neutral-200 rounded-2xl p-5 md:p-7 shadow-sm">
-
-            <div class="flex items-center justify-between flex-wrap gap-4 mb-6">
-
-                <div class="flex gap-1 bg-neutral-100 p-1 rounded-xl">
-
-                    <button type="button" id="gameSpeedBtn"
-                        class="px-5 py-2 rounded-lg bg-white shadow-sm text-neutral-900 text-xs font-extrabold">
-                        Speed
-                    </button>
-
-                    <button type="button" id="gameAccuracyBtn"
-                        class="px-5 py-2 rounded-lg text-neutral-500 text-xs font-extrabold">
-                        Accuracy
-                    </button>
-
-                </div>
-
-                <div class="text-right">
-                    <p id="gameChartTitle" class="text-sm font-extrabold text-neutral-700">
-                        Gaming Speed
-                    </p>
-
-                    <p id="gameChartSubtitle" class="text-xs text-neutral-400 mt-1">
-                        Words per minute
-                    </p>
-                </div>
-
-            </div>
-
-            <div class="relative w-full" style="height: 320px;">
-                <canvas id="gamePerformanceChart"></canvas>
-            </div>
-
-            <div id="gameEmptyState" class="hidden py-12 text-center">
-                <div class="text-3xl mb-3">🚀</div>
-
-                <h4 class="font-black text-neutral-900">
-                    No gaming data yet
-                </h4>
-
-                <p class="text-sm text-neutral-500 mt-2">
-                    Complete your first Space Shooter mission to see your performance.
-                </p>
-            </div>
-
-        </div>
-    </section>
-
-
-<!-- DIFFICULTY ANALYTICS -->
-<section class="mt-10 mb-10">
-
-    <div class="mb-6">
-        <p class="text-xs font-extrabold uppercase tracking-[0.2em] text-indigo-600 mb-2">
-            Performance Breakdown
-        </p>
-
-        <h2 class="text-2xl md:text-3xl font-black text-neutral-900">
-            Difficulty Analytics
-        </h2>
-
-        <p class="text-sm text-neutral-500 mt-2">
-            Compare your performance across different difficulty levels.
-        </p>
-    </div>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-
-        {% for item in difficulty_stats %}
-
-        <div class="bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <p class="text-xs font-extrabold uppercase tracking-wider text-neutral-400">
-                        Difficulty
-                    </p>
-
-                    <h3 class="text-2xl font-black text-neutral-900 mt-2">
-                        {{ item.difficulty }}
-                    </h3>
-                </div>
-
-                {% if item.difficulty == 'Easy' %}
-                    <div class="w-12 h-12 rounded-xl bg-green-50 text-green-600 flex items-center justify-center text-2xl">●</div>
-                {% elif item.difficulty == 'Normal' %}
-                    <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl">◆</div>
-                {% elif item.difficulty == 'Hard' %}
-                    <div class="w-12 h-12 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center text-2xl">▲</div>
-                {% else %}
-                    <div class="w-12 h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center text-2xl">★</div>
-                {% endif %}
-            </div>
-
-            <div class="mb-5">
-                <p class="text-xs font-bold text-neutral-400 uppercase tracking-wider">
-                    Total Games
-                </p>
-
-                <p class="text-3xl font-black text-neutral-900 mt-1">
-                    {{ item.total_games }}
-                </p>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4 pt-5 border-t border-neutral-100">
-                <div>
-                    <p class="text-xs font-bold text-neutral-400">
-                        Average Speed
-                    </p>
-
-                    <p class="text-xl font-black text-violet-600 mt-1">
-                        {{ item.average_wpm }}
-                        <span class="text-xs text-neutral-400">WPM</span>
-                    </p>
-                </div>
-
-                <div>
-                    <p class="text-xs font-bold text-neutral-400">
-                        Average Accuracy
-                    </p>
-
-                    <p class="text-xl font-black text-green-600 mt-1">
-                        {{ item.average_accuracy }}%
-                    </p>
-                </div>
-            </div>
-
-            <div class="mt-5">
-                <div class="flex justify-between text-xs font-bold text-neutral-500 mb-2">
-                    <span>Accuracy</span>
-                    <span>{{ item.average_accuracy }}%</span>
-                </div>
-
-                <div class="w-full h-2 bg-neutral-100 rounded-full overflow-hidden">
-                    <div
-                        class="h-full bg-green-500 rounded-full"
-                        style="width: {{ item.average_accuracy }}%">
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        {% endfor %}
-
-    </div>
-
-</section>
-
-
-    <!-- PREVIOUS GAMES -->
-    <section>
-
-        <div class="mb-6">
-            <p class="text-xs font-extrabold uppercase tracking-[0.2em] text-indigo-600 mb-2">
-                Mission History
-            </p>
-
-            <div class="flex items-center justify-between gap-4 flex-wrap">
-                <div>
-                    <h2 class="text-2xl md:text-3xl font-black text-neutral-900">
-                        Previous Games
-                    </h2>
-
-                    <p class="text-sm text-neutral-500 mt-2">
-                        Review your recent Space Shooter missions.
-                    </p>
-                </div>
-
-                <span class="text-xs font-bold text-neutral-400">
-                    Latest 10 games
+    <div id="spaceShooterHome" class="space-y-10">
+        <!-- HERO -->
+        <section class="relative overflow-hidden rounded-3xl bg-neutral-950 text-white p-7 md:p-12">
+            <div class="absolute -top-24 -right-16 w-80 h-80 rounded-full bg-violet-600/20 blur-3xl"></div>
+            <div class="absolute -bottom-32 left-1/3 w-80 h-80 rounded-full bg-blue-600/20 blur-3xl"></div>
+            <div class="relative z-10 max-w-2xl">
+                <span class="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.2em] text-violet-300">
+                    <span class="w-2 h-2 rounded-full bg-green-400"></span>
+                    TYPEMASTER PRO / GAMES
                 </span>
+                <h1 class="text-4xl md:text-6xl font-black tracking-tight mt-5">Space Shooter</h1>
+                <p class="text-sm md:text-base text-white/60 mt-4 max-w-lg leading-relaxed">
+                    Test your typing speed. Destroy incoming targets. Improve your accuracy and beat your high score.
+                </p>
+                <div class="game-controls flex flex-wrap items-center gap-3 mt-8">
+                    <select id="difficulty"
+                            class="px-5 py-3 rounded-xl bg-white/10 border border-white/20 text-white font-bold text-sm outline-none focus:border-violet-400">
+                        <option value="easy" class="text-neutral-900">Easy</option>
+                        <option value="normal" selected class="text-neutral-900">Normal</option>
+                        <option value="hard" class="text-neutral-900">Hard</option>
+                        <option value="extreme" class="text-neutral-900">Extreme</option>
+                    </select>
+                    <button id="startGame"
+                            class="px-7 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-extrabold text-sm transition-all shadow-lg shadow-violet-600/20">
+                        START GAME →
+                    </button>
+                </div>
             </div>
-        </div>
-
-        <div class="bg-white border border-neutral-200 rounded-2xl overflow-hidden shadow-sm">
-
-            <div class="overflow-x-auto">
-
-                <table class="w-full text-left min-w-[850px]">
-
-                    <thead>
-                        <tr class="border-b border-neutral-200 bg-neutral-50">
-
-                            <th class="p-4 text-xs font-extrabold uppercase tracking-wider text-neutral-400">
-                                Date
-                            </th>
-
-                            <th class="p-4 text-xs font-extrabold uppercase tracking-wider text-neutral-400">
-                                Difficulty
-                            </th>
-
-                            <th class="p-4 text-xs font-extrabold uppercase tracking-wider text-neutral-400">
-                                Score
-                            </th>
-
-                            <th class="p-4 text-xs font-extrabold uppercase tracking-wider text-neutral-400">
-                                WPM
-                            </th>
-
-                            <th class="p-4 text-xs font-extrabold uppercase tracking-wider text-neutral-400">
-                                Accuracy
-                            </th>
-
-                            <th class="p-4 text-xs font-extrabold uppercase tracking-wider text-neutral-400">
-                                Destroyed
-                            </th>
-
-                            <th class="p-4 text-xs font-extrabold uppercase tracking-wider text-neutral-400">
-                                Duration
-                            </th>
-
-                        </tr>
-                    </thead>
-
-                    <tbody>
-
-                        {% for result in history %}
-
-                        <tr class="border-b border-neutral-100 hover:bg-neutral-50 transition-colors">
-
-                            <td class="p-4 text-xs text-neutral-600">
-                                {{ result.created_at|date:"d M Y" }}
-                            </td>
-
-                            <td class="p-4 text-xs font-bold text-neutral-800">
-                                {{ result.get_difficulty_display }}
-                            </td>
-
-                            <td class="p-4 text-xs font-black text-neutral-900">
-                                {{ result.score }}
-                            </td>
-
-                            <td class="p-4 text-xs font-bold text-violet-600">
-                                {{ result.wpm }}
-                            </td>
-
-                            <td class="p-4 text-xs font-bold text-green-600">
-                                {{ result.accuracy }}%
-                            </td>
-
-                            <td class="p-4 text-xs font-bold text-neutral-800">
-                                {{ result.words_destroyed }}
-                            </td>
-
-                            <td class="p-4 text-xs text-neutral-600">
-                                {{ result.duration }}s
-                            </td>
-
-                        </tr>
-
-                        {% empty %}
-
-                        <tr>
-                            <td colspan="7" class="py-12 text-center">
-                                <div class="text-3xl mb-3">🎮</div>
-
-                                <h3 class="font-black text-neutral-900">
-                                    No games played yet
-                                </h3>
-
-                                <p class="text-sm text-neutral-500 mt-2">
-                                    Complete your first Space Shooter mission to see your history.
+            <div class="hidden lg:flex absolute right-12 top-1/2 -translate-y-1/2 items-center justify-center w-64 h-64">
+                <div class="absolute inset-0 rounded-full border border-white/10"></div>
+                <div class="absolute inset-5 rounded-full border border-dashed border-violet-400/30"></div>
+                <div class="absolute inset-12 rounded-full border border-white/10"></div>
+                <div class="text-8xl drop-shadow-[0_0_30px_rgba(139,92,246,0.6)]">🚀</div>
+                <span class="absolute top-4 right-8 text-2xl">✦</span>
+                <span class="absolute bottom-8 left-5 text-xl">✧</span>
+            </div>
+        </section>
+        <!-- PERFORMANCE SUMMARY -->
+        <section>
+            <div class="mb-6">
+                <p class="text-xs font-extrabold uppercase tracking-[0.2em] text-indigo-600 mb-2">Gaming Statistics</p>
+                <h2 class="text-2xl md:text-3xl font-black text-neutral-900">Game Performance</h2>
+                <p class="text-sm text-neutral-500 mt-2">Track your Space Shooter gaming progress.</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Total Games -->
+                <div class="bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <p class="text-xs font-extrabold uppercase tracking-wider text-neutral-400">Total Games</p>
+                            <h3 class="text-3xl font-black text-neutral-900 mt-2">
+                                {{ stats.total_games|default:0 }}
+                            </h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center text-2xl">
+                            🎮
+                        </div>
+                    </div>
+                    <p class="text-xs text-neutral-400 border-t border-neutral-100 pt-4">Total missions completed</p>
+                </div>
+                <!-- Best Score -->
+                <div class="bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <p class="text-xs font-extrabold uppercase tracking-wider text-neutral-400">Best Score</p>
+                            <h3 class="text-3xl font-black text-neutral-900 mt-2">{{ stats.best_score|default:0 }}</h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl">
+                            🏆
+                        </div>
+                    </div>
+                    <p class="text-xs text-neutral-400 border-t border-neutral-100 pt-4">Your highest game score</p>
+                </div>
+                <!-- Average WPM -->
+                <div class="bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <p class="text-xs font-extrabold uppercase tracking-wider text-neutral-400">
+                                Average Speed
+                            </p>
+                            <h3 class="text-3xl font-black text-violet-600 mt-2">
+                                {{ stats.average_wpm|default:0 }}
+                                <span class="text-xs text-neutral-400">WPM</span>
+                            </h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl">
+                            ⚡
+                        </div>
+                    </div>
+                    <p class="text-xs text-neutral-400 border-t border-neutral-100 pt-4">Average typing speed</p>
+                </div>
+                <!-- Accuracy -->
+                <div class="bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <p class="text-xs font-extrabold uppercase tracking-wider text-neutral-400">
+                                Average Accuracy
+                            </p>
+                            <h3 class="text-3xl font-black text-green-600 mt-2">
+                                {{ stats.average_accuracy|default:0 }}%
+                            </h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-green-50 text-green-600 flex items-center justify-center text-2xl">
+                            🎯
+                        </div>
+                    </div>
+                    <p class="text-xs text-neutral-400 border-t border-neutral-100 pt-4">Overall typing accuracy</p>
+                </div>
+            </div>
+        </section>
+        <!-- PERFORMANCE ANALYTICS -->
+        <section>
+            <div class="mb-6">
+                <p class="text-xs font-extrabold uppercase tracking-[0.2em] text-indigo-600 mb-2">Gaming Analytics</p>
+                <h2 class="text-2xl md:text-3xl font-black text-neutral-900">Performance Analytics</h2>
+                <p class="text-sm text-neutral-500 mt-2">Analyze your Space Shooter speed and accuracy over time.</p>
+            </div>
+            <div class="bg-white border border-neutral-200 rounded-2xl p-5 md:p-7 shadow-sm">
+                <div class="flex items-center justify-between flex-wrap gap-4 mb-6">
+                    <div class="flex gap-1 bg-neutral-100 p-1 rounded-xl">
+                        <button type="button"
+                                id="gameSpeedBtn"
+                                class="px-5 py-2 rounded-lg bg-white shadow-sm text-neutral-900 text-xs font-extrabold">
+                            Speed
+                        </button>
+                        <button type="button"
+                                id="gameAccuracyBtn"
+                                class="px-5 py-2 rounded-lg text-neutral-500 text-xs font-extrabold">Accuracy</button>
+                    </div>
+                    <div class="text-right">
+                        <p id="gameChartTitle" class="text-sm font-extrabold text-neutral-700">Gaming Speed</p>
+                        <p id="gameChartSubtitle" class="text-xs text-neutral-400 mt-1">Words per minute</p>
+                    </div>
+                </div>
+                <div class="relative w-full" style="height: 320px;">
+                    <canvas id="gamePerformanceChart"></canvas>
+                </div>
+                <div id="gameEmptyState" class="hidden py-12 text-center">
+                    <div class="text-3xl mb-3">🚀</div>
+                    <h4 class="font-black text-neutral-900">No gaming data yet</h4>
+                    <p class="text-sm text-neutral-500 mt-2">
+                        Complete your first Space Shooter mission to see your performance.
+                    </p>
+                </div>
+            </div>
+        </section>
+        <!-- DIFFICULTY ANALYTICS -->
+        <section class="mt-10 mb-10">
+            <div class="mb-6">
+                <p class="text-xs font-extrabold uppercase tracking-[0.2em] text-indigo-600 mb-2">
+                    Performance Breakdown
+                </p>
+                <h2 class="text-2xl md:text-3xl font-black text-neutral-900">Difficulty Analytics</h2>
+                <p class="text-sm text-neutral-500 mt-2">
+                    Compare your performance across different difficulty levels.
+                </p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {% for item in difficulty_stats %}
+                    <div class="bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <p class="text-xs font-extrabold uppercase tracking-wider text-neutral-400">
+                                    Difficulty
                                 </p>
-                            </td>
-                        </tr>
-
-                        {% endfor %}
-
-                    </tbody>
-
-                </table>
-
+                                <h3 class="text-2xl font-black text-neutral-900 mt-2">{{ item.difficulty }}</h3>
+                            </div>
+                            {% if item.difficulty == "Easy" %}
+                                <div class="w-12 h-12 rounded-xl bg-green-50 text-green-600 flex items-center justify-center text-2xl">●</div>
+                            {% elif item.difficulty == "Normal" %}
+                                <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl">◆</div>
+                            {% elif item.difficulty == "Hard" %}
+                                <div class="w-12 h-12 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center text-2xl">▲</div>
+                            {% else %}
+                                <div class="w-12 h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center text-2xl">★</div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-5">
+                            <p class="text-xs font-bold text-neutral-400 uppercase tracking-wider">Total Games</p>
+                            <p class="text-3xl font-black text-neutral-900 mt-1">{{ item.total_games }}</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 pt-5 border-t border-neutral-100">
+                            <div>
+                                <p class="text-xs font-bold text-neutral-400">Average Speed</p>
+                                <p class="text-xl font-black text-violet-600 mt-1">
+                                    {{ item.average_wpm }}
+                                    <span class="text-xs text-neutral-400">WPM</span>
+                                </p>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-neutral-400">Average Accuracy</p>
+                                <p class="text-xl font-black text-green-600 mt-1">{{ item.average_accuracy }}%</p>
+                            </div>
+                        </div>
+                        <div class="mt-5">
+                            <div class="flex justify-between text-xs font-bold text-neutral-500 mb-2">
+                                <span>Accuracy</span>
+                                <span>{{ item.average_accuracy }}%</span>
+                            </div>
+                            <div class="w-full h-2 bg-neutral-100 rounded-full overflow-hidden">
+                                <div class="h-full bg-green-500 rounded-full"
+                                     style="width: {{ item.average_accuracy }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
             </div>
-        </div>
-
-    </section>
-
-</div>
-
-
-<!-- CHART DATA -->
-{{ game_chart_data|json_script:"game-chart-data" }}
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-
-<script>
+        </section>
+        <!-- PREVIOUS GAMES -->
+        <section>
+            <div class="mb-6">
+                <p class="text-xs font-extrabold uppercase tracking-[0.2em] text-indigo-600 mb-2">Mission History</p>
+                <div class="flex items-center justify-between gap-4 flex-wrap">
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-black text-neutral-900">Previous Games</h2>
+                        <p class="text-sm text-neutral-500 mt-2">Review your recent Space Shooter missions.</p>
+                    </div>
+                    <span class="text-xs font-bold text-neutral-400">Latest 10 games</span>
+                </div>
+            </div>
+            <div class="bg-white border border-neutral-200 rounded-2xl overflow-hidden shadow-sm">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left min-w-[850px]">
+                        <thead>
+                            <tr class="border-b border-neutral-200 bg-neutral-50">
+                                <th class="p-4 text-xs font-extrabold uppercase tracking-wider text-neutral-400">
+                                    Date
+                                </th>
+                                <th class="p-4 text-xs font-extrabold uppercase tracking-wider text-neutral-400">
+                                    Difficulty
+                                </th>
+                                <th class="p-4 text-xs font-extrabold uppercase tracking-wider text-neutral-400">
+                                    Score
+                                </th>
+                                <th class="p-4 text-xs font-extrabold uppercase tracking-wider text-neutral-400">
+                                    WPM
+                                </th>
+                                <th class="p-4 text-xs font-extrabold uppercase tracking-wider text-neutral-400">
+                                    Accuracy
+                                </th>
+                                <th class="p-4 text-xs font-extrabold uppercase tracking-wider text-neutral-400">
+                                    Destroyed
+                                </th>
+                                <th class="p-4 text-xs font-extrabold uppercase tracking-wider text-neutral-400">
+                                    Duration
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in history %}
+                                <tr class="border-b border-neutral-100 hover:bg-neutral-50 transition-colors">
+                                    <td class="p-4 text-xs text-neutral-600">{{ result.created_at|date:"d M Y" }}</td>
+                                    <td class="p-4 text-xs font-bold text-neutral-800">
+                                        {{ result.get_difficulty_display }}
+                                    </td>
+                                    <td class="p-4 text-xs font-black text-neutral-900">{{ result.score }}</td>
+                                    <td class="p-4 text-xs font-bold text-violet-600">{{ result.wpm }}</td>
+                                    <td class="p-4 text-xs font-bold text-green-600">{{ result.accuracy }}%</td>
+                                    <td class="p-4 text-xs font-bold text-neutral-800">
+                                        {{ result.words_destroyed }}
+                                    </td>
+                                    <td class="p-4 text-xs text-neutral-600">{{ result.duration }}s</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="7" class="py-12 text-center">
+                                        <div class="text-3xl mb-3">🎮</div>
+                                        <h3 class="font-black text-neutral-900">No games played yet</h3>
+                                        <p class="text-sm text-neutral-500 mt-2">
+                                            Complete your first Space Shooter mission to see your history.
+                                        </p>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+    <!-- CHART DATA -->
+    {{ game_chart_data|json_script:"game-chart-data" }}
+    <script src="{% static 'vendor/chart.umd.min.js' %}"></script>
+    <script>
 document.addEventListener("DOMContentLoaded", function () {
 
     const dataElement = document.getElementById("game-chart-data");
@@ -630,11 +445,8 @@ document.addEventListener("DOMContentLoaded", function () {
     accuracyButton.addEventListener("click", () => setMetric("accuracy"));
 
 });
-</script>
-
+    </script>
 {% endblock %}
-
-
 {% block extra_js %}
-<script src="{% static 'games/space_shooter/js/home.js' %}"></script>
+    <script src="{% static 'games/space_shooter/js/home.js' %}"></script>
 {% endblock %}

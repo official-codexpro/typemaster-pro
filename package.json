@@ -1,10 +1,22 @@
 {
+  "scripts": {
+    "build:css": "tailwindcss --config tailwind.config.cjs --input static/css/tailwind.input.css --output static/css/tailwind.css --minify",
+    "build:vendor": "node scripts/sync-vendor.mjs",
+    "build:car-race": "esbuild static/games/car_game/js/race-world.js --bundle --format=iife --target=es2020 --minify --outfile=static/games/car_game/js/race-world.bundle.js",
+    "build:type-fighter": "node scripts/extract-type-fighter-animations.mjs && esbuild static/games/type_fighter/src/main.js --bundle --format=esm --target=es2020 --minify --outfile=static/games/type_fighter/dist/game.js && node scripts/trim-generated-whitespace.mjs static/games/type_fighter/dist/game.js",
+    "build": "npm run build:css && npm run build:vendor && npm run build:car-race && npm run build:type-fighter",
+    "format": "prettier --write \"static/**/*.js\" \"static/**/*.css\" \"scripts/**/*.mjs\" \"tailwind.config.cjs\" package.json README.md",
+    "format:check": "prettier --check \"static/**/*.js\" \"static/**/*.css\" \"scripts/**/*.mjs\" \"tailwind.config.cjs\" package.json README.md"
+  },
   "dependencies": {
+    "chart.js": "4.6.1",
     "gsap": "^3.15.1",
     "three": "^0.187.0"
   },
   "devDependencies": {
-    "esbuild": "^0.28.2"
+    "esbuild": "^0.28.2",
+    "prettier": "3.10.1",
+    "tailwindcss": "3.4.19"
   },
   "allowScripts": {
     "esbuild@0.28.2": true

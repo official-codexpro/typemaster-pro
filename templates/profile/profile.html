@@ -1,437 +1,274 @@
-
 {% extends "base/base.html" %}
-
 {% block title %}My Profile | TypeMaster Pro{% endblock %}
-
 {% block content %}
-
-<div class="profile-page min-h-screen px-4 sm:px-6 py-10">
-
-    <div class="max-w-5xl mx-auto">
-
-        <!-- Page Heading -->
-        <div class="mb-8">
-            <p class="text-xs font-extrabold uppercase tracking-[0.2em] text-indigo-600 mb-2">
-                Your Account
-            </p>
-            <h1 class="text-3xl font-black text-neutral-900">
-                My Profile
-            </h1>
-            <p class="text-sm text-neutral-500 mt-2">
-                Your identity, achievements and typing journey.
-            </p>
-        </div>
-
-
-        <!-- Profile Card -->
-        <div class="bg-white border border-neutral-200 rounded-3xl overflow-hidden shadow-sm">
-
-            <!-- Cover -->
-            <!-- Profile Cover Banner -->
-<div class="relative h-36 sm:h-48 overflow-hidden">
-
-    {% if profile.cover_image %}
-        <img
-            src="{{ profile.cover_image.url }}"
-            alt="Profile Cover"
-            class="absolute inset-0 w-full h-full object-cover"
-        >
-    {% else %}
-        <div class="absolute inset-0 bg-gradient-to-r from-indigo-700 via-violet-700 to-purple-600">
-        </div>
-
-        <div class="absolute inset-0 flex items-center justify-center">
-            <span class="text-4xl font-black tracking-widest text-white">
-                TP
-            </span>
-        </div>
-    {% endif %}
-
-    <div class="absolute inset-0 bg-black/10"></div>
-
-</div>
-
-            <!-- Profile Information -->
-            <div class="px-6 sm:px-10 pb-8">
-
-                <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5">
-
-                    <!-- Profile Picture -->
-                    <div class="-mt-16 relative">
-                        {% if profile.profile_picture %}
-                            <img
-                                src="{{ profile.profile_picture.url }}"
-                                alt="Profile Picture"
-                                class="w-32 h-32 rounded-3xl object-cover border-4 border-white shadow-lg bg-white">
-                        {% else %}
-                            <div class="w-32 h-32 rounded-3xl bg-indigo-100 text-indigo-700 border-4 border-white shadow-lg flex items-center justify-center text-5xl font-black uppercase">
-                                {{ request.user.username|first }}
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <!-- Edit Button -->
-                    <div class="sm:mb-2">
-                        <a href="{% url 'edit_profile' %}"
-                           class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-sm font-bold text-neutral-700 transition shadow-sm">
-                            <span>✎</span>
-                            Edit Profile
-                        </a>
-                    </div>
-
+    <div class="profile-page min-h-screen px-4 sm:px-6 py-10">
+        <div class="max-w-5xl mx-auto">
+            <!-- Page Heading -->
+            <div class="mb-8">
+                <p class="text-xs font-extrabold uppercase tracking-[0.2em] text-indigo-600 mb-2">Your Account</p>
+                <h1 class="text-3xl font-black text-neutral-900">My Profile</h1>
+                <p class="text-sm text-neutral-500 mt-2">Your identity, achievements and typing journey.</p>
+            </div>
+            <!-- Profile Card -->
+            <div class="bg-white border border-neutral-200 rounded-3xl overflow-hidden shadow-sm">
+                <!-- Cover -->
+                <!-- Profile Cover Banner -->
+                <div class="relative h-36 sm:h-48 overflow-hidden">
+                    {% if profile.cover_image %}
+                        <img src="{{ profile.cover_image.url }}"
+                             alt="Profile Cover"
+                             class="absolute inset-0 w-full h-full object-cover">
+                    {% else %}
+                        <div class="absolute inset-0 bg-gradient-to-r from-indigo-700 via-violet-700 to-purple-600">
+                        </div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span class="text-4xl font-black tracking-widest text-white">TP</span>
+                        </div>
+                    {% endif %}
+                    <div class="absolute inset-0 bg-black/10"></div>
                 </div>
-
-
-                <!-- Name and Bio -->
-                <div class="mt-5">
-
-                    <div class="flex flex-wrap items-center gap-3">
-                        <h2 class="text-2xl sm:text-3xl font-black text-neutral-900">
-                            {{ request.user.username }}
-                        </h2>
-
-                        <span class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold">
-                            TypeMaster Member
-                        </span>
+                <!-- Profile Information -->
+                <div class="px-6 sm:px-10 pb-8">
+                    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5">
+                        <!-- Profile Picture -->
+                        <div class="-mt-16 relative">
+                            {% if profile.profile_picture %}
+                                <img src="{{ profile.profile_picture.url }}"
+                                     alt="Profile Picture"
+                                     class="w-32 h-32 rounded-3xl object-cover border-4 border-white shadow-lg bg-white">
+                            {% else %}
+                                <div class="w-32 h-32 rounded-3xl bg-indigo-100 text-indigo-700 border-4 border-white shadow-lg flex items-center justify-center text-5xl font-black uppercase">
+                                    {{ request.user.username|first }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <!-- Edit Button -->
+                        <div class="sm:mb-2">
+                            <a href="{% url 'edit_profile' %}"
+                               class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-sm font-bold text-neutral-700 transition shadow-sm">
+                                <span>✎</span>
+                                Edit Profile
+                            </a>
+                        </div>
                     </div>
-
-                    <p class="text-sm text-neutral-500 mt-2 break-all">
-                        {{ request.user.email|default:"Email not provided" }}
-                    </p>
-
-                    <!-- Bio -->
-                    <div class="mt-6 max-w-3xl">
-
-                        <p class="text-xs font-extrabold uppercase tracking-wider text-neutral-400 mb-2">
-                            About Me
+                    <!-- Name and Bio -->
+                    <div class="mt-5">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <h2 class="text-2xl sm:text-3xl font-black text-neutral-900">
+                                {{ request.user.username }}
+                            </h2>
+                            <span class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold">
+                                TypeMaster Member
+                            </span>
+                        </div>
+                        <p class="text-sm text-neutral-500 mt-2 break-all">
+                            {{ request.user.email|default:"Email not provided" }}
                         </p>
-
-                        {% if profile.bio %}
-                            <p class="text-neutral-700 text-sm sm:text-base leading-7 whitespace-pre-line">
-                                {{ profile.bio }}
+                        <!-- Bio -->
+                        <div class="mt-6 max-w-3xl">
+                            <p class="text-xs font-extrabold uppercase tracking-wider text-neutral-400 mb-2">
+                                About Me
                             </p>
-                        {% else %}
-                            <p class="text-neutral-400 text-sm italic">
-                                No bio added yet. Tell people something about yourself.
-                            </p>
-                        {% endif %}
-
-                    </div>
-
-
-                    <!-- Member Information -->
-                    <div class="flex flex-wrap items-center gap-x-6 gap-y-3 mt-6 pt-5 border-t border-neutral-100">
-
-                        <div class="flex items-center gap-2 text-sm text-neutral-500">
-                            <span>📅</span>
-                            <span>
-                                Joined
-                                <strong class="text-neutral-800">
-                                    {{ request.user.date_joined|date:"d M Y" }}
-                                </strong>
-                            </span>
+                            {% if profile.bio %}
+                                <p class="text-neutral-700 text-sm sm:text-base leading-7 whitespace-pre-line">
+                                    {{ profile.bio }}
+                                </p>
+                            {% else %}
+                                <p class="text-neutral-400 text-sm italic">
+                                    No bio added yet. Tell people something about yourself.
+                                </p>
+                            {% endif %}
                         </div>
-
-                        <div class="flex items-center gap-2 text-sm text-neutral-500">
-                            <span>⌨</span>
-                            <span>
-                                <strong class="text-neutral-800">
-                                    {{ profile_stats.total_tests }}
-                                </strong>
-                                Tests Completed
-                            </span>
+                        <!-- Member Information -->
+                        <div class="flex flex-wrap items-center gap-x-6 gap-y-3 mt-6 pt-5 border-t border-neutral-100">
+                            <div class="flex items-center gap-2 text-sm text-neutral-500">
+                                <span>📅</span>
+                                <span>
+                                    Joined
+                                    <strong class="text-neutral-800">
+                                        {{ request.user.date_joined|date:"d M Y" }}
+                                    </strong>
+                                </span>
+                            </div>
+                            <div class="flex items-center gap-2 text-sm text-neutral-500">
+                                <span>⌨</span>
+                                <span>
+                                    <strong class="text-neutral-800">{{ profile_stats.total_tests }}</strong>
+                                    Tests Completed
+                                </span>
+                            </div>
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
-
-        </div>
-
-
-        <!-- Personal Records -->
-        <div class="mt-10">
-
-            <div class="mb-5">
-                <p class="text-xs font-extrabold uppercase tracking-[0.2em] text-indigo-600 mb-2">
-                    Performance Highlights
-                </p>
-                <h2 class="text-2xl font-black text-neutral-900">
-                    Personal Records
-                </h2>
-                <p class="text-sm text-neutral-500 mt-2">
-                    Your achievements across all typing and coding sessions.
-                </p>
-            </div>
-
-
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-
-                <!-- Total Tests -->
-                <div class="bg-white border border-neutral-200 rounded-2xl p-5 shadow-sm">
-                    <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl mb-4">
-                        ⌨
-                    </div>
-                    <p class="text-xs font-bold uppercase tracking-wider text-neutral-400">
-                        Total Tests
+            <!-- Personal Records -->
+            <div class="mt-10">
+                <div class="mb-5">
+                    <p class="text-xs font-extrabold uppercase tracking-[0.2em] text-indigo-600 mb-2">
+                        Performance Highlights
                     </p>
-                    <h3 class="text-3xl font-black text-neutral-900 mt-2">
-                        {{ profile_stats.total_tests }}
-                    </h3>
-                    <p class="text-xs text-neutral-400 mt-2">
-                        Completed sessions
+                    <h2 class="text-2xl font-black text-neutral-900">Personal Records</h2>
+                    <p class="text-sm text-neutral-500 mt-2">
+                        Your achievements across all typing and coding sessions.
                     </p>
                 </div>
-
-
-                <!-- Highest WPM -->
-                <div class="bg-white border border-neutral-200 rounded-2xl p-5 shadow-sm">
-                    <div class="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center text-xl mb-4">
-                        ✦
-                    </div>
-                    <p class="text-xs font-bold uppercase tracking-wider text-neutral-400">
-                        Highest Speed
-                    </p>
-                    <h3 class="text-3xl font-black text-violet-600 mt-2">
-                        {{ profile_stats.best_wpm }}
-                        <span class="text-xs text-neutral-400">WPM</span>
-                    </h3>
-                    <p class="text-xs text-neutral-400 mt-2">
-                        Personal best record
-                    </p>
-                </div>
-
-
-                <!-- Best Accuracy -->
-                <div class="bg-white border border-neutral-200 rounded-2xl p-5 shadow-sm">
-                    <div class="w-10 h-10 rounded-xl bg-green-50 text-green-600 flex items-center justify-center text-xl mb-4">
-                        ✓
-                    </div>
-                    <p class="text-xs font-bold uppercase tracking-wider text-neutral-400">
-                        Best Accuracy
-                    </p>
-                    <h3 class="text-3xl font-black text-green-600 mt-2">
-                        {{ profile_stats.best_accuracy }}%
-                    </h3>
-                    <p class="text-xs text-neutral-400 mt-2">
-                        Highest accuracy achieved
-                    </p>
-                </div>
-
-
-                <!-- Average Speed -->
-                <div class="bg-white border border-neutral-200 rounded-2xl p-5 shadow-sm">
-                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl mb-4">
-                        ↗
-                    </div>
-                    <p class="text-xs font-bold uppercase tracking-wider text-neutral-400">
-                        Average Speed
-                    </p>
-                    <h3 class="text-3xl font-black text-blue-600 mt-2">
-                        {{ profile_stats.average_wpm }}
-                        <span class="text-xs text-neutral-400">WPM</span>
-                    </h3>
-                    <p class="text-xs text-neutral-400 mt-2">
-                        Across all sessions
-                    </p>
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- Practice Activity -->
-        <div class="mt-10">
-
-            <div class="mb-5">
-                <p class="text-xs font-extrabold uppercase tracking-[0.2em] text-indigo-600 mb-2">
-                    Practice Activity
-                </p>
-                <h2 class="text-2xl font-black text-neutral-900">
-                    Your Learning Journey
-                </h2>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                <!-- Normal Typing -->
-                <div class="bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm">
-
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-bold text-neutral-500">
-                                Normal Typing
-                            </p>
-                            <h3 class="text-3xl font-black text-neutral-900 mt-2">
-                                {{ profile_stats.typing_tests }}
-                            </h3>
-                            <p class="text-xs text-neutral-400 mt-1">
-                                Practice sessions
-                            </p>
-                        </div>
-
-                        <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl">
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Total Tests -->
+                    <div class="bg-white border border-neutral-200 rounded-2xl p-5 shadow-sm">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl mb-4">
                             ⌨
                         </div>
+                        <p class="text-xs font-bold uppercase tracking-wider text-neutral-400">Total Tests</p>
+                        <h3 class="text-3xl font-black text-neutral-900 mt-2">{{ profile_stats.total_tests }}</h3>
+                        <p class="text-xs text-neutral-400 mt-2">Completed sessions</p>
                     </div>
-
+                    <!-- Highest WPM -->
+                    <div class="bg-white border border-neutral-200 rounded-2xl p-5 shadow-sm">
+                        <div class="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center text-xl mb-4">
+                            ✦
+                        </div>
+                        <p class="text-xs font-bold uppercase tracking-wider text-neutral-400">Highest Speed</p>
+                        <h3 class="text-3xl font-black text-violet-600 mt-2">
+                            {{ profile_stats.best_wpm }}
+                            <span class="text-xs text-neutral-400">WPM</span>
+                        </h3>
+                        <p class="text-xs text-neutral-400 mt-2">Personal best record</p>
+                    </div>
+                    <!-- Best Accuracy -->
+                    <div class="bg-white border border-neutral-200 rounded-2xl p-5 shadow-sm">
+                        <div class="w-10 h-10 rounded-xl bg-green-50 text-green-600 flex items-center justify-center text-xl mb-4">
+                            ✓
+                        </div>
+                        <p class="text-xs font-bold uppercase tracking-wider text-neutral-400">Best Accuracy</p>
+                        <h3 class="text-3xl font-black text-green-600 mt-2">{{ profile_stats.best_accuracy }}%</h3>
+                        <p class="text-xs text-neutral-400 mt-2">Highest accuracy achieved</p>
+                    </div>
+                    <!-- Average Speed -->
+                    <div class="bg-white border border-neutral-200 rounded-2xl p-5 shadow-sm">
+                        <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl mb-4">
+                            ↗
+                        </div>
+                        <p class="text-xs font-bold uppercase tracking-wider text-neutral-400">Average Speed</p>
+                        <h3 class="text-3xl font-black text-blue-600 mt-2">
+                            {{ profile_stats.average_wpm }}
+                            <span class="text-xs text-neutral-400">WPM</span>
+                        </h3>
+                        <p class="text-xs text-neutral-400 mt-2">Across all sessions</p>
+                    </div>
                 </div>
-
-
-                <!-- Code Practice -->
-                <div class="bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm">
-
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-bold text-neutral-500">
-                                Code Practice
-                            </p>
-                            <h3 class="text-3xl font-black text-neutral-900 mt-2">
-                                {{ profile_stats.code_tests }}
-                            </h3>
-                            <p class="text-xs text-neutral-400 mt-1">
-                                Developer practice sessions
-                            </p>
-                        </div>
-
-                        <div class="w-12 h-12 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center text-2xl">
-                            &lt;/&gt;
-                        </div>
-                    </div>
-
+            </div>
+            <!-- Practice Activity -->
+            <div class="mt-10">
+                <div class="mb-5">
+                    <p class="text-xs font-extrabold uppercase tracking-[0.2em] text-indigo-600 mb-2">
+                        Practice Activity
+                    </p>
+                    <h2 class="text-2xl font-black text-neutral-900">Your Learning Journey</h2>
                 </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- Personal Best Record -->
-        <div class="mt-10">
-
-            <div class="mb-5">
-                <p class="text-xs font-extrabold uppercase tracking-[0.2em] text-violet-600 mb-2">
-                    Hall of Fame
-                </p>
-                <h2 class="text-2xl font-black text-neutral-900">
-                    Your Best Performance
-                </h2>
-            </div>
-
-            {% if best_result %}
-
-            <div class="relative overflow-hidden bg-neutral-900 rounded-3xl p-7 sm:p-9 text-white shadow-lg">
-
-                <div class="absolute -right-10 -top-10 w-48 h-48 rounded-full bg-violet-600/20 blur-3xl"></div>
-
-                <div class="relative z-10">
-
-                    <div class="flex flex-wrap items-center justify-between gap-4">
-
-                        <div>
-                            <p class="text-xs font-extrabold uppercase tracking-[0.2em] text-violet-300">
-                                Personal Best
-                            </p>
-                            <h3 class="text-5xl sm:text-6xl font-black mt-3">
-                                {{ best_result.wpm }}
-                                <span class="text-lg text-neutral-400">WPM</span>
-                            </h3>
-                            <p class="text-sm text-neutral-400 mt-3">
-                                Your highest recorded typing speed.
-                            </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Normal Typing -->
+                    <div class="bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-bold text-neutral-500">Normal Typing</p>
+                                <h3 class="text-3xl font-black text-neutral-900 mt-2">
+                                    {{ profile_stats.typing_tests }}
+                                </h3>
+                                <p class="text-xs text-neutral-400 mt-1">Practice sessions</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl">
+                                ⌨
+                            </div>
                         </div>
-
-                        <div class="text-5xl">
-                            🏆
-                        </div>
-
                     </div>
-
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 pt-6 border-t border-white/10">
-
-                        <div>
-                            <p class="text-xs text-neutral-400">Accuracy</p>
-                            <p class="text-xl font-bold mt-1">
-                                {{ best_result.accuracy }}%
-                            </p>
+                    <!-- Code Practice -->
+                    <div class="bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-bold text-neutral-500">Code Practice</p>
+                                <h3 class="text-3xl font-black text-neutral-900 mt-2">
+                                    {{ profile_stats.code_tests }}
+                                </h3>
+                                <p class="text-xs text-neutral-400 mt-1">Developer practice sessions</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center text-2xl">
+                                &lt;/&gt;
+                            </div>
                         </div>
-
-                        <div>
-                            <p class="text-xs text-neutral-400">Mistakes</p>
-                            <p class="text-xl font-bold mt-1">
-                                {{ best_result.mistakes }}
-                            </p>
-                        </div>
-
-                        <div>
-                            <p class="text-xs text-neutral-400">Mode</p>
-                            <p class="text-xl font-bold mt-1 capitalize">
-                                {{ best_result.difficulty }}
-                            </p>
-                        </div>
-
-                        <div>
-                            <p class="text-xs text-neutral-400">Date</p>
-                            <p class="text-sm font-bold mt-2">
-                                {{ best_result.created_at|date:"d M Y" }}
-                            </p>
-                        </div>
-
                     </div>
-
-                    {% if best_result.difficulty == 'code' and best_result.language %}
-                    <div class="mt-5 pt-5 border-t border-white/10">
-                        <p class="text-xs text-neutral-400">Programming Language</p>
-                        <p class="font-bold mt-1 uppercase">
-                            {{ best_result.language }}
+                </div>
+            </div>
+            <!-- Personal Best Record -->
+            <div class="mt-10">
+                <div class="mb-5">
+                    <p class="text-xs font-extrabold uppercase tracking-[0.2em] text-violet-600 mb-2">Hall of Fame</p>
+                    <h2 class="text-2xl font-black text-neutral-900">Your Best Performance</h2>
+                </div>
+                {% if best_result %}
+                    <div class="relative overflow-hidden bg-neutral-900 rounded-3xl p-7 sm:p-9 text-white shadow-lg">
+                        <div class="absolute -right-10 -top-10 w-48 h-48 rounded-full bg-violet-600/20 blur-3xl"></div>
+                        <div class="relative z-10">
+                            <div class="flex flex-wrap items-center justify-between gap-4">
+                                <div>
+                                    <p class="text-xs font-extrabold uppercase tracking-[0.2em] text-violet-300">
+                                        Personal Best
+                                    </p>
+                                    <h3 class="text-5xl sm:text-6xl font-black mt-3">
+                                        {{ best_result.wpm }}
+                                        <span class="text-lg text-neutral-400">WPM</span>
+                                    </h3>
+                                    <p class="text-sm text-neutral-400 mt-3">Your highest recorded typing speed.</p>
+                                </div>
+                                <div class="text-5xl">🏆</div>
+                            </div>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 pt-6 border-t border-white/10">
+                                <div>
+                                    <p class="text-xs text-neutral-400">Accuracy</p>
+                                    <p class="text-xl font-bold mt-1">{{ best_result.accuracy }}%</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-neutral-400">Mistakes</p>
+                                    <p class="text-xl font-bold mt-1">{{ best_result.mistakes }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-neutral-400">Mode</p>
+                                    <p class="text-xl font-bold mt-1 capitalize">{{ best_result.difficulty }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-neutral-400">Date</p>
+                                    <p class="text-sm font-bold mt-2">{{ best_result.created_at|date:"d M Y" }}</p>
+                                </div>
+                            </div>
+                            {% if best_result.difficulty == "code" and best_result.language %}
+                                <div class="mt-5 pt-5 border-t border-white/10">
+                                    <p class="text-xs text-neutral-400">Programming Language</p>
+                                    <p class="font-bold mt-1 uppercase">{{ best_result.language }}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="bg-white border border-neutral-200 rounded-2xl p-10 text-center">
+                        <p class="text-4xl mb-3">🎯</p>
+                        <h3 class="font-black text-neutral-900">Your record starts here</h3>
+                        <p class="text-sm text-neutral-500 mt-2">
+                            Complete your first typing test to unlock your personal best.
                         </p>
+                        <a href="{% url 'home' %}"
+                           class="inline-block mt-5 px-6 py-3 rounded-xl bg-neutral-900 text-white text-sm font-bold hover:bg-neutral-700 transition">
+                            Start Practicing
+                        </a>
                     </div>
-                    {% endif %}
-
-                </div>
-
+                {% endif %}
             </div>
-
-            {% else %}
-
-            <div class="bg-white border border-neutral-200 rounded-2xl p-10 text-center">
-                <p class="text-4xl mb-3">🎯</p>
-                <h3 class="font-black text-neutral-900">
-                    Your record starts here
-                </h3>
-                <p class="text-sm text-neutral-500 mt-2">
-                    Complete your first typing test to unlock your personal best.
-                </p>
+            <!-- Footer Actions -->
+            <div class="flex flex-wrap items-center justify-between gap-4 mt-10">
+                <p class="text-xs text-neutral-400">Keep practicing. Your next personal best is waiting.</p>
                 <a href="{% url 'home' %}"
-                   class="inline-block mt-5 px-6 py-3 rounded-xl bg-neutral-900 text-white text-sm font-bold hover:bg-neutral-700 transition">
-                    Start Practicing
+                   class="px-5 py-3 rounded-xl bg-neutral-900 hover:bg-neutral-700 text-white text-sm font-bold transition">
+                    ← Back to Dashboard
                 </a>
             </div>
-
-            {% endif %}
-
         </div>
-
-
-        <!-- Footer Actions -->
-        <div class="flex flex-wrap items-center justify-between gap-4 mt-10">
-
-            <p class="text-xs text-neutral-400">
-                Keep practicing. Your next personal best is waiting.
-            </p>
-
-            <a href="{% url 'home' %}"
-               class="px-5 py-3 rounded-xl bg-neutral-900 hover:bg-neutral-700 text-white text-sm font-bold transition">
-                ← Back to Dashboard
-            </a>
-
-        </div>
-
     </div>
-
-</div>
-
 {% endblock %}

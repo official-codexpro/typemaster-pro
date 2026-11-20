@@ -1,45 +1,52 @@
-
 {% load static %}
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-theme="light">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}TypeMaster Pro{% endblock %}</title>
-
+    <link
+      id="themeFavicon"
+      rel="icon"
+      type="image/svg+xml"
+      href="{% static 'favicon-dark.svg' %}"
+    />
     <!-- Load saved theme before page renders -->
     <script>
-        (() => {
-            const savedTheme = localStorage.getItem('typemaster-theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-        })();
+      (() => {
+        const root = document.documentElement;
+        const savedTheme = localStorage.getItem('typemaster-theme') || 'light';
+        root.setAttribute('data-theme', savedTheme);
+
+        const favicon = document.getElementById('themeFavicon');
+        const updateFavicon = () => {
+          const theme = root.getAttribute('data-theme');
+          favicon.href =
+            theme === 'dark'
+              ? "{% static 'favicon-light.svg' %}"
+              : "{% static 'favicon-dark.svg' %}";
+        };
+
+        updateFavicon();
+        new MutationObserver(updateFavicon).observe(root, {
+          attributes: true,
+          attributeFilter: ['data-theme'],
+        });
+      })();
     </script>
-
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-
+    <link rel="stylesheet" href="{% static 'css/tailwind.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
     {% block extra_css %}{% endblock %}
-</head>
-
-<body class="min-h-screen">
-
+  </head>
+  <body class="min-h-screen">
     <!-- Navbar -->
     {% include "components/navbar.html" %}
-    {% include "components/loader.html" %}
     <!-- Page Content -->
     {% block content %}{% endblock %}
-
     <!-- Footer -->
     {% include "components/footer.html" %}
-
-    <!-- GSAP -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.14.2/gsap.min.js"></script>
-
+    <script src="{% static 'vendor/gsap.min.js' %}" defer></script>
     {% block extra_js %}{% endblock %}
-
-</body>
+  </body>
 </html>

@@ -1,169 +1,105 @@
-
 {% extends "base/base.html" %}
 {% load static %}
-
 {% block title %}Space Shooter | TypeMaster Pro{% endblock %}
-
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'games/space_shooter/css/game.css' %}">
+    <link rel="stylesheet"
+          href="{% static 'games/space_shooter/css/game.css' %}">
 {% endblock %}
-
 {% block content %}
-
-<div id="spaceShooterGame"
-     data-difficulty="{{ difficulty }}"
-     data-save-url="{% url 'save_space_shooter_result' %}"
-     data-home-url="{% url 'space_shooter' %}">
-
-    <!-- FULL SCREEN GAME -->
-    <main class="game-screen">
-
-        <!-- TOP HUD -->
-        <header class="game-header">
-
-            <a href="{% url 'space_shooter' %}" class="back-home">
-                ✕ EXIT
-            </a>
-
-            <div class="game-brand">
-                <span class="brand-icon">✦</span>
-                <div>
-                    <strong>SPACE DEFENSE</strong>
-                    <small>TYPEMASTER PRO</small>
+    <div id="spaceShooterGame"
+         data-difficulty="{{ difficulty }}"
+         data-save-url="{% url 'save_space_shooter_result' %}"
+         data-home-url="{% url 'space_shooter' %}">
+        <main class="ss-shell">
+            <header class="ss-topbar">
+                <a class="ss-exit"
+                   href="{% url 'space_shooter' %}"
+                   aria-label="Exit mission">
+                    <span>‹</span> EXIT
+                </a>
+                <div class="ss-brand">
+                    <span class="ss-brand-mark">S</span>
+                    <div>
+                        <strong>SPACE STRIKE</strong>
+                        <small>TACTICAL TYPING</small>
+                    </div>
                 </div>
-            </div>
-
-            <div class="difficulty-badge">
-                <span class="status-dot"></span>
-                {{ difficulty|upper }}
-            </div>
-
-        </header>
-
-        <!-- LIVE GAME STATS -->
-        <section class="game-hud">
-
-            <div class="hud-item">
-                <span>SCORE</span>
-                <strong id="score">000000</strong>
-            </div>
-
-            <div class="hud-item">
-                <span>WAVE</span>
-                <strong id="wave">01</strong>
-            </div>
-
-            <div class="hud-item">
-                <span>WPM</span>
-                <strong id="wpm">000</strong>
-            </div>
-
-            <div class="hud-item">
-                <span>ACCURACY</span>
-                <strong id="accuracy">100%</strong>
-            </div>
-
-            <div class="hud-item">
-                <span>COMBO</span>
-                <strong id="combo">×0</strong>
-            </div>
-
-        </section>
-
-        <!-- GAME ARENA -->
-        <section class="game-arena" id="gameArena">
-
-            <canvas id="gameCanvas"></canvas>
-
-            <!-- ENEMY WORDS WILL APPEAR HERE -->
-            <div class="enemy-layer" id="enemyLayer"></div>
-
-            <!-- ARENA STATUS -->
-            <div class="arena-top">
-
-                <div class="arena-location">
-                    <span class="live-indicator"></span>
-                    DEEP SPACE SECTOR 07
+                <div class="ss-status">
+                    <span class="ss-live-dot"></span>
+                    <strong>{{ difficulty|upper }}</strong>
                 </div>
-
-                <div class="arena-warning" id="arenaStatus">
-                    ENEMY INCOMING
+            </header>
+            <section class="ss-hud" aria-label="Mission statistics">
+                <div class="ss-stat ss-stat-score">
+                    <span>SCORE</span>
+                    <strong id="score">000000</strong>
                 </div>
-
-            </div>
-
-            <!-- CENTER MESSAGE -->
-            <div class="game-message" id="gameMessage">
-
-                <span class="message-icon">✦</span>
-
-                <strong>DEFEND THE GALAXY</strong>
-
-                <small>Prepare for incoming enemies</small>
-
-            </div>
-
-            <!-- BOTTOM GAME STATUS -->
-            <div class="arena-bottom">
-
-                <div class="ship-status">
-                    <span>SHIP STATUS</span>
-                    <strong id="shipStatus">OPERATIONAL</strong>
+                <div class="ss-stat">
+                    <span>WAVE</span>
+                    <strong id="wave">01</strong>
                 </div>
-
-                <div class="mission-timer">
-                    <span>MISSION TIME</span>
-                    <strong id="missionTimer">01:00</strong>
+                <div class="ss-stat">
+                    <span>SPEED</span>
+                    <strong><b id="wpm">000</b> WPM</strong>
                 </div>
-
-                <div class="destroyed-status">
-                    <span>ENEMIES DESTROYED</span>
-                    <strong id="destroyedCount">0</strong>
+                <div class="ss-stat">
+                    <span>ACCURACY</span>
+                    <strong id="accuracy">100%</strong>
                 </div>
-
-            </div>
-
-        </section>
-
-        <!-- GAME CONTROLS -->
-        <footer class="game-controls">
-
-            <div class="controls-hint">
-                <strong>COMBAT MODE ACTIVE</strong>
-                <small>Type directly to fire at enemy characters</small>
-            </div>
-
-            <div class="control-buttons">
-
-                <button type="button" id="pauseGame">
-                    Ⅱ PAUSE
-                </button>
-
-                <button type="button" id="quitGame">
-                    ✕ END MISSION
-                </button>
-
-            </div>
-
-        </footer>
-
-    </main>
-
-    <!-- HIDDEN KEYBOARD CAPTURE -->
-    <input
-        type="text"
-        id="typingInput"
-        class="keyboard-capture"
-        autocomplete="off"
-        autocapitalize="off"
-        spellcheck="false"
-        aria-label="Game keyboard controls"
-    >
-
-</div>
-
+                <div class="ss-stat ss-stat-combo">
+                    <span>COMBO</span>
+                    <strong id="combo">×0</strong>
+                </div>
+            </section>
+            <section class="ss-arena" id="gameArena">
+                <canvas id="gameCanvas" aria-label="Space Shooter arena"></canvas>
+                <div class="ss-enemy-layer" id="enemyLayer"></div>
+                <div class="ss-arena-top">
+                    <div><span class="ss-live-dot"></span> SECTOR 07</div>
+                    <div id="arenaStatus">ENEMY SCANNING</div>
+                </div>
+                <div class="ss-message" id="gameMessage" aria-live="polite">
+                    <span>MISSION READY</span>
+                    <strong>TYPE TO ENGAGE</strong>
+                </div>
+                <div class="ss-arena-bottom">
+                    <div class="ss-ship-status">
+                        <span>SHIELD</span>
+                        <strong id="shipStatus">ONLINE</strong>
+                    </div>
+                    <div class="ss-time">
+                        <span>TIME</span>
+                        <strong id="missionTimer">01:00</strong>
+                    </div>
+                    <div class="ss-kills">
+                        <span>DESTROYED</span>
+                        <strong id="destroyedCount">0</strong>
+                    </div>
+                </div>
+            </section>
+            <footer class="ss-footer">
+                <div class="ss-combat-hint">
+                    <span class="ss-combat-dot"></span>
+                    <div>
+                        <strong>COMBAT ACTIVE</strong>
+                        <small>Type enemy words • Arrow / A-D moves ship</small>
+                    </div>
+                </div>
+                <div class="ss-actions">
+                    <button type="button" id="pauseGame">Ⅱ &nbsp; PAUSE</button>
+                    <button type="button" id="quitGame" class="ss-quit">× &nbsp; END</button>
+                </div>
+            </footer>
+        </main>
+        <input type="text"
+               id="typingInput"
+               class="ss-keyboard-capture"
+               autocomplete="off"
+               autocapitalize="off"
+               spellcheck="false"
+               aria-label="Type enemy words">
+    </div>
 {% endblock %}
-
 {% block extra_js %}
-<script src="{% static 'games/space_shooter/js/game.js' %}"></script>
+    <script src="{% static 'games/space_shooter/js/game.js' %}"></script>
 {% endblock %}

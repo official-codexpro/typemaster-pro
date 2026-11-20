@@ -1,0 +1,27 @@
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+type/venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Local data and user uploads
+*.sqlite3
+media/
+profile_pictures/
+
+# Node and generated deployment output
+node_modules/
+staticfiles/
+coverage/
+htmlcov/
+*.log
