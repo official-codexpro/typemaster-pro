@@ -84,7 +84,10 @@ document.addEventListener('DOMContentLoaded', () => {
     paragraphsCompleted = 0;
   let currentWpm = 0,
     recentCorrectKeys = [];
+  let finishSequence = null;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const finishCrossingDuration = 1600;
+  const resultDelayAfterCrossing = 3500;
   let standingsSignature = '';
   let lastStandingsUpdate = 0;
   const standingsRows = new Map();
@@ -461,9 +464,36 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function tick(timestamp) {
-    if (!running || paused || ended) return;
+    if ((!running && !finishSequence) || paused || ended) return;
     const dt = previous ? Math.min((timestamp - previous) / 1000, 0.1) : 0;
     previous = timestamp;
+    if (finishSequence) {
+      const progress = clamp((timestamp - finishSequence.startedAt) / finishCrossingDuration, 0, 1);
+      const easedProgress = progress * progress * (3 - 2 * progress);
+      const player = racers[0];
+      player.progress =
+        finishSequence.startProgress +
+        (finishSequence.targetProgress - finishSequence.startProgress) * easedProgress;
+      player.velocity =
+        progress < 1
+          ? ((finishSequence.targetProgress - finishSequence.startProgress) *
+              6 *
+              progress *
+              (1 - progress)) /
+            (finishCrossingDuration / 1000)
+          : 0;
+      player.throttle = progress < 1 ? 1 : 0;
+      updateHud();
+      world.render(racers, dt);
+      if (progress >= 1) {
+        const { reason, place } = finishSequence;
+        finishSequence = null;
+        window.setTimeout(() => endGame(reason, place), resultDelayAfterCrossing);
+      } else {
+        raf = requestAnimationFrame(tick);
+      }
+      return;
+    }
     remaining = Math.max(0, (raceEndTime - performance.now()) / 1000);
     elapsed = raceSeconds - remaining;
     racers.slice(1).forEach((car, i) => {
@@ -493,13 +523,27 @@ document.addEventListener('DOMContentLoaded', () => {
     player.progress += player.velocity * dt;
     player.drivePulse = Math.max(0, player.drivePulse - dt * 1.65);
     updateHud();
-    world.render(racers, dt);
     if (remaining <= 0) {
+      remaining = 0;
+      elapsed = raceSeconds;
       updateHud();
-      world.render(racers, 0);
       const ranking = [...racers].sort((a, b) => b.progress - a.progress);
       const place = ranking.indexOf(racers[0]) + 1;
-      endGame(place === 1 ? 'YOU WIN THE RACE!' : `RACE COMPLETE · PLACE ${place}`, place);
+      const reason = place === 1 ? 'YOU WIN THE RACE!' : `RACE COMPLETE · PLACE ${place}`;
+      const startProgress = player.progress;
+      finishSequence = {
+        startedAt: timestamp,
+        startProgress,
+        targetProgress: startProgress + 1.1,
+        reason,
+        place,
+      };
+      running = false;
+      input.disabled = true;
+      $('pauseButton').disabled = true;
+      world.showFinishLine(startProgress + 0.55);
+      world.render(racers, 0);
+      raf = requestAnimationFrame(tick);
     } else raf = requestAnimationFrame(tick);
   }
   function startLoop() {

@@ -219,6 +219,25 @@ function createTrackLabel(text, accent = '#4be5ff') {
   });
 }
 
+function createFinishRibbonTexture() {
+  return canvasTexture(
+    (context, width, height) => {
+      const columns = 12;
+      const rows = 2;
+      const cellWidth = width / columns;
+      const cellHeight = height / rows;
+      for (let row = 0; row < rows; row++) {
+        for (let column = 0; column < columns; column++) {
+          context.fillStyle = (row + column) % 2 === 0 ? '#f5f7f4' : '#111820';
+          context.fillRect(column * cellWidth, row * cellHeight, cellWidth, cellHeight);
+        }
+      }
+    },
+    512,
+    96,
+  );
+}
+
 function makeCarNumber(number, color) {
   const texture = canvasTexture(
     (context, width, height) => {
@@ -502,6 +521,7 @@ export class RaceWorld3D {
     this.createCity();
     this.createStreetLights();
     this.createTrackSigns();
+    this.createFinishLine();
     this.composer.addPass(new RenderPass(this.scene, this.camera));
     this.composer.addPass(new UnrealBloomPass(new THREE.Vector2(1, 1), 0.46, 0.62, 0.77));
     this.resize();
@@ -1102,6 +1122,64 @@ export class RaceWorld3D {
     rail.position.set(0, 9.72, 3.15);
     bridge.add(rail);
     this.scene.add(bridge);
+  }
+
+  createFinishLine() {
+    const finishLine = new THREE.Group();
+    const ribbon = new THREE.Mesh(
+      new THREE.PlaneGeometry(TRACK_HALF_WIDTH * 2, 2.2),
+      new THREE.MeshBasicMaterial({
+        map: createFinishRibbonTexture(),
+        side: THREE.DoubleSide,
+        toneMapped: false,
+        polygonOffset: true,
+        polygonOffsetFactor: -1,
+      }),
+    );
+    ribbon.rotation.x = -Math.PI / 2;
+    ribbon.position.y = 0.12;
+    finishLine.add(ribbon);
+
+    const supportMaterial = new THREE.MeshStandardMaterial({
+      color: '#536477',
+      metalness: 0.78,
+      roughness: 0.24,
+    });
+    for (const x of [-14.6, 14.6]) {
+      const post = new THREE.Mesh(new THREE.BoxGeometry(0.54, 8, 0.62), supportMaterial);
+      post.position.set(x, 4, 0);
+      post.castShadow = true;
+      finishLine.add(post);
+    }
+    const beam = new THREE.Mesh(
+      new THREE.BoxGeometry(30, 0.65, 0.7),
+      new THREE.MeshStandardMaterial({
+        color: '#405163',
+        metalness: 0.65,
+        roughness: 0.31,
+      }),
+    );
+    beam.position.y = 7.1;
+    finishLine.add(beam);
+
+    const board = new THREE.Mesh(
+      new THREE.PlaneGeometry(13.2, 2.05),
+      createTrackLabel('FINISH', '#d4ff69'),
+    );
+    board.position.set(0, 8.3, 0.43);
+    board.rotation.y = Math.PI;
+    finishLine.add(board);
+
+    this.finishLine = finishLine;
+    this.finishLine.visible = false;
+    this.scene.add(this.finishLine);
+  }
+
+  showFinishLine(progress) {
+    const pose = this.pose(progress, 0);
+    this.finishLine.position.copy(pose.center);
+    this.finishLine.rotation.y = pose.rotation;
+    this.finishLine.visible = true;
   }
 
   pose(progress, lane) {

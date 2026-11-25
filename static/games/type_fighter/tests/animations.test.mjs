@@ -38,6 +38,26 @@ test('both fighter rigs have configured defeat animations', () => {
   for (const id of Object.values(DEFEAT_ANIMATIONS)) assert.ok(ANIMATION_CLIPS[id]);
 });
 
+test('all supplied attack, reaction, and defeat clips are connected to combat actions', () => {
+  const configured = new Set(Object.values(DEFEAT_ANIMATIONS));
+  for (const attacks of Object.values(FIGHT_ANIMATIONS)) {
+    for (const mapping of Object.values(attacks)) {
+      configured.add(mapping.attack);
+      configured.add(mapping.reaction);
+    }
+  }
+  assert.deepEqual([...Object.keys(ANIMATION_CLIPS)].filter((id) => !configured.has(id)), []);
+  assert.equal(FIGHT_ANIMATIONS.player.kick.attack, 'heroDropKick');
+  assert.equal(FIGHT_ANIMATIONS.player.kick.reaction, 'enemyDropKickReaction');
+  assert.equal(FIGHT_ANIMATIONS.player.launcher.attack, 'heroFlipKick');
+  assert.equal(FIGHT_ANIMATIONS.player.launcher.reaction, 'enemyFlipKickReaction');
+  assert.equal(FIGHT_ANIMATIONS.player.heavy.attack, 'heroKneeCombo');
+  assert.equal(FIGHT_ANIMATIONS.player.heavy.reaction, 'enemyKneeReaction');
+  assert.equal(FIGHT_ANIMATIONS.enemy.kick.attack, 'enemyDropKick');
+  assert.equal(FIGHT_ANIMATIONS.enemy.launcher.attack, 'enemyFlipKick');
+  assert.equal(FIGHT_ANIMATIONS.enemy.special.attack, 'enemyKneeCombo');
+});
+
 test('attack categories pair with the matching opposite-side reactions', () => {
   assert.equal(FIGHT_ANIMATIONS.player.kick.attack, 'heroDropKick');
   assert.equal(FIGHT_ANIMATIONS.player.kick.reaction, 'enemyDropKickReaction');
